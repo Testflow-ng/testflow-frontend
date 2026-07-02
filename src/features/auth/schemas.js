@@ -17,7 +17,11 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   fullName: z.string().trim().min(2, 'Enter your full name').max(120),
   email,
-  matricNumber: z.string().trim().min(3, 'Enter your matric number').max(20),
+  // Optional: blank is treated as "not provided".
+  matricNumber: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+    z.string().trim().min(3, 'Enter a valid matric number').max(20).optional(),
+  ),
   password: strongPassword,
 });
 

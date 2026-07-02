@@ -42,14 +42,19 @@ apiClient.interceptors.response.use(
     if (status === 401 && original && !original._retry && !isAuthFlowUrl(original.url)) {
       original._retry = true;
       try {
-        // De-duplicate concurrent refreshes into a single in-flight request.
-        refreshPromise = refreshPromise ?? apiClient.post('/api/auth/refresh');
+        // Single-flight: create the refresh once and clear it only when it
+        // settles (inside its own finally), so late-joining requests dedupe
+        // onto the same in-flight refresh instead of starting a new one.
+        if (!refreshPromise) {
+          refreshPromise = apiClient.post('/api/auth/refresh').finally(() => {
+            refreshPromise = null;
+          });
+        }
         await refreshPromise;
         return apiClient(original);
       } catch {
-        // Refresh failed — fall through to the normalized rejection below.
-      } finally {
-        refreshPromise = null;
+        // Refresh failed (expired session or backend down) — fall through to
+        // the normalized rejection below so the caller can redirect to login.
       }
     }
 

@@ -42,7 +42,7 @@ function RegisterPage() {
         }
       >
         <Alert variant="success">
-          Your account has been created. We sent a verification link to your email — open it to
+          Your account has been created. We sent a verification link to your email. Open it to
           verify your address.
         </Alert>
       </AuthScreen>
@@ -76,7 +76,7 @@ function RegisterPage() {
             {...register('email')}
           />
         </Field>
-        <Field label="Matric number" error={errors.matricNumber?.message} required>
+        <Field label="Matric number" hint="Optional" error={errors.matricNumber?.message}>
           <Input autoComplete="off" placeholder="e.g. CSC/2021/001" {...register('matricNumber')} />
         </Field>
         <Field

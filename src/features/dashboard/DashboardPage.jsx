@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from '../../components/ui/index.js';
+import { Alert, Button, Card } from '../../components/ui/index.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 
@@ -27,34 +27,28 @@ function DashboardPage() {
       <h1 className="mt-1 text-2xl text-foreground-strong">Welcome, {user.fullName}</h1>
 
       {!user.isEmailVerified && (
-        <div className="mt-6 rounded-md border border-warning/30 bg-warning/10 p-4 text-sm">
-          <p className="font-medium text-warning">Verify your email</p>
-          <p className="mt-1 text-muted">
-            Check your inbox for a verification link. You&apos;ll need a verified email to start
-            exams.
-          </p>
+        <div className="mt-6 flex flex-col items-start gap-3">
+          <Alert variant="warning">
+            Verify your email to start exams. Check your inbox for the verification link.
+          </Alert>
           {resent ? (
-            <p className="mt-2 text-muted">If your account is unverified, a new link is on its way.</p>
+            <p className="text-sm text-muted">
+              If your account is unverified, a new link is on its way.
+            </p>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3"
-              loading={resending}
-              onClick={handleResend}
-            >
+            <Button variant="outline" size="sm" loading={resending} onClick={handleResend}>
               Resend verification email
             </Button>
           )}
         </div>
       )}
 
-      <div className="mt-8 rounded-lg border border-border bg-surface p-6">
+      <Card padding="lg" className="mt-8">
         <h2 className="text-lg text-foreground-strong">Your dashboard</h2>
         <p className="mt-1 text-sm text-muted">
           Subjects, exams, and results will appear here as they come online.
         </p>
-      </div>
+      </Card>
 
       <div className="mt-8">
         <Button variant="outline" onClick={logout}>

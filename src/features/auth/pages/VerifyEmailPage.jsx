@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, Spinner } from '../../../components/ui/index.js';
 import { authApi } from '../api.js';
@@ -8,24 +8,23 @@ import AuthScreen from '../AuthScreen.jsx';
 function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { isAuthenticated, setUser } = useAuth();
+  const { isAuthenticated } = useAuth();
   // Derive the no-token case up front so we don't setState synchronously in the effect.
   const [state, setState] = useState(token ? 'verifying' : 'error');
+  const attempted = useRef(false);
 
   useEffect(() => {
-    if (!token) {
+    // Verify exactly once per token, even across StrictMode double-invoke and
+    // re-renders when auth state settles after bootstrap.
+    if (!token || attempted.current) {
       return undefined;
     }
+    attempted.current = true;
     let active = true;
     authApi
       .verifyEmail(token)
-      .then((res) => {
-        if (!active) return;
-        // Keep the in-memory user in sync if this browser is already signed in.
-        if (isAuthenticated && res?.user) {
-          setUser(res.user);
-        }
-        setState('success');
+      .then(() => {
+        if (active) setState('success');
       })
       .catch(() => {
         if (active) setState('error');
@@ -33,10 +32,13 @@ function VerifyEmailPage() {
     return () => {
       active = false;
     };
-  }, [token, isAuthenticated, setUser]);
+  }, [token]);
 
   const footer = (
-    <Link className="font-medium text-primary hover:underline" to={isAuthenticated ? '/dashboard' : '/login'}>
+    <Link
+      className="font-medium text-primary hover:underline"
+      to={isAuthenticated ? '/dashboard' : '/login'}
+    >
       {isAuthenticated ? 'Go to dashboard' : 'Continue to sign in'}
     </Link>
   );
@@ -46,10 +48,10 @@ function VerifyEmailPage() {
       {state === 'verifying' ? (
         <div className="flex items-center justify-center gap-3 py-2 text-sm text-muted">
           <Spinner size="sm" label="Verifying your email" className="text-primary" />
-          Verifying your email…
+          Verifying your email
         </div>
       ) : state === 'success' ? (
-        <Alert variant="success">Your email has been verified. Thank you!</Alert>
+        <Alert variant="success">Your email has been verified. Thank you.</Alert>
       ) : (
         <Alert variant="danger">
           This verification link is invalid or has expired. You can request a new one from your
