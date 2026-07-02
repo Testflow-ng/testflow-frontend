@@ -2,10 +2,38 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="TestFlow is a modern SaaS starter kit with accessible, performant PWA foundations."
+    />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/png" href="/favicons/favicon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#2563eb" />
+    <script>
+      const themeKey = 'theme';
+      const storedTheme = localStorage.getItem(themeKey);
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme =
+        storedTheme === 'light' || storedTheme === 'dark'
+          ? storedTheme
+          : systemPrefersDark
+            ? 'dark'
+            : 'light';
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) {
+        themeMeta.setAttribute('content', theme === 'dark' ? '#0f172a' : '#2563eb');
+      }
+    </script>
     <title>TestFlow</title>
   </head>
   <body>
