@@ -1,12 +1,12 @@
 import { cn } from '../../utils/cn.js';
 
-const base =
+export const buttonBase =
   'inline-flex items-center justify-center gap-2 rounded-md font-medium select-none ' +
   'transition-colors duration-[var(--duration-sm)] ease-[var(--transition-ease)] motion-reduce:transition-none ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ' +
   'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50';
 
-const variants = {
+export const buttonVariants = {
   primary:
     'bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover active:bg-primary-active',
   secondary:
@@ -29,5 +29,5 @@ const sizes = {
  * a router Link). Keeps the "no copy-pasted class blocks" rule enforceable.
  */
 export function buttonClasses({ variant = 'primary', size = 'md', fullWidth = false, className } = {}) {
-  return cn(base, variants[variant], sizes[size], fullWidth && 'w-full', className);
+  return cn(buttonBase, buttonVariants[variant], sizes[size], fullWidth && 'w-full', className);
 }
