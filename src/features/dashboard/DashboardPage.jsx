@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Alert, Button, Card } from '../../components/ui/index.js';
+import { Alert, Button } from '../../components/ui/index.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
+import SubjectGrid from '../subjects/SubjectGrid.jsx';
 
 function DashboardPage() {
   const { user, logout } = useAuth();
@@ -43,14 +44,17 @@ function DashboardPage() {
         </div>
       )}
 
-      <Card padding="lg" className="mt-8">
-        <h2 className="text-lg text-foreground-strong">Your dashboard</h2>
-        <p className="mt-1 text-sm text-muted">
-          Subjects, exams, and results will appear here as they come online.
-        </p>
-      </Card>
-
       <div className="mt-8">
+        <h2 className="text-lg font-semibold text-foreground-strong">Subjects</h2>
+        <p className="mt-1 text-sm text-muted">
+          Choose a subject to practice. Timed exams open here soon.
+        </p>
+        <div className="mt-4">
+          <SubjectGrid />
+        </div>
+      </div>
+
+      <div className="mt-10">
         <Button variant="outline" onClick={logout}>
           Sign out
         </Button>
