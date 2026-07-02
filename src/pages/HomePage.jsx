@@ -3,8 +3,6 @@ import { ArrowRight, Clock, ShieldCheck, Sparkles } from 'lucide-react';
 import { buttonClasses } from '../components/ui/index.js';
 import { useAuth } from '../features/auth/useAuth.js';
 
-const SUBJECTS = ['PHY102', 'ACC102', 'MTH102', 'EGL102', 'PHL102', 'CHM102', 'STA112', 'GST112'];
-
 const HIGHLIGHTS = [
   {
     Icon: Clock,
@@ -94,22 +92,6 @@ function HomePage() {
                 <h2 className="text-base font-semibold text-foreground-strong">{title}</h2>
                 <p className="mt-0.5 text-sm leading-relaxed text-muted">{copy}</p>
               </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="flex flex-col gap-3 border-t border-border pt-6">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted">
-          Available subjects
-        </p>
-        <ul className="flex flex-wrap gap-2">
-          {SUBJECTS.map((subject) => (
-            <li
-              key={subject}
-              className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-xs text-foreground"
-            >
-              {subject}
             </li>
           ))}
         </ul>

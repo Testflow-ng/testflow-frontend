@@ -9,7 +9,7 @@ function Header() {
   const { isAuthenticated, isLoading, logout } = useAuth();
 
   return (
-    <header className="flex items-center justify-between gap-3 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))]">
+    <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
       <Link
         to="/"
         className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
