@@ -1,6 +1,74 @@
 @import 'tailwindcss';
 
 /*
+  Tailwind v4 token bridge.
+  Maps TestFlow's runtime CSS variables (defined in :root and
+  :root[data-theme='dark'] below) onto Tailwind's semantic utility scale.
+  `inline` keeps the utilities referencing the live variables, so every
+  utility stays theme-reactive (bg-primary, text-muted, etc. flip with the
+  active theme without regenerating classes).
+*/
+@theme inline {
+  /* Surfaces & text */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--text);
+  --color-foreground-strong: var(--text-strong);
+  --color-muted: var(--text-muted);
+
+  /* Brand & status (each color exposes base / foreground / hover / active) */
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-active: var(--color-secondary-active);
+  --color-success: var(--color-success);
+  --color-success-foreground: var(--color-success-foreground);
+  --color-success-hover: var(--color-success-hover);
+  --color-success-active: var(--color-success-active);
+  --color-warning: var(--color-warning);
+  --color-warning-foreground: var(--color-warning-foreground);
+  --color-warning-hover: var(--color-warning-hover);
+  --color-warning-active: var(--color-warning-active);
+  --color-danger: var(--color-danger);
+  --color-danger-foreground: var(--color-danger-foreground);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-danger-active: var(--color-danger-active);
+  --color-info: var(--color-info);
+  --color-info-foreground: var(--color-info-foreground);
+  --color-info-hover: var(--color-info-hover);
+  --color-info-active: var(--color-info-active);
+  --color-neutral: var(--color-neutral);
+  --color-neutral-foreground: var(--color-neutral-foreground);
+  --color-neutral-hover: var(--color-neutral-hover);
+  --color-neutral-active: var(--color-neutral-active);
+
+  /* Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* Elevation */
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  /* Typography */
+  --font-sans: var(--font-family-base);
+  --font-heading: var(--font-family-heading);
+  --font-mono: var(--font-family-mono);
+}
+
+/*
   Global foundation styles for TestFlow
   - Modern reset and box-sizing
   - Fluid typography and responsive defaults
@@ -329,6 +397,14 @@
     --color-scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
   }
 }
+
+/*
+  Reset and base element styles live in Tailwind's `base` layer so that utility
+  classes (which live in the higher-priority `utilities` layer) can always
+  override them. Without this, the unlayered reset would beat utilities like
+  `bg-surface` or `text-2xl` regardless of specificity.
+*/
+@layer base {
 
 /* Modern CSS reset */
 :where(
@@ -744,3 +820,6 @@ table {
     forced-color-adjust: none;
   }
 }
+
+}
+/* end @layer base */

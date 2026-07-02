@@ -6,6 +6,22 @@ const THEMES = {
 
 const isValidTheme = (value) => value === THEMES.LIGHT || value === THEMES.DARK;
 
+const listeners = new Set();
+
+/**
+ * Subscribe to theme changes (programmatic toggles and system-preference
+ * changes). Returns an unsubscribe function. Designed for React's
+ * useSyncExternalStore so every consumer stays in sync with the singleton.
+ */
+const subscribe = (listener) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+const notify = () => {
+  listeners.forEach((listener) => listener());
+};
+
 const getStoredTheme = () => {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
@@ -57,6 +73,8 @@ const setTheme = (theme, { persist = true } = {}) => {
       // Ignore storage failures in private modes.
     }
   }
+
+  notify();
 };
 
 const toggleTheme = () => {
@@ -73,6 +91,7 @@ const initializeTheme = () => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (event) => {
       applyTheme(event.matches ? THEMES.DARK : THEMES.LIGHT);
+      notify();
     };
 
     if (mediaQuery.addEventListener) {
@@ -83,4 +102,4 @@ const initializeTheme = () => {
   }
 };
 
-export { THEMES, getTheme, setTheme, toggleTheme, initializeTheme };
+export { THEMES, getTheme, setTheme, toggleTheme, initializeTheme, subscribe };
