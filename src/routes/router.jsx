@@ -17,6 +17,11 @@ import HistoryPage from '../features/exam/HistoryPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
+import RequireAdmin from '../features/admin/RequireAdmin.jsx';
+import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
+import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
+import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
+import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +50,18 @@ export const router = createBrowserRouter([
           { path: 'profile', element: <ProfilePage /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
+
+          // Admin Routes
+          {
+            element: <RequireAdmin />,
+            children: [
+              { path: 'admin', element: <AdminDashboardPage /> },
+              { path: 'admin/questions', element: <QuestionBankPage /> },
+              { path: 'admin/questions/new', element: <EditQuestionPage /> },
+              { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
+              { path: 'admin/subjects', element: <SubjectManagementPage /> },
+            ],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

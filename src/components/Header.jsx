@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogIn,
   Menu,
+  ShieldAlert,
   Sparkles,
   TrendingUp,
   User,
@@ -18,17 +19,23 @@ import NavDrawer from './NavDrawer.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
 
 function Header() {
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const authLinks = [
+    { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+    { to: '/progress', label: 'Your progress', Icon: TrendingUp },
+    { to: '/achievements', label: 'Achievements', Icon: Award },
+    { to: '/history', label: 'Exam history', Icon: History },
+    { to: '/profile', label: 'Profile', Icon: User },
+  ];
+
+  if (user?.role === 'admin') {
+    authLinks.push({ to: '/admin', label: 'Admin panel', Icon: ShieldAlert });
+  }
+
   const links = isAuthenticated
-    ? [
-        { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-        { to: '/progress', label: 'Your progress', Icon: TrendingUp },
-        { to: '/achievements', label: 'Achievements', Icon: Award },
-        { to: '/history', label: 'Exam history', Icon: History },
-        { to: '/profile', label: 'Profile', Icon: User },
-      ]
+    ? authLinks
     : [
         { to: '/', label: 'Home', Icon: Home },
         { to: '/features', label: 'How it works', Icon: Sparkles },
