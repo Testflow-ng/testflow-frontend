@@ -107,14 +107,16 @@ function HomePage() {
                 )}
               </div>
               <div className="mt-10 flex items-center gap-4 text-sm text-muted">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-surface-strong flex items-center justify-center text-[10px] font-bold">
-                      U{i}
-                    </div>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-8 w-8 rounded-full border-2 border-background bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                        {String.fromCharCode(64 + i)}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="font-medium text-foreground-strong">Trusted by students</p>
                 </div>
-                <p>Joined by 500+ students this week</p>
               </div>
             </motion.div>
           </div>

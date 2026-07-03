@@ -310,7 +310,18 @@ function ExamRuntimePage() {
     return <PageLoader />;
   }
 
-  return <ExamRuntime key={session.id} session={session} />;
+  if (!session.questions?.length) {
+    return (
+      <div className="mx-auto w-full max-w-xl px-5 py-10">
+        <Alert variant="danger">This exam session has no questions. Please try starting a new one.</Alert>
+        <Button variant="outline" className="mt-4" onClick={() => navigate('/dashboard')}>
+          Back to dashboard
+        </Button>
+      </div>
+    );
+  }
+
+  return <ExamRuntime key={session.id || id} session={session} />;
 }
 
 export default ExamRuntimePage;

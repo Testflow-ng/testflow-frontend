@@ -31,8 +31,8 @@ function QuestionBankPage() {
     placeholderData: keepPreviousData,
   });
 
-  const questions = data?.questions || [];
-  const totalPages = data?.pagination?.pages || 1;
+  const questions = data?.items || [];
+  const totalPages = data?.pages || 1;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-6">

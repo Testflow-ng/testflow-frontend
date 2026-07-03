@@ -10,6 +10,7 @@ const META = {
   GST112: { Icon: Landmark, accent: 'bg-danger/10 text-danger' },
   PHL102: { Icon: Brain, accent: 'bg-info/10 text-info' },
   ACC102: { Icon: ScrollText, accent: 'bg-success/10 text-success' },
+  ECO102: { Icon: TrendingUp, accent: 'bg-blue-500/10 text-blue-500' },
 };
 
 const DEFAULT = { Icon: BookOpen, accent: 'bg-primary/10 text-primary' };

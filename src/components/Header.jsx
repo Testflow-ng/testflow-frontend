@@ -84,7 +84,7 @@ function Header() {
             variant="ghost"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
-            className={cn(isAuthenticated ? '' : '')}
+            className={cn('')}
           >
             <Menu size={20} aria-hidden="true" />
           </IconButton>
