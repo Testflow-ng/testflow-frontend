@@ -38,6 +38,7 @@ function Achievements({ stats }) {
             </span>
             <span className="text-xs font-semibold text-foreground-strong">{achievement.label}</span>
             <span className="text-[11px] leading-tight text-muted">{achievement.description}</span>
+            <span className="sr-only">{achievement.earned ? 'Earned' : 'Locked'}</span>
           </li>
         );
       })}

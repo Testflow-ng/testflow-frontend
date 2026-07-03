@@ -16,8 +16,11 @@ function ProgressSection() {
     );
   }
 
-  // If progress can't load, omit it silently — the rest of the dashboard still works.
-  if (isError || !stats) {
+  // Non-blocking: a failed load shows a small notice, not a disguised empty state.
+  if (isError) {
+    return <Alert variant="warning">Couldn&apos;t load your progress right now.</Alert>;
+  }
+  if (!stats) {
     return null;
   }
 
