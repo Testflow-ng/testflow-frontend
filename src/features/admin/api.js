@@ -1,6 +1,9 @@
 import apiClient from '../../api/client.js';
 
 export const adminApi = {
+  // Stats
+  getStats: () => apiClient.get('/api/admin/stats').then((res) => res.data),
+
   // Questions
   listQuestions: (params) => apiClient.get('/api/questions', { params }).then((res) => res.data),
   getQuestion: (id) => apiClient.get(`/api/questions/${id}`).then((res) => res.data.question),
