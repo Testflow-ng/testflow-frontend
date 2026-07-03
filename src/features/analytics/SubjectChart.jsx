@@ -32,7 +32,7 @@ function SubjectChart({ perSubject = [] }) {
       <p className="mb-3 text-sm font-semibold text-foreground-strong">Average score by subject</p>
       <div role="img" aria-label={`Average score by subject: ${summary}`}>
         <ResponsiveContainer width="100%" height={210}>
-          <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
+          <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -6 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={colors.border} vertical={false} />
             <XAxis
               dataKey="code"
@@ -46,7 +46,7 @@ function SubjectChart({ perSubject = [] }) {
             />
             <YAxis
               domain={[0, 100]}
-              width={30}
+              width={34}
               tick={{ fontSize: 10, fill: colors.muted }}
               tickLine={false}
               axisLine={false}

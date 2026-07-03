@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
+import FeaturesPage from '../pages/FeaturesPage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import PublicOnly from '../features/auth/PublicOnly.jsx';
@@ -13,12 +14,16 @@ import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
 import HistoryPage from '../features/exam/HistoryPage.jsx';
+import ProgressPage from '../features/analytics/ProgressPage.jsx';
+import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
+import ProfilePage from '../features/profile/ProfilePage.jsx';
 
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'features', element: <FeaturesPage /> },
       // Reachable whether signed in or not (the link comes from an email).
       { path: 'verify-email', element: <VerifyEmailPage /> },
       {
@@ -34,7 +39,10 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'progress', element: <ProgressPage /> },
+          { path: 'achievements', element: <AchievementsPage /> },
           { path: 'history', element: <HistoryPage /> },
+          { path: 'profile', element: <ProfilePage /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
         ],

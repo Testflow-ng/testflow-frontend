@@ -1,12 +1,40 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
-import ThemeToggle from './ThemeToggle.jsx';
+import {
+  Award,
+  History,
+  Home,
+  LayoutDashboard,
+  LogIn,
+  Menu,
+  Sparkles,
+  TrendingUp,
+  User,
+  UserPlus,
+} from 'lucide-react';
 import Logo from './Logo.jsx';
-import { Button, buttonClasses } from './ui/index.js';
+import IconButton from './ui/IconButton.jsx';
+import NavDrawer from './NavDrawer.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
 
 function Header() {
   const { isAuthenticated, isLoading, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const links = isAuthenticated
+    ? [
+        { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+        { to: '/progress', label: 'Your progress', Icon: TrendingUp },
+        { to: '/achievements', label: 'Achievements', Icon: Award },
+        { to: '/history', label: 'Exam history', Icon: History },
+        { to: '/profile', label: 'Profile', Icon: User },
+      ]
+    : [
+        { to: '/', label: 'Home', Icon: Home },
+        { to: '/features', label: 'How it works', Icon: Sparkles },
+        { to: '/login', label: 'Sign in', Icon: LogIn },
+        { to: '/register', label: 'Create account', Icon: UserPlus },
+      ];
 
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border bg-background/80 px-5 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
@@ -16,24 +44,19 @@ function Header() {
       >
         <Logo size={30} />
       </Link>
-      <div className="flex items-center gap-2">
-        {!isLoading &&
-          (isAuthenticated ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              leadingIcon={<LogOut size={16} aria-hidden="true" />}
-            >
-              Sign out
-            </Button>
-          ) : (
-            <Link to="/login" className={buttonClasses({ variant: 'ghost', size: 'sm' })}>
-              Sign in
-            </Link>
-          ))}
-        <ThemeToggle />
-      </div>
+
+      {!isLoading && (
+        <IconButton variant="ghost" aria-label="Open menu" onClick={() => setMenuOpen(true)}>
+          <Menu size={20} aria-hidden="true" />
+        </IconButton>
+      )}
+
+      <NavDrawer
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        links={links}
+        onSignOut={isAuthenticated ? logout : undefined}
+      />
     </header>
   );
 }

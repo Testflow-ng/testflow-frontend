@@ -1,38 +1,50 @@
-import Card from '../../components/ui/Card.jsx';
-import Button from '../../components/ui/Button.jsx';
+import { ChevronRight } from 'lucide-react';
+import Spinner from '../../components/ui/Spinner.jsx';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from './subjectMeta.js';
 
+/** Compact, tappable subject row: the whole card starts a practice exam. */
 function SubjectCard({ subject, onStart, isStarting }) {
   const { Icon, accent } = subjectMeta(subject.code);
   const count = subject.questionCount ?? 0;
   const disabled = count === 0;
 
   return (
-    <Card className="flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg', accent)}>
-          <Icon size={20} aria-hidden="true" />
-        </span>
-        <div className="min-w-0">
-          <p className="font-mono text-xs font-medium text-muted">{subject.code}</p>
-          <h3 className="text-sm font-semibold text-foreground-strong">{subject.title}</h3>
-          <p className="mt-0.5 text-xs text-muted">
-            {count} {count === 1 ? 'question' : 'questions'}
-          </p>
-        </div>
+    <button
+      type="button"
+      disabled={disabled || isStarting}
+      onClick={() => onStart(subject.code)}
+      aria-label={
+        disabled
+          ? `${subject.title}: no questions yet`
+          : `Start ${subject.title} practice, ${count} questions`
+      }
+      className={cn(
+        'flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-4 text-left transition-colors',
+        disabled
+          ? 'cursor-not-allowed opacity-60'
+          : 'hover:border-border-strong hover:bg-surface-strong',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+      )}
+    >
+      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', accent)}>
+        <Icon size={22} aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-mono text-xs font-medium text-muted">{subject.code}</p>
+        <h3 className="truncate text-sm font-semibold text-foreground-strong">{subject.title}</h3>
+        <p className="mt-0.5 text-xs text-muted">
+          {disabled ? 'No questions yet' : `${count} questions`}
+        </p>
       </div>
-      <Button
-        size="sm"
-        variant={disabled ? 'outline' : 'primary'}
-        fullWidth
-        disabled={disabled}
-        loading={isStarting}
-        onClick={() => onStart(subject.code)}
-      >
-        {disabled ? 'No questions yet' : 'Start practice'}
-      </Button>
-    </Card>
+      <span className="shrink-0 text-muted">
+        {isStarting ? (
+          <Spinner size="sm" className="text-primary" />
+        ) : (
+          <ChevronRight size={18} aria-hidden="true" />
+        )}
+      </span>
+    </button>
   );
 }
 

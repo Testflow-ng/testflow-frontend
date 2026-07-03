@@ -1,71 +1,41 @@
-import { useState } from 'react';
-import { Alert, Button } from '../../components/ui/index.js';
-import { authApi } from '../auth/api.js';
+import { Link } from 'react-router-dom';
+import { Alert, Avatar } from '../../components/ui/index.js';
 import { useAuth } from '../auth/useAuth.js';
 import SubjectGrid from '../subjects/SubjectGrid.jsx';
-import ProgressSection from '../analytics/ProgressSection.jsx';
 
 function DashboardPage() {
-  const { user, logout } = useAuth();
-  const [resent, setResent] = useState(false);
-  const [resending, setResending] = useState(false);
-
-  const handleResend = async () => {
-    setResending(true);
-    try {
-      await authApi.resendVerification({ email: user.email });
-      setResent(true);
-    } catch {
-      // Response is intentionally generic; surface success either way.
-      setResent(true);
-    } finally {
-      setResending(false);
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <section className="mx-auto w-full max-w-2xl flex-1 px-5 py-10">
-      <p className="text-sm text-muted">Signed in as {user.email}</p>
-      <h1 className="mt-1 text-2xl text-foreground-strong">Welcome, {user.fullName}</h1>
+    <section className="mx-auto w-full max-w-2xl flex-1 px-5 py-6">
+      <div className="flex items-center gap-3">
+        <Avatar name={user.fullName} size="md" />
+        <div className="min-w-0">
+          <p className="text-xs text-muted">Welcome back</p>
+          <p className="truncate text-base font-semibold text-foreground-strong">
+            {user.fullName}
+          </p>
+        </div>
+      </div>
 
       {!user.isEmailVerified && (
-        <div className="mt-6 flex flex-col items-start gap-3">
+        <div className="mt-6">
           <Alert variant="warning">
-            Verify your email to start exams. Check your inbox for the verification link.
+            Verify your email to start exams. Open the link we sent, or resend it from your{' '}
+            <Link to="/profile" className="font-medium underline">
+              profile
+            </Link>
+            .
           </Alert>
-          {resent ? (
-            <p className="text-sm text-muted">
-              If your account is unverified, a new link is on its way.
-            </p>
-          ) : (
-            <Button variant="outline" size="sm" loading={resending} onClick={handleResend}>
-              Resend verification email
-            </Button>
-          )}
         </div>
       )}
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-foreground-strong">Subjects</h2>
-        <p className="mt-1 text-sm text-muted">Choose a subject to start a timed practice exam.</p>
+        <h1 className="text-lg font-semibold text-foreground-strong">Practice a subject</h1>
+        <p className="mt-1 text-sm text-muted">Pick a subject to start a timed exam.</p>
         <div className="mt-4">
           <SubjectGrid />
         </div>
-      </div>
-
-      {user.isEmailVerified && (
-        <div className="mt-10">
-          <h2 className="text-lg font-semibold text-foreground-strong">Your progress</h2>
-          <div className="mt-4">
-            <ProgressSection />
-          </div>
-        </div>
-      )}
-
-      <div className="mt-10">
-        <Button variant="outline" onClick={logout}>
-          Sign out
-        </Button>
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 export { default as Alert } from './Alert.jsx';
+export { default as Avatar } from './Avatar.jsx';
 export { default as Button } from './Button.jsx';
 export { default as Card } from './Card.jsx';
 export { default as Field } from './Field.jsx';
