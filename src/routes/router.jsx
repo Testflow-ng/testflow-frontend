@@ -12,6 +12,7 @@ import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
+import HistoryPage from '../features/exam/HistoryPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'history', element: <HistoryPage /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
         ],

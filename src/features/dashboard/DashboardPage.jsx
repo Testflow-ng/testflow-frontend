@@ -3,6 +3,7 @@ import { Alert, Button } from '../../components/ui/index.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import SubjectGrid from '../subjects/SubjectGrid.jsx';
+import ProgressSection from '../analytics/ProgressSection.jsx';
 
 function DashboardPage() {
   const { user, logout } = useAuth();
@@ -46,13 +47,20 @@ function DashboardPage() {
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-foreground-strong">Subjects</h2>
-        <p className="mt-1 text-sm text-muted">
-          Choose a subject to practice. Timed exams open here soon.
-        </p>
+        <p className="mt-1 text-sm text-muted">Choose a subject to start a timed practice exam.</p>
         <div className="mt-4">
           <SubjectGrid />
         </div>
       </div>
+
+      {user.isEmailVerified && (
+        <div className="mt-10">
+          <h2 className="text-lg font-semibold text-foreground-strong">Your progress</h2>
+          <div className="mt-4">
+            <ProgressSection />
+          </div>
+        </div>
+      )}
 
       <div className="mt-10">
         <Button variant="outline" onClick={logout}>
