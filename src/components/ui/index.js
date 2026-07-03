@@ -4,6 +4,7 @@ export { default as Card } from './Card.jsx';
 export { default as Field } from './Field.jsx';
 export { default as IconButton } from './IconButton.jsx';
 export { default as Input } from './Input.jsx';
+export { default as Modal } from './Modal.jsx';
 export { default as PasswordInput } from './PasswordInput.jsx';
 export { default as Spinner } from './Spinner.jsx';
 export { buttonClasses } from './buttonClasses.js';

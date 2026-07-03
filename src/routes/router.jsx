@@ -10,6 +10,8 @@ import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage.jsx';
 import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage.jsx';
 import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
+import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
+import ExamResultPage from '../features/exam/ExamResultPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -29,7 +31,11 @@ export const router = createBrowserRouter([
       },
       {
         element: <RequireAuth />,
-        children: [{ path: 'dashboard', element: <DashboardPage /> }],
+        children: [
+          { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'exam/:id', element: <ExamRuntimePage /> },
+          { path: 'exam/:id/result', element: <ExamResultPage /> },
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],
