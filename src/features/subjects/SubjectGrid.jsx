@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { Alert, Spinner } from '../../components/ui/index.js';
 import { useStartExam } from '../exam/useStartExam.js';
+import ExamStartDialog from '../exam/ExamStartDialog.jsx';
 import { useSubjects } from './useSubjects.js';
 import SubjectCard from './SubjectCard.jsx';
 
 function SubjectGrid() {
   const { data: subjects, isLoading, isError, error } = useSubjects();
-  const { start, startingCode, error: startError } = useStartExam();
+  const { start, isStarting, error: startError } = useStartExam();
+  const [selected, setSelected] = useState(null);
 
   if (isLoading) {
     return (
@@ -28,14 +31,18 @@ function SubjectGrid() {
       {startError ? <Alert variant="danger">{startError}</Alert> : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {subjects.map((subject) => (
-          <SubjectCard
-            key={subject.code}
-            subject={subject}
-            onStart={start}
-            isStarting={startingCode === subject.code}
-          />
+          <SubjectCard key={subject.code} subject={subject} onSelect={setSelected} />
         ))}
       </div>
+
+      {selected && (
+        <ExamStartDialog
+          subject={selected}
+          isStarting={isStarting}
+          onClose={() => setSelected(null)}
+          onConfirm={(config) => start(selected.code, config)}
+        />
+      )}
     </div>
   );
 }

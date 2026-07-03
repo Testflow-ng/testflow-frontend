@@ -1,10 +1,9 @@
 import { ChevronRight } from 'lucide-react';
-import Spinner from '../../components/ui/Spinner.jsx';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from './subjectMeta.js';
 
-/** Compact, tappable subject row: the whole card starts a practice exam. */
-function SubjectCard({ subject, onStart, isStarting }) {
+/** Compact, tappable subject row: opens the start dialog to configure the exam. */
+function SubjectCard({ subject, onSelect }) {
   const { Icon, accent } = subjectMeta(subject.code);
   const count = subject.questionCount ?? 0;
   const disabled = count === 0;
@@ -12,12 +11,10 @@ function SubjectCard({ subject, onStart, isStarting }) {
   return (
     <button
       type="button"
-      disabled={disabled || isStarting}
-      onClick={() => onStart(subject.code)}
+      disabled={disabled}
+      onClick={() => onSelect(subject)}
       aria-label={
-        disabled
-          ? `${subject.title}: no questions yet`
-          : `Start ${subject.title} practice, ${count} questions`
+        disabled ? `${subject.title}: no questions yet` : `Set up ${subject.title} practice`
       }
       className={cn(
         'flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-4 text-left transition-colors',
@@ -37,13 +34,7 @@ function SubjectCard({ subject, onStart, isStarting }) {
           {disabled ? 'No questions yet' : `${count} questions`}
         </p>
       </div>
-      <span className="shrink-0 text-muted">
-        {isStarting ? (
-          <Spinner size="sm" className="text-primary" />
-        ) : (
-          <ChevronRight size={18} aria-hidden="true" />
-        )}
-      </span>
+      <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
     </button>
   );
 }
