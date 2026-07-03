@@ -1,23 +1,22 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
-import { LogOut, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { LogOut, X, Moon, Sun } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import IconButton from './ui/IconButton.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import Logo from './Logo.jsx';
 
 const ITEM_CLASS =
-  'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
+  'flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-base font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
 /**
- * Slide-in navigation drawer opened by the header hamburger. Escape closes it,
- * body scroll locks while open, and focus returns to the trigger on close.
- * `links` are { to, label, Icon }; `onSignOut` (optional) renders in the footer.
+ * Slide-in navigation drawer. Redesigned to feel premium.
  */
 function NavDrawer({ open, onClose, links, onSignOut }) {
   const panelRef = useRef(null);
   const previouslyFocused = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -42,12 +41,10 @@ function NavDrawer({ open, onClose, links, onSignOut }) {
 
   return createPortal(
     <div className="fixed inset-0 z-[600]">
-      <button
-        type="button"
-        aria-label="Close menu"
-        tabIndex={-1}
+      <div
+        aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-foreground/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-foreground/20 backdrop-blur-md transition-opacity duration-500"
       />
       <div
         ref={panelRef}
@@ -55,30 +52,58 @@ function NavDrawer({ open, onClose, links, onSignOut }) {
         aria-modal="true"
         aria-label="Menu"
         tabIndex={-1}
-        className="absolute inset-y-0 right-0 flex w-72 max-w-[80%] flex-col border-l border-border bg-surface p-5 shadow-xl focus:outline-none"
+        className={cn(
+          "absolute inset-y-0 right-0 flex w-80 max-w-[85%] flex-col bg-surface shadow-2xl transition-transform duration-500 ease-out focus:outline-none",
+          open ? "translate-x-0" : "translate-x-full"
+        )}
       >
-        <div className="flex items-center justify-between">
-          <Logo size={26} />
-          <IconButton size="sm" aria-label="Close menu" onClick={onClose}>
-            <X size={18} aria-hidden="true" />
+        <div className="flex items-center justify-between p-6">
+          <div className="flex items-center gap-2">
+            <Logo size={28} />
+            <span className="font-display text-lg font-bold text-foreground-strong">TestFlow</span>
+          </div>
+          <IconButton variant="ghost" aria-label="Close menu" onClick={onClose}>
+            <X size={20} aria-hidden="true" />
           </IconButton>
         </div>
 
-        <nav className="mt-6 flex flex-col gap-1">
-          {links.map(({ to, label, Icon }) => (
-            <Link
-              key={label}
-              to={to}
-              onClick={onClose}
-              className={cn(ITEM_CLASS, 'text-foreground hover:bg-surface-strong')}
-            >
-              <Icon size={18} className="shrink-0 text-muted" aria-hidden="true" />
-              {label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex-1 overflow-y-auto px-4 py-2">
+          <nav className="flex flex-col gap-2">
+            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted">Navigation</p>
+            {links.map(({ to, label, Icon }) => {
+              const isActive = location.pathname === to;
+              return (
+                <Link
+                  key={label}
+                  to={to}
+                  onClick={onClose}
+                  className={cn(
+                    ITEM_CLASS,
+                    isActive
+                      ? 'bg-primary/10 text-primary shadow-sm shadow-primary/5'
+                      : 'text-muted hover:text-foreground-strong hover:bg-surface-strong'
+                  )}
+                >
+                  <Icon size={20} className={cn("shrink-0", isActive ? "text-primary" : "text-muted")} aria-hidden="true" />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
 
-        <div className="mt-auto flex flex-col gap-1 border-t border-border pt-4">
+          <div className="mt-8 space-y-2">
+            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted">Settings</p>
+            <div className="flex items-center justify-between rounded-xl bg-surface-strong px-4 py-3">
+              <div className="flex items-center gap-3">
+                <Sun size={20} className="text-muted" />
+                <span className="text-sm font-semibold text-foreground-strong">Theme</span>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-border bg-surface-strong/30">
           {onSignOut && (
             <button
               type="button"
@@ -88,14 +113,13 @@ function NavDrawer({ open, onClose, links, onSignOut }) {
               }}
               className={cn(ITEM_CLASS, 'text-danger hover:bg-danger/10')}
             >
-              <LogOut size={18} className="shrink-0" aria-hidden="true" />
+              <LogOut size={20} className="shrink-0" aria-hidden="true" />
               Sign out
             </button>
           )}
-          <div className="flex items-center justify-between px-3 py-2">
-            <span className="text-sm text-muted">Theme</span>
-            <ThemeToggle />
-          </div>
+          <p className="mt-4 text-center text-[10px] text-muted">
+            TestFlow v1.0.0 &bull; Eddyrus Media
+          </p>
         </div>
       </div>
     </div>,

@@ -1,4 +1,4 @@
-import { Atom, BookOpen, Brain, Calculator, FlaskConical, Landmark, ScrollText, Sigma } from 'lucide-react';
+import { Atom, BookOpen, Brain, Calculator, FlaskConical, Landmark, ScrollText, Sigma, TrendingUp } from 'lucide-react';
 
 // Presentational only (icon + tonal accent per subject). Not stored in the DB.
 const META = {

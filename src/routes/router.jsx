@@ -22,6 +22,7 @@ import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
 import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
 import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
 import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
+import StudentManagementPage from '../features/admin/pages/StudentManagementPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
               { path: 'admin/questions/new', element: <EditQuestionPage /> },
               { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
               { path: 'admin/subjects', element: <SubjectManagementPage /> },
+              { path: 'admin/students', element: <StudentManagementPage /> },
             ],
           },
         ],

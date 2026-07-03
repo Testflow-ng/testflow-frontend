@@ -1,8 +1,8 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ArrowRight } from 'lucide-react';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from './subjectMeta.js';
 
-/** Compact, tappable subject row: opens the start dialog to configure the exam. */
+/** Premium subject card for the student dashboard. */
 function SubjectCard({ subject, onSelect }) {
   const { Icon, accent } = subjectMeta(subject.code);
   const count = subject.questionCount ?? 0;
@@ -17,24 +17,38 @@ function SubjectCard({ subject, onSelect }) {
         disabled ? `${subject.title}: no questions yet` : `Set up ${subject.title} practice`
       }
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-4 text-left transition-colors',
+        'group flex w-full flex-col items-start gap-4 rounded-2xl border border-border bg-surface p-5 text-left transition-all duration-300',
         disabled
           ? 'cursor-not-allowed opacity-60'
-          : 'hover:border-border-strong hover:bg-surface-strong',
+          : 'hover:border-primary/50 hover:bg-surface-strong hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       )}
     >
-      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-lg', accent)}>
-        <Icon size={22} aria-hidden="true" />
-      </span>
+      <div className="flex w-full items-center justify-between">
+        <span className={cn('flex size-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110', accent)}>
+          <Icon size={24} aria-hidden="true" />
+        </span>
+        <div className={cn(
+          "flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider",
+          count > 20 ? "bg-success/10 text-success" : "bg-surface-strong text-muted"
+        )}>
+          {disabled ? 'Coming Soon' : `${count} Qs`}
+        </div>
+      </div>
+
       <div className="min-w-0 flex-1">
-        <p className="font-mono text-xs font-medium text-muted">{subject.code}</p>
-        <h3 className="truncate text-sm font-semibold text-foreground-strong">{subject.title}</h3>
-        <p className="mt-0.5 text-xs text-muted">
-          {disabled ? 'No questions yet' : `${count} questions`}
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted">{subject.code}</p>
+        <h3 className="truncate text-lg font-bold text-foreground-strong tracking-tight">{subject.title}</h3>
+        <p className="mt-1 text-xs leading-relaxed text-muted line-clamp-2">
+          {disabled
+            ? 'We are currently adding content for this subject. Check back soon.'
+            : `Master ${subject.title} with our curated question bank.`}
         </p>
       </div>
-      <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
+
+      <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-primary opacity-0 transition-all duration-300 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0">
+        Start Practice <ArrowRight size={14} />
+      </div>
     </button>
   );
 }
