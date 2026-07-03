@@ -62,8 +62,36 @@ function ExamRuntime({ session }) {
     setPaletteOpen(false);
   };
 
+  const paletteGrid = (
+    <div className="grid grid-cols-5 gap-2">
+      {questions.map((_, index) => {
+        const state = answers[index].markedForReview
+          ? 'marked'
+          : answers[index].selectedOption !== null
+            ? 'answered'
+            : 'unanswered';
+        return (
+          <button
+            key={index}
+            type="button"
+            onClick={() => jumpTo(index)}
+            className={cn(
+              'flex h-10 items-center justify-center rounded-md border text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+              index === current && 'ring-2 ring-primary ring-offset-1 ring-offset-background',
+              state === 'answered' && 'border-primary bg-primary/10 text-primary',
+              state === 'marked' && 'border-warning bg-warning/10 text-warning',
+              state === 'unanswered' && 'border-border bg-surface text-muted',
+            )}
+          >
+            {index + 1}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 py-6">
+    <div className="mx-auto flex w-full max-w-xl lg:max-w-5xl flex-1 flex-col px-5 py-6">
       <div className="flex items-center justify-between gap-3">
         <span className="font-mono text-sm font-medium text-muted">{session.subjectCode}</span>
         <div className="flex items-center gap-2">
@@ -85,6 +113,7 @@ function ExamRuntime({ session }) {
             size="sm"
             onClick={() => setPaletteOpen(true)}
             leadingIcon={<LayoutGrid size={16} aria-hidden="true" />}
+            className="lg:hidden"
           >
             {answeredCount}/{total}
           </Button>
@@ -104,66 +133,84 @@ function ExamRuntime({ session }) {
         />
       </div>
 
-      <div className="mt-6 flex-1">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted">
-          Question {current + 1} of {total}
-        </p>
-        <h1 className="mt-2 text-lg font-semibold leading-relaxed text-foreground-strong">
-          {question.stem}
-        </h1>
+      <div className="lg:grid lg:grid-cols-[1fr_300px] lg:gap-12 lg:items-start mt-6 flex-1">
+        <div className="flex flex-col h-full">
+          <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted">
+            Question {current + 1} of {total}
+          </p>
+          <h1 className="mt-2 text-lg font-semibold leading-relaxed text-foreground-strong lg:text-xl">
+            {question.stem}
+          </h1>
 
-        <fieldset className="mt-5 flex flex-col gap-2.5">
-          <legend className="sr-only">Select your answer</legend>
-          {question.options.map((option, index) => {
-            const selected = answer.selectedOption === index;
-            return (
-              <label
-                key={index}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 transition-colors',
-                  selected
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-surface hover:border-border-strong',
-                )}
-              >
-                <input
-                  type="radio"
-                  name={`question-${current}`}
-                  className="sr-only"
-                  checked={selected}
-                  onChange={() => persist(current, { selectedOption: index })}
-                />
-                <span
+          <fieldset className="mt-5 flex flex-col gap-2.5">
+            <legend className="sr-only">Select your answer</legend>
+            {question.options.map((option, index) => {
+              const selected = answer.selectedOption === index;
+              return (
+                <label
+                  key={index}
                   className={cn(
-                    'flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
+                    'flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 transition-colors',
                     selected
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border-strong text-muted',
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border bg-surface hover:border-border-strong',
                   )}
                 >
-                  {letter(index)}
-                </span>
-                <span className="text-sm text-foreground-strong">{option}</span>
-              </label>
-            );
-          })}
-        </fieldset>
+                  <input
+                    type="radio"
+                    name={`question-${current}`}
+                    className="sr-only"
+                    checked={selected}
+                    onChange={() => persist(current, { selectedOption: index })}
+                  />
+                  <span
+                    className={cn(
+                      'flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
+                      selected
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border-strong text-muted',
+                    )}
+                  >
+                    {letter(index)}
+                  </span>
+                  <span className="text-sm text-foreground-strong lg:text-base">{option}</span>
+                </label>
+              );
+            })}
+          </fieldset>
 
-        <button
-          type="button"
-          onClick={() => persist(current, { markedForReview: !answer.markedForReview })}
-          aria-pressed={answer.markedForReview}
-          className={cn(
-            'mt-4 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-            answer.markedForReview ? 'text-warning' : 'text-muted hover:text-foreground',
-          )}
-        >
-          <Flag size={15} aria-hidden="true" />
-          {answer.markedForReview ? 'Marked for review' : 'Mark for review'}
-        </button>
+          <button
+            type="button"
+            onClick={() => persist(current, { markedForReview: !answer.markedForReview })}
+            aria-pressed={answer.markedForReview}
+            className={cn(
+              'mt-4 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+              answer.markedForReview ? 'text-warning' : 'text-muted hover:text-foreground',
+            )}
+          >
+            <Flag size={15} aria-hidden="true" />
+            {answer.markedForReview ? 'Marked for review' : 'Mark for review'}
+          </button>
+        </div>
+
+        <aside className="hidden lg:flex flex-col gap-4 sticky top-24">
+          <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-foreground-strong uppercase tracking-wider">Questions</h2>
+              <span className="text-xs font-medium text-muted">{answeredCount} of {total}</span>
+            </div>
+            {paletteGrid}
+            <Button
+              className="w-full mt-6"
+              onClick={() => setConfirmOpen(true)}
+            >
+              Submit Exam
+            </Button>
+          </div>
+        </aside>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-4 lg:w-full lg:max-w-xl">
         <Button
           variant="outline"
           size="sm"
@@ -174,7 +221,7 @@ function ExamRuntime({ session }) {
           Prev
         </Button>
         {current === total - 1 ? (
-          <Button size="sm" onClick={() => setConfirmOpen(true)}>
+          <Button size="sm" onClick={() => setConfirmOpen(true)} className="lg:hidden">
             Submit exam
           </Button>
         ) : (
@@ -195,31 +242,7 @@ function ExamRuntime({ session }) {
         title="Questions"
         description={`${answeredCount} of ${total} answered`}
       >
-        <div className="grid grid-cols-5 gap-2">
-          {questions.map((_, index) => {
-            const state = answers[index].markedForReview
-              ? 'marked'
-              : answers[index].selectedOption !== null
-                ? 'answered'
-                : 'unanswered';
-            return (
-              <button
-                key={index}
-                type="button"
-                onClick={() => jumpTo(index)}
-                className={cn(
-                  'flex h-10 items-center justify-center rounded-md border text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                  index === current && 'ring-2 ring-primary ring-offset-1 ring-offset-background',
-                  state === 'answered' && 'border-primary bg-primary/10 text-primary',
-                  state === 'marked' && 'border-warning bg-warning/10 text-warning',
-                  state === 'unanswered' && 'border-border bg-surface text-muted',
-                )}
-              >
-                {index + 1}
-              </button>
-            );
-          })}
-        </div>
+        {paletteGrid}
       </Modal>
 
       <Modal
