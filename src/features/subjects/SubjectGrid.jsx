@@ -29,7 +29,7 @@ function SubjectGrid() {
   return (
     <div className="flex flex-col gap-3">
       {startError ? <Alert variant="danger">{startError}</Alert> : null}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {subjects.map((subject) => (
           <SubjectCard key={subject.code} subject={subject} onSelect={setSelected} />
         ))}

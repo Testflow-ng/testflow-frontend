@@ -7,7 +7,7 @@ function DashboardPage() {
   const { user } = useAuth();
 
   return (
-    <section className="mx-auto w-full max-w-2xl flex-1 px-5 py-6">
+    <section className="mx-auto w-full max-w-5xl flex-1 px-5 py-6">
       <div className="flex items-center gap-3">
         <Avatar name={user.fullName} size="md" />
         <div className="min-w-0">

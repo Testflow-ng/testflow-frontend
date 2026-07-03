@@ -24,66 +24,97 @@ function ProfilePage() {
   };
 
   const rows = [
+    { label: 'Full name', value: user.fullName },
+    { label: 'Email address', value: user.email },
     ...(user.matricNumber ? [{ label: 'Matric number', value: user.matricNumber }] : []),
     { label: 'Role', value: user.role === 'admin' ? 'Administrator' : 'Student' },
     ...(user.createdAt ? [{ label: 'Member since', value: formatDate(user.createdAt) }] : []),
   ];
 
   return (
-    <section className="mx-auto w-full max-w-xl flex-1 px-5 py-8">
-      <div className="flex flex-col items-center text-center">
-        <Avatar name={user.fullName} size="lg" />
-        <h1 className="mt-4 text-xl font-semibold text-foreground-strong">{user.fullName}</h1>
-        <p className="mt-0.5 text-sm text-muted">{user.email}</p>
-        <span
-          className={cn(
-            'mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
-            user.isEmailVerified ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
-          )}
-        >
-          {user.isEmailVerified ? (
-            <CheckCircle2 size={13} aria-hidden="true" />
-          ) : (
-            <AlertTriangle size={13} aria-hidden="true" />
-          )}
-          {user.isEmailVerified ? 'Email verified' : 'Email not verified'}
-        </span>
+    <section className="mx-auto w-full max-w-2xl lg:max-w-4xl flex-1 px-5 py-8">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
+        <Avatar name={user.fullName} size="lg" className="h-24 w-24 text-2xl" />
+        <div className="flex-1 text-center md:text-left">
+          <h1 className="text-3xl font-bold text-foreground-strong">{user.fullName}</h1>
+          <p className="mt-1 text-muted">{user.email}</p>
+          <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider',
+                user.isEmailVerified ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
+              )}
+            >
+              {user.isEmailVerified ? (
+                <CheckCircle2 size={13} aria-hidden="true" />
+              ) : (
+                <AlertTriangle size={13} aria-hidden="true" />
+              )}
+              {user.isEmailVerified ? 'Verified' : 'Unverified'}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+              {user.role}
+            </span>
+          </div>
+        </div>
+        <div className="flex gap-3">
+           <Button variant="outline" size="sm" onClick={logout}>
+            Sign out
+          </Button>
+        </div>
       </div>
 
-      {!user.isEmailVerified && (
-        <div className="mt-6">
-          {resent ? (
-            <Alert variant="info">If your account is unverified, a new link is on its way.</Alert>
-          ) : (
-            <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
-              <p className="text-sm text-warning">Verify your email to start taking exams.</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                loading={resending}
-                onClick={handleResend}
-              >
-                Resend verification email
-              </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted mb-4">Account Information</h2>
+          <dl className="divide-y divide-border rounded-xl border border-border bg-surface overflow-hidden">
+            {rows.map((row) => (
+              <div key={row.label} className="flex items-center justify-between gap-4 px-5 py-4">
+                <dt className="text-sm font-medium text-muted">{row.label}</dt>
+                <dd className="truncate text-sm font-bold text-foreground-strong">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {!user.isEmailVerified && (
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted mb-4">Account Security</h2>
+              {resent ? (
+                <Alert variant="info">If your account is unverified, a new link is on its way.</Alert>
+              ) : (
+                <div className="rounded-xl border border-warning/30 bg-warning/10 p-5">
+                  <p className="text-sm font-medium text-warning">Your email is not verified yet. You cannot start taking exams until you verify your account.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4 bg-surface"
+                    loading={resending}
+                    onClick={handleResend}
+                  >
+                    Resend verification email
+                  </Button>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      <h2 className="mt-8 text-sm font-semibold text-foreground-strong">Account details</h2>
-      <dl className="mt-3 divide-y divide-border rounded-lg border border-border bg-surface">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between gap-4 px-4 py-3">
-            <dt className="text-sm text-muted">{row.label}</dt>
-            <dd className="truncate text-sm font-medium text-foreground-strong">{row.value}</dd>
+          <div>
+             <h2 className="text-sm font-bold uppercase tracking-widest text-muted mb-4">Quick Links</h2>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Link to="/history" className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface hover:bg-surface-strong transition-colors">
+                  <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-xs">H</div>
+                  <span className="text-sm font-bold text-foreground-strong">Exam History</span>
+                </Link>
+                <Link to="/progress" className="flex items-center gap-3 p-4 rounded-xl border border-border bg-surface hover:bg-surface-strong transition-colors">
+                  <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 font-bold text-xs">P</div>
+                  <span className="text-sm font-bold text-foreground-strong">My Progress</span>
+                </Link>
+             </div>
           </div>
-        ))}
-      </dl>
-
-      <Button variant="outline" fullWidth className="mt-8" onClick={logout}>
-        Sign out
-      </Button>
+        </div>
+      </div>
     </section>
   );
 }
