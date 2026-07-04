@@ -88,6 +88,7 @@ function BulkImportModal({ open, onOpenChange }) {
             <li><strong>options</strong>: Array of 2-6 strings</li>
             <li><strong>correctIndex</strong>: 0-based index of the correct option</li>
             <li><strong>difficulty</strong>: "easy", "medium", or "hard" (optional)</li>
+            <li><strong>LaTeX Support</strong>: Wrap math in <code>$...$</code> for inline or <code>$$...$$</code> for blocks.</li>
           </ul>
         </div>
 

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Clock, Flag, LayoutGrid, CheckCircle2 } from 'lucide-react';
 import { Alert, Button, Modal, Card } from '../../components/ui/index.js';
 import PageLoader from '../../components/PageLoader.jsx';
+import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 import { useCountdown } from './useCountdown.js';
@@ -212,9 +213,9 @@ function ExamRuntime({ session }) {
       {/* Main Content Area */}
       <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-16 lg:items-start flex-1">
         <div className="flex flex-col min-h-[400px]">
-          <h1 className="text-xl font-bold leading-relaxed text-foreground-strong lg:text-2xl tracking-tight font-display">
+          <MathText className="text-xl font-bold leading-relaxed text-foreground-strong lg:text-2xl tracking-tight font-display">
             {question.stem}
-          </h1>
+          </MathText>
 
           <fieldset className="mt-8 flex flex-col gap-3">
             <legend className="sr-only">Select your answer</legend>
@@ -247,12 +248,14 @@ function ExamRuntime({ session }) {
                   >
                     {letter(index)}
                   </span>
-                  <span className={cn(
-                    "text-sm lg:text-base font-medium transition-colors",
-                    selected ? "text-foreground-strong font-bold" : "text-foreground"
-                  )}>
+                  <MathText
+                    className={cn(
+                      'text-sm lg:text-base font-medium transition-colors',
+                      selected ? 'text-foreground-strong font-bold' : 'text-foreground',
+                    )}
+                  >
                     {option}
-                  </span>
+                  </MathText>
                   {selected && <CheckCircle2 size={18} className="ml-auto text-primary" />}
                 </label>
               );

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
 import { Alert, Button } from '../../components/ui/index.js';
 import PageLoader from '../../components/PageLoader.jsx';
+import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 
@@ -60,18 +61,20 @@ function ExamResultPage() {
         {result.questions.map((question) => (
           <li key={question.index} className="rounded-lg border border-border bg-surface p-4">
             <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-medium text-foreground-strong">
+              <MathText className="text-sm font-medium text-foreground-strong">
                 {question.index + 1}. {question.stem}
-              </p>
+              </MathText>
               <span
                 className={cn(
                   'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
-                  question.isCorrect
-                    ? 'bg-success/10 text-success'
-                    : 'bg-danger/10 text-danger',
+                  question.isCorrect ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
                 )}
               >
-                {question.isCorrect ? 'Correct' : question.selectedOption === null ? 'Skipped' : 'Wrong'}
+                {question.isCorrect
+                  ? 'Correct'
+                  : question.selectedOption === null
+                    ? 'Skipped'
+                    : 'Wrong'}
               </span>
             </div>
 
@@ -94,7 +97,7 @@ function ExamResultPage() {
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full border border-current text-[11px] font-semibold">
                       {letter(index)}
                     </span>
-                    <span>{option}</span>
+                    <MathText>{option}</MathText>
                     {isCorrect ? (
                       <Check size={15} className="ml-auto shrink-0" aria-label="Correct answer" />
                     ) : isChosen ? (
@@ -106,10 +109,10 @@ function ExamResultPage() {
             </div>
 
             {question.explanation ? (
-              <p className="mt-3 rounded-md bg-surface-strong p-3 text-xs leading-relaxed text-muted">
+              <MathText className="mt-3 rounded-md bg-surface-strong p-3 text-xs leading-relaxed text-muted">
                 <span className="font-semibold text-foreground-strong">Explanation. </span>
                 {question.explanation}
-              </p>
+              </MathText>
             ) : null}
           </li>
         ))}

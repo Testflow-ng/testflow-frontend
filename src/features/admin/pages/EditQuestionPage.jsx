@@ -13,8 +13,9 @@ import {
   Field,
   Spinner,
   IconButton,
-  Alert
+  Alert,
 } from '../../../components/ui/index.js';
+import MathText from '../../../components/MathText.jsx';
 import { ChevronLeft, Plus, Trash2, Save } from 'lucide-react';
 
 function EditQuestionPage() {
@@ -40,6 +41,7 @@ function EditQuestionPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    watch,
   } = useForm({
     resolver: zodResolver(questionSchema),
     defaultValues: {
@@ -139,9 +141,15 @@ function EditQuestionPage() {
             <Field label="Question Text (Stem)" error={errors.stem?.message}>
               <textarea
                 className="w-full min-h-[120px] rounded-md border border-border bg-surface p-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                placeholder="Type the question here..."
+                placeholder="Type the question here... Use $ for math."
                 {...register('stem')}
               />
+              {watch('stem') && (
+                <div className="mt-2 p-3 rounded-lg bg-surface-strong border border-border">
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Live Preview</p>
+                  <MathText className="text-sm">{watch('stem')}</MathText>
+                </div>
+              )}
             </Field>
           </div>
         </Card>
