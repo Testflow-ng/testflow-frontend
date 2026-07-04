@@ -108,9 +108,10 @@ function AdminDashboardPage() {
 
   const statCards = [
     { label: 'Total Signups', value: stats.users.students, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { label: 'Total Exams Taken', value: stats.usage.totalSessions, icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { label: 'Active Sessions (1h)', value: stats.usage.activeNow, icon: Activity, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'Questions Bank', value: stats.content.questions, icon: FileQuestion, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Total Subjects', value: stats.content.subjects, icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
+    { label: 'Total Exams', value: stats.usage.totalSessions, icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Question Bank', value: stats.content.questions, icon: FileQuestion, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { label: 'Active Now', value: stats.usage.activeNow, icon: Activity, color: 'text-rose-500', bg: 'bg-rose-500/10' },
   ];
 
   return (
@@ -143,7 +144,8 @@ function AdminDashboardPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
         {statCards.map((stat) => (
           <Card key={stat.label} className="p-5 flex flex-col gap-3">
             <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", stat.bg)}>
