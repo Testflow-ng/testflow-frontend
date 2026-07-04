@@ -1,9 +1,7 @@
-import { Link } from 'react-router-dom';
-import { Alert, Card } from '../../components/ui/index.js';
 import { useAuth } from '../auth/useAuth.js';
 import SubjectGrid from '../subjects/SubjectGrid.jsx';
 import { useStats } from '../analytics/useStats.js';
-import { Trophy, Target, Zap, Clock } from 'lucide-react';
+import { Trophy, Zap } from 'lucide-react';
 import Avatar from '../../components/ui/Avatar.jsx';
 
 function DashboardPage() {

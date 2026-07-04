@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut, X, Moon, Sun } from 'lucide-react';
+import { LogOut, X, Sun } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import IconButton from './ui/IconButton.jsx';
 import ThemeToggle from './ThemeToggle.jsx';

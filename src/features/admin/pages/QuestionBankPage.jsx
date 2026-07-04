@@ -10,7 +10,7 @@ import {
   IconButton,
   Field
 } from '../../../components/ui/index.js';
-import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BulkImportModal from '../components/BulkImportModal.jsx';
 

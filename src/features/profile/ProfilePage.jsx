@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, Edit2, Lock, Save, X, History, TrendingUp } from 'lucide-react';
+import { Edit2, Lock, Save, History, TrendingUp } from 'lucide-react';
 import { Alert, Avatar, Button, Input, Field, Modal } from '../../components/ui/index.js';
-import { cn } from '../../utils/cn.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import { Link } from 'react-router-dom';
@@ -11,8 +10,6 @@ const formatDate = (value) =>
 
 function ProfilePage() {
   const { user, logout, refreshUser } = useAuth();
-  const [resent, setResent] = useState(false);
-  const [resending, setResending] = useState(false);
 
   // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
@@ -22,19 +19,13 @@ function ProfilePage() {
 
   // Change Password State
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [passwordError, setPasswordError] = useState(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-
-  const handleResend = async () => {
-    setResending(true);
-    try {
-      await authApi.resendVerification({ email: user.email });
-    } finally {
-      setResent(true);
-      setResending(false);
-    }
-  };
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
@@ -61,7 +52,7 @@ function ProfilePage() {
     try {
       await authApi.changePassword({
         currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
+        newPassword: passwordForm.newPassword,
       });
       setIsPasswordModalOpen(false);
       // Backend signs user out on password change for security
@@ -77,17 +68,31 @@ function ProfilePage() {
     { label: 'Full name', value: user.fullName },
     { label: 'Email address', value: user.email },
     ...(user.matricNumber ? [{ label: 'Matric number', value: user.matricNumber }] : []),
-    { label: 'Role', value: user.role === 'admin' ? 'Administrator' : user.role === 'super_admin' ? 'Super Admin' : 'Student' },
+    {
+      label: 'Role',
+      value:
+        user.role === 'admin'
+          ? 'Administrator'
+          : user.role === 'super_admin'
+            ? 'Super Admin'
+            : 'Student',
+    },
     ...(user.createdAt ? [{ label: 'Member since', value: formatDate(user.createdAt) }] : []),
   ];
 
   return (
     <section className="mx-auto w-full max-w-2xl lg:max-w-4xl flex-1 px-5 py-8">
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
-        <Avatar name={user.fullName} size="lg" className="h-24 w-24 text-2xl border-4 border-primary/10 p-1" />
+        <Avatar
+          name={user.fullName}
+          size="lg"
+          className="h-24 w-24 text-2xl border-4 border-primary/10 p-1"
+        />
         <div className="flex-1 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-3">
-            <h1 className="text-3xl font-black text-foreground-strong tracking-tight">{user.fullName}</h1>
+            <h1 className="text-3xl font-black text-foreground-strong tracking-tight">
+              {user.fullName}
+            </h1>
             <button
               onClick={() => setIsEditing(true)}
               className="p-2 rounded-full hover:bg-surface-strong text-muted hover:text-primary transition-colors"
@@ -103,10 +108,15 @@ function ProfilePage() {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-           <Button variant="outline" size="sm" onClick={() => setIsPasswordModalOpen(true)} leadingIcon={<Lock size={14} />}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsPasswordModalOpen(true)}
+            leadingIcon={<Lock size={14} />}
+          >
             Security
           </Button>
-           <Button variant="ghost" size="sm" onClick={logout} className="text-danger hover:bg-danger/5">
+          <Button variant="ghost" size="sm" onClick={logout} className="text-danger hover:bg-danger/5">
             Logout
           </Button>
         </div>
@@ -115,7 +125,9 @@ function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted">Account Profile</h2>
+            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted">
+              Account Profile
+            </h2>
           </div>
           <dl className="divide-y divide-border rounded-2xl border border-border bg-surface overflow-hidden shadow-sm">
             {rows.map((row) => (
@@ -129,23 +141,31 @@ function ProfilePage() {
 
         <div className="flex flex-col gap-8">
           <div>
-             <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted mb-4">Activity Portal</h2>
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link to="/history" className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm">
-                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform group-hover:scale-110">
-                    <History size={20} />
-                  </div>
-                  <p className="mt-3 text-sm font-bold text-foreground-strong">Exam History</p>
-                  <p className="text-[10px] text-muted font-medium">Review your past attempts</p>
-                </Link>
-                <Link to="/progress" className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm">
-                  <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 transition-transform group-hover:scale-110">
-                    <TrendingUp size={20} />
-                  </div>
-                  <p className="mt-3 text-sm font-bold text-foreground-strong">My Progress</p>
-                  <p className="text-[10px] text-muted font-medium">Track your performance</p>
-                </Link>
-             </div>
+            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted mb-4">
+              Activity Portal
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                to="/history"
+                className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm"
+              >
+                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform group-hover:scale-110">
+                  <History size={20} />
+                </div>
+                <p className="mt-3 text-sm font-bold text-foreground-strong">Exam History</p>
+                <p className="text-[10px] text-muted font-medium">Review your past attempts</p>
+              </Link>
+              <Link
+                to="/progress"
+                className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm"
+              >
+                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 transition-transform group-hover:scale-110">
+                  <TrendingUp size={20} />
+                </div>
+                <p className="mt-3 text-sm font-bold text-foreground-strong">My Progress</p>
+                <p className="text-[10px] text-muted font-medium">Track your performance</p>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -158,7 +178,9 @@ function ProfilePage() {
         description="Update your personal information"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
             <Button loading={isSaving} onClick={handleSaveProfile} leadingIcon={<Save size={16} />}>
               Save Changes
             </Button>
@@ -176,7 +198,9 @@ function ProfilePage() {
           </Field>
           <Field label="Email Address">
             <Input value={user.email} disabled className="bg-surface-strong" />
-            <p className="text-[10px] text-muted mt-1.5 font-medium italic">Email address cannot be changed for security reasons.</p>
+            <p className="text-[10px] text-muted mt-1.5 font-medium italic">
+              Email address cannot be changed for security reasons.
+            </p>
           </Field>
         </div>
       </Modal>
@@ -196,7 +220,9 @@ function ProfilePage() {
               type="password"
               required
               value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))
+              }
             />
           </Field>
 
@@ -207,7 +233,7 @@ function ProfilePage() {
               type="password"
               required
               value={passwordForm.newPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+              onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
             />
           </Field>
 
@@ -216,13 +242,19 @@ function ProfilePage() {
               type="password"
               required
               value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))
+              }
             />
           </Field>
 
           <div className="pt-4 flex justify-end gap-3">
-            <Button type="button" variant="ghost" onClick={() => setIsPasswordModalOpen(false)}>Cancel</Button>
-            <Button type="submit" loading={isChangingPassword}>Update Password</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsPasswordModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={isChangingPassword}>
+              Update Password
+            </Button>
           </div>
         </form>
       </Modal>

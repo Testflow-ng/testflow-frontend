@@ -12,7 +12,6 @@ import {
   Sparkles,
   TrendingUp,
   User,
-  Settings,
 } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import Logo from './Logo.jsx';

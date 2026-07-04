@@ -11,7 +11,7 @@ import {
   Modal,
   Avatar
 } from '../../../components/ui/index.js';
-import { UserPlus, Shield, ShieldCheck, Mail, Lock, X, User } from 'lucide-react';
+import { UserPlus, Shield, ShieldCheck, Mail, Lock, User } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';

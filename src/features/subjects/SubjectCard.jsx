@@ -1,4 +1,4 @@
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from './subjectMeta.js';
 

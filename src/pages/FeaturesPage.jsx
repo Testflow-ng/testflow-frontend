@@ -2,12 +2,9 @@ import { Link } from 'react-router-dom';
 import {
   Clock,
   ShieldCheck,
-  Sparkles,
   ListChecks,
-  ArrowRight,
   Target,
   BarChart3,
-  Smartphone,
   CheckCircle2,
   Lock
 } from 'lucide-react';

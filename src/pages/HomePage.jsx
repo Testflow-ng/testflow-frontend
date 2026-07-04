@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
-  BookOpen,
   Zap,
   ShieldCheck,
-  Award,
   Smartphone,
   Clock,
   BarChart3,
@@ -14,8 +12,6 @@ import { motion } from 'framer-motion';
 import { buttonClasses } from '../components/ui/index.js';
 import { useAuth } from '../features/auth/useAuth.js';
 import { cn } from '../utils/cn.js';
-
-const MotionLink = motion.create(Link);
 
 function HomePage() {
   const { isAuthenticated } = useAuth();

@@ -5,7 +5,6 @@ import {
   Button,
   Modal,
   Alert,
-  Spinner
 } from '../../../components/ui/index.js';
 import { FileCode, AlertCircle } from 'lucide-react';
 

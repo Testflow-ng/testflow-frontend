@@ -40,7 +40,6 @@ function EditQuestionPage() {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-    watch,
   } = useForm({
     resolver: zodResolver(questionSchema),
     defaultValues: {

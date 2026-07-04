@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Clock, Flag, LayoutGrid, CheckCircle2 } from 'lucide-react';
@@ -28,6 +28,20 @@ function ExamRuntime({ session }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
+
+  const persist = useCallback(
+    (index, patch) => {
+      setAnswers((prev) => {
+        const next = [...prev];
+        if (next[index]) {
+          next[index] = { ...next[index], ...patch };
+        }
+        return next;
+      });
+      examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
+    },
+    [id],
+  );
 
   const submit = async () => {
     if (submittingRef.current) return;
@@ -89,31 +103,20 @@ function ExamRuntime({ session }) {
         const index = key.charCodeAt(0) - 97;
         if (index < question.options.length) persist(current, { selectedOption: index });
       }
-      if (key === 'arrowright') if (current < total - 1) setCurrent(c => c + 1);
-      if (key === 'arrowleft') if (current > 0) setCurrent(c => c - 1);
+      if (key === 'arrowright') if (current < total - 1) setCurrent((c) => c + 1);
+      if (key === 'arrowleft') if (current > 0) setCurrent((c) => c - 1);
       if (key === 'm') {
         const answer = answers[current];
         if (answer) persist(current, { markedForReview: !answer.markedForReview });
       }
       if (key === 'enter') {
         if (current === total - 1) setConfirmOpen(true);
-        else setCurrent(c => c + 1);
+        else setCurrent((c) => c + 1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [current, total, questions, answers, confirmOpen, paletteOpen, submitting]);
-
-  const persist = (index, patch) => {
-    setAnswers((prev) => {
-      const next = [...prev];
-      if (next[index]) {
-        next[index] = { ...next[index], ...patch };
-      }
-      return next;
-    });
-    examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
-  };
+  }, [current, total, questions, answers, confirmOpen, paletteOpen, submitting, persist]);
 
   const answeredCount = answers.filter((answer) => answer.selectedOption !== null).length;
   const question = questions[current];

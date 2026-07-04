@@ -12,7 +12,6 @@ import {
   Modal
 } from '../../../components/ui/index.js';
 import { Search, ChevronLeft, ChevronRight, User, CheckCircle2, Eye, EyeOff, Lock, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { cn } from '../../../utils/cn.js';
 
 const maskEmail = (email) => {
   const [name, domain] = email.split('@');
