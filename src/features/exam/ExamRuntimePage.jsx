@@ -14,7 +14,7 @@ const letter = (index) => String.fromCharCode(65 + index);
 function ExamRuntime({ session }) {
   const navigate = useNavigate();
   const id = session.id;
-  const questions = session.questions;
+  const questions = session.questions || [];
   const total = questions.length;
 
   const [answers, setAnswers] = useState(() =>
@@ -35,8 +35,8 @@ function ExamRuntime({ session }) {
     setSubmitting(true);
     try {
       await examApi.submit(id);
-    } catch {
-      // The result view finalizes/reads authoritatively, so navigate regardless.
+    } catch (err) {
+      console.error('Submission Error:', err);
     }
     navigate(`/exam/${id}/result`, { replace: true });
   };
@@ -45,15 +45,14 @@ function ExamRuntime({ session }) {
 
   // Anti-Cheating & Integrity Protection
   useEffect(() => {
-    // 1. Focus Detection
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'hidden') {
+      if (document.visibilityState === 'hidden' && !submittingRef.current) {
         try {
           const result = await examApi.recordStrike(id);
           if (result.status === 'submitted') {
             alert('Integrity Violation: Exam auto-submitted due to multiple tab switches.');
             navigate(`/exam/${id}/result`, { replace: true });
-          } else {
+          } else if (result.strikes) {
             alert(`Integrity Warning: Please stay on this tab. Strike ${result.strikes}/3`);
           }
         } catch (err) {
@@ -62,10 +61,7 @@ function ExamRuntime({ session }) {
       }
     };
 
-    // 2. Prevent Right-Click
     const handleContextMenu = (e) => e.preventDefault();
-
-    // 3. Prevent Copy-Paste
     const handleCopy = (e) => {
       e.preventDefault();
       alert('Content protection enabled: copying is disabled during exams.');
@@ -80,19 +76,25 @@ function ExamRuntime({ session }) {
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('copy', handleCopy);
     };
-  }, []);
+  }, [id, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (confirmOpen || paletteOpen || submitting) return;
       const key = e.key.toLowerCase();
+      const question = questions[current];
+      if (!question) return;
+
       if (key >= 'a' && key <= 'f') {
         const index = key.charCodeAt(0) - 97;
         if (index < question.options.length) persist(current, { selectedOption: index });
       }
       if (key === 'arrowright') if (current < total - 1) setCurrent(c => c + 1);
       if (key === 'arrowleft') if (current > 0) setCurrent(c => c - 1);
-      if (key === 'm') persist(current, { markedForReview: !answer.markedForReview });
+      if (key === 'm') {
+        const answer = answers[current];
+        if (answer) persist(current, { markedForReview: !answer.markedForReview });
+      }
       if (key === 'enter') {
         if (current === total - 1) setConfirmOpen(true);
         else setCurrent(c => c + 1);
@@ -100,12 +102,14 @@ function ExamRuntime({ session }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [current, questions.length, confirmOpen, paletteOpen, submitting]);
+  }, [current, total, questions, answers, confirmOpen, paletteOpen, submitting]);
 
   const persist = (index, patch) => {
     setAnswers((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], ...patch };
+      if (next[index]) {
+        next[index] = { ...next[index], ...patch };
+      }
       return next;
     });
     examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
@@ -116,6 +120,8 @@ function ExamRuntime({ session }) {
   const answer = answers[current];
   const lowTime = remaining <= 60;
 
+  if (!question) return null;
+
   const jumpTo = (index) => {
     setCurrent(index);
     setPaletteOpen(false);
@@ -124,9 +130,9 @@ function ExamRuntime({ session }) {
   const paletteGrid = (
     <div className="grid grid-cols-5 gap-2.5">
       {questions.map((_, index) => {
-        const state = answers[index].markedForReview
+        const state = answers[index]?.markedForReview
           ? 'marked'
-          : answers[index].selectedOption !== null
+          : answers[index]?.selectedOption !== null
             ? 'answered'
             : 'unanswered';
         return (
@@ -155,7 +161,7 @@ function ExamRuntime({ session }) {
       <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex flex-col">
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted leading-none mb-1">
-            {session.subjectCode} &bull; Attempt Mode
+            {session.subjectCode} &bull; Examination Mode
           </span>
           <h2 className="text-sm font-bold text-foreground-strong">Question {current + 1} of {total}</h2>
         </div>
@@ -203,14 +209,14 @@ function ExamRuntime({ session }) {
       {/* Main Content Area */}
       <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-16 lg:items-start flex-1">
         <div className="flex flex-col min-h-[400px]">
-          <h1 className="text-xl font-bold leading-relaxed text-foreground-strong lg:text-2xl tracking-tight">
+          <h1 className="text-xl font-bold leading-relaxed text-foreground-strong lg:text-2xl tracking-tight font-display">
             {question.stem}
           </h1>
 
           <fieldset className="mt-8 flex flex-col gap-3">
             <legend className="sr-only">Select your answer</legend>
             {question.options.map((option, index) => {
-              const selected = answer.selectedOption === index;
+              const selected = answer?.selectedOption === index;
               return (
                 <label
                   key={index}
@@ -253,17 +259,17 @@ function ExamRuntime({ session }) {
           <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
              <button
               type="button"
-              onClick={() => persist(current, { markedForReview: !answer.markedForReview })}
-              aria-pressed={answer.markedForReview}
+              onClick={() => persist(current, { markedForReview: !answer?.markedForReview })}
+              aria-pressed={answer?.markedForReview}
               className={cn(
                 'inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all',
-                answer.markedForReview
+                answer?.markedForReview
                   ? 'bg-warning/10 text-warning'
                   : 'text-muted hover:text-foreground hover:bg-surface-strong',
               )}
             >
-              <Flag size={16} className={answer.markedForReview ? "fill-warning" : ""} />
-              {answer.markedForReview ? 'Marked for Review' : 'Mark for Review'}
+              <Flag size={16} className={answer?.markedForReview ? "fill-warning" : ""} />
+              {answer?.markedForReview ? 'Marked for Review' : 'Mark for Review'}
             </button>
 
             <div className="hidden lg:flex items-center gap-3">

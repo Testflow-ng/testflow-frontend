@@ -24,6 +24,7 @@ import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 
 const maskEmail = (email) => {
+  if (!email) return '';
   const [name, domain] = email.split('@');
   if (name.length <= 2) return `${name[0]}***@${domain}`;
   return `${name[0]}${name[1]}***${name[name.length - 1]}@${domain}`;
@@ -72,7 +73,6 @@ function AdminDashboardPage() {
   ];
 
   if (['admin', 'super_admin'].includes(currentUser?.role)) {
-    // Check if super_admin to add roster link
     if (currentUser?.role === 'super_admin') {
       const hasRosterLink = adminLinks.some(l => l.href === '/admin/roster');
       if (!hasRosterLink) {
@@ -121,11 +121,11 @@ function AdminDashboardPage() {
             <LayoutDashboard className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground-strong tracking-tight">Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold text-foreground-strong tracking-tight font-display">Admin Dashboard</h1>
             <p className="text-muted text-sm font-medium">Real-time overview of TestFlow activity</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted bg-surface p-2 rounded-lg border border-border">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted bg-surface p-2 rounded-lg border border-border tabular-nums">
           <Clock className="w-3.5 h-3.5" />
           Last updated: {new Date().toLocaleTimeString()}
         </div>
@@ -151,7 +151,7 @@ function AdminDashboardPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-muted uppercase tracking-wider">{stat.label}</p>
-              <p className="text-2xl font-black text-foreground-strong mt-1">{stat.value.toLocaleString()}</p>
+              <p className="text-2xl font-black text-foreground-strong mt-1 tabular-nums">{stat.value.toLocaleString()}</p>
             </div>
           </Card>
         ))}
@@ -167,8 +167,8 @@ function AdminDashboardPage() {
                   <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110", link.bg)}>
                     <link.icon className={cn("w-6 h-6", link.color)} />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground-strong mb-2">{link.title}</h3>
-                  <p className="text-sm text-muted leading-relaxed">{link.description}</p>
+                  <h3 className="text-lg font-bold text-foreground-strong mb-2 font-display">{link.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed font-medium">{link.description}</p>
                 </Card>
               </Link>
             ))}
@@ -177,16 +177,16 @@ function AdminDashboardPage() {
 
         <div className="space-y-6">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted">Recent Signups</h2>
-          <Card className="divide-y divide-border overflow-hidden">
+          <Card className="divide-y divide-border overflow-hidden p-0">
             {recentUsers.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted">No recent signups</div>
+              <div className="p-6 text-center text-sm text-muted font-medium">No recent signups</div>
             ) : (
               recentUsers.map((user) => (
                 <div key={user.id} className="p-4 flex items-center gap-3">
                   <Avatar name={user.fullName} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-foreground-strong truncate">{user.fullName}</p>
-                    <p className="text-[10px] text-muted truncate">{maskEmail(user.email)}</p>
+                    <p className="text-[10px] font-medium text-muted truncate">{maskEmail(user.email)}</p>
                   </div>
                   {user.isEmailVerified && (
                     <CheckCircle2 className="w-3.5 h-3.5 text-success flex-shrink-0" />
@@ -194,7 +194,7 @@ function AdminDashboardPage() {
                 </div>
               ))
             )}
-            <Link to="/admin/students" className="block p-3 text-center text-xs font-bold text-primary hover:bg-surface-strong transition-colors">
+            <Link to="/admin/students" className="block p-4 text-center text-xs font-bold text-primary hover:bg-surface-strong transition-colors border-t border-border">
               View all students
             </Link>
           </Card>

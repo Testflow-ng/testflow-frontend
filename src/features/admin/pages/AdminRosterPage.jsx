@@ -11,7 +11,7 @@ import {
   Modal,
   Avatar
 } from '../../../components/ui/index.js';
-import { UserPlus, Shield, ShieldCheck, Mail, Lock, X } from 'lucide-react';
+import { UserPlus, Shield, ShieldCheck, Mail, Lock, X, User } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
@@ -36,13 +36,18 @@ function AdminRosterPage() {
       queryClient.invalidateQueries(['adminRoster']);
       setIsAddModalOpen(false);
       setForm({ fullName: '', email: '', password: '', confirmPassword: '' });
+      setError(null);
     },
     onError: (err) => {
       setError(err.message || 'Failed to create admin');
     }
   });
 
-  const handleCreate = () => {
+  const handleCreate = (e) => {
+    e?.preventDefault();
+    if (!form.fullName || !form.email || !form.password) {
+      return setError('All fields are required');
+    }
     if (form.password !== form.confirmPassword) {
       return setError('Passwords do not match');
     }
@@ -53,9 +58,9 @@ function AdminRosterPage() {
     return (
       <div className="mx-auto max-w-xl py-20 px-5 text-center">
         <Shield size={48} className="mx-auto text-danger mb-4 opacity-20" />
-        <h1 className="text-2xl font-bold text-foreground-strong">Access Denied</h1>
-        <p className="text-muted mt-2">Only Super Administrators can manage the admin roster.</p>
-        <Button className="mt-8" onClick={() => navigate('/admin')}>Back to Dashboard</Button>
+        <h1 className="text-2xl font-bold text-foreground-strong font-display">Access Denied</h1>
+        <p className="text-muted mt-2 font-medium">Only Super Administrators can manage the admin roster.</p>
+        <Button className="mt-8 rounded-xl px-8" onClick={() => navigate('/admin')}>Back to Dashboard</Button>
       </div>
     );
   }
@@ -64,13 +69,13 @@ function AdminRosterPage() {
     <div className="mx-auto w-full max-w-4xl px-5 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-black text-foreground-strong tracking-tight">Admin Roster</h1>
+          <h1 className="text-3xl font-black text-foreground-strong tracking-tight font-display">Admin Roster</h1>
           <p className="text-muted text-sm font-medium">Manage executive and technical platform administrators</p>
         </div>
         <Button
           onClick={() => setIsAddModalOpen(true)}
           leadingIcon={<UserPlus size={18} />}
-          className="shadow-lg shadow-primary/20"
+          className="shadow-lg shadow-primary/20 rounded-xl px-6"
         >
           Add New Admin
         </Button>
@@ -81,19 +86,19 @@ function AdminRosterPage() {
           <Spinner size="lg" />
         </div>
       ) : isError ? (
-        <Alert variant="danger">Failed to load admin roster.</Alert>
+        <Alert variant="danger" className="rounded-xl">Failed to load admin roster.</Alert>
       ) : (
         <div className="grid gap-4">
-          {admins.map((admin) => (
-            <Card key={admin.id} className="p-5 flex items-center justify-between border-primary/5">
+          {admins?.map((admin) => (
+            <Card key={admin.id} className="p-5 flex items-center justify-between border-primary/5 hover:border-primary/10 transition-colors">
               <div className="flex items-center gap-4">
                 <Avatar name={admin.fullName} size="md" className="border-2 border-primary/10" />
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-bold text-foreground-strong">{admin.fullName}</p>
                     {admin.role === 'super_admin' && (
-                      <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded">
-                        Super Admin
+                      <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                        Founder
                       </span>
                     )}
                   </div>
@@ -125,14 +130,15 @@ function AdminRosterPage() {
             <Button
               loading={createMutation.isPending}
               onClick={handleCreate}
+              className="px-8 shadow-lg shadow-primary/10"
             >
               Create Account
             </Button>
           </>
         }
       >
-        <div className="space-y-4 pt-2">
-          {error && <Alert variant="danger">{error}</Alert>}
+        <form onSubmit={handleCreate} className="space-y-4 pt-2">
+          {error && <Alert variant="danger" className="rounded-xl">{error}</Alert>}
           <Field label="Full Name">
             <Input
               value={form.fullName}
@@ -170,13 +176,13 @@ function AdminRosterPage() {
               />
             </Field>
           </div>
-          <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
-            <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Security Note</p>
-            <p className="text-[11px] leading-relaxed text-muted font-medium">
-              New admins are verified by default. Advise them to change their password immediately after their first login.
+          <div className="rounded-2xl bg-primary/5 p-5 border border-primary/10">
+            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Security Protocol</p>
+            <p className="text-[11px] leading-relaxed text-muted font-medium italic">
+              "New admins are verified by default. Advise them to change their password immediately after their first login."
             </p>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );
