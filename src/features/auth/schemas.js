@@ -14,16 +14,21 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export const registerSchema = z.object({
-  fullName: z.string().trim().min(2, 'Enter your full name').max(120),
-  email,
-  // Optional: blank is treated as "not provided".
-  matricNumber: z.preprocess(
-    (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
-    z.string().trim().min(3, 'Enter a valid matric number').max(20).optional(),
-  ),
-  password: strongPassword,
-});
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+    email,
+    matricNumber: z.preprocess(
+      (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+      z.string().trim().min(3, 'Enter a valid matric number').max(20).optional(),
+    ),
+    password: strongPassword,
+    confirmPassword: z.string().min(1, 'Confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export const forgotPasswordSchema = z.object({ email });
 

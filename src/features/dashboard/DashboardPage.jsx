@@ -53,22 +53,6 @@ function DashboardPage() {
         )}
       </div>
 
-      {!user.isEmailVerified && (
-        <div className="mb-8">
-          <Alert variant="warning" className="rounded-2xl border-dashed">
-            <div className="flex items-center gap-2">
-              <Target size={18} className="text-amber-600" />
-              <span>
-                Account Restricted: Please verify your email to unlock all subjects.
-                <Link to="/profile" className="ml-2 font-bold underline hover:text-amber-700">
-                  Verify Now
-                </Link>
-              </span>
-            </div>
-          </Alert>
-        </div>
-      )}
-
       <div className="space-y-6">
         <div>
           <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted mb-4">Available Courses</h2>

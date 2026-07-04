@@ -6,6 +6,14 @@ export const adminApi = {
 
   // Students
   listStudents: (params) => apiClient.get('/api/admin/students', { params }).then((res) => res.data),
+  resetStudentPassword: (id, password) =>
+    apiClient.patch(`/api/admin/students/${id}/reset-password`, { password }).then((res) => res.data),
+  toggleStudentStatus: (id) =>
+    apiClient.patch(`/api/admin/students/${id}/toggle-status`).then((res) => res.data.user),
+
+  // Admin Roster (Super Admin)
+  listAdmins: () => apiClient.get('/api/admin/roster').then((res) => res.data.admins),
+  createAdmin: (payload) => apiClient.post('/api/admin/create', payload).then((res) => res.data.user),
 
   // Questions
   listQuestions: (params) => apiClient.get('/api/questions', { params }).then((res) => res.data),

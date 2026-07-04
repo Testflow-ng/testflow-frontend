@@ -7,9 +7,6 @@ import RequireAuth from '../features/auth/RequireAuth.jsx';
 import PublicOnly from '../features/auth/PublicOnly.jsx';
 import LoginPage from '../features/auth/pages/LoginPage.jsx';
 import RegisterPage from '../features/auth/pages/RegisterPage.jsx';
-import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage.jsx';
-import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage.jsx';
-import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
@@ -23,6 +20,7 @@ import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
 import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
 import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
 import StudentManagementPage from '../features/admin/pages/StudentManagementPage.jsx';
+import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -30,15 +28,11 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'features', element: <FeaturesPage /> },
-      // Reachable whether signed in or not (the link comes from an email).
-      { path: 'verify-email', element: <VerifyEmailPage /> },
       {
         element: <PublicOnly />,
         children: [
           { path: 'login', element: <LoginPage /> },
           { path: 'register', element: <RegisterPage /> },
-          { path: 'forgot-password', element: <ForgotPasswordPage /> },
-          { path: 'reset-password', element: <ResetPasswordPage /> },
         ],
       },
       {
@@ -51,8 +45,6 @@ export const router = createBrowserRouter([
           { path: 'profile', element: <ProfilePage /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
-
-          // Admin Routes
           {
             element: <RequireAdmin />,
             children: [
@@ -62,6 +54,7 @@ export const router = createBrowserRouter([
               { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
               { path: 'admin/subjects', element: <SubjectManagementPage /> },
               { path: 'admin/students', element: <StudentManagementPage /> },
+              { path: 'admin/roster', element: <AdminRosterPage /> },
             ],
           },
         ],

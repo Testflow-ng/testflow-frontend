@@ -5,7 +5,8 @@ import {
   Card,
   Spinner,
   Avatar,
-  Alert
+  Alert,
+  Button
 } from '../../../components/ui/index.js';
 import {
   BookOpen,
@@ -15,15 +16,32 @@ import {
   Activity,
   CheckCircle2,
   TrendingUp,
-  Clock
+  Clock,
+  ShieldCheck,
+  Download
 } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
+import { useAuth } from '../../auth/useAuth.js';
+
+const maskEmail = (email) => {
+  const [name, domain] = email.split('@');
+  if (name.length <= 2) return `${name[0]}***@${domain}`;
+  return `${name[0]}${name[1]}***${name[name.length - 1]}@${domain}`;
+};
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function AdminDashboardPage() {
+  const { user: currentUser } = useAuth();
+
+  const handleExport = () => {
+    window.open(`${API_URL}/api/admin/export-results`, '_blank');
+  };
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['adminStats'],
     queryFn: adminApi.getStats,
-    refetchInterval: 30000, // Refresh every 30 seconds for "real-time" feel
+    refetchInterval: 30000,
   });
 
   const adminLinks = [
@@ -52,6 +70,23 @@ function AdminDashboardPage() {
       bg: 'bg-purple-500/10',
     },
   ];
+
+  if (['admin', 'super_admin'].includes(currentUser?.role)) {
+    // Check if super_admin to add roster link
+    if (currentUser?.role === 'super_admin') {
+      const hasRosterLink = adminLinks.some(l => l.href === '/admin/roster');
+      if (!hasRosterLink) {
+        adminLinks.push({
+          title: 'Admin Roster',
+          description: 'Manage executive roles and permissions.',
+          href: '/admin/roster',
+          icon: ShieldCheck,
+          color: 'text-danger',
+          bg: 'bg-danger/10',
+        });
+      }
+    }
+  }
 
   if (isLoading) {
     return (
@@ -86,8 +121,8 @@ function AdminDashboardPage() {
             <LayoutDashboard className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground-strong">Admin Dashboard</h1>
-            <p className="text-muted text-sm">Real-time overview of TestFlow activity</p>
+            <h1 className="text-2xl font-bold text-foreground-strong tracking-tight">Admin Dashboard</h1>
+            <p className="text-muted text-sm font-medium">Real-time overview of TestFlow activity</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted bg-surface p-2 rounded-lg border border-border">
@@ -96,7 +131,18 @@ function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      <div className="flex justify-end mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          leadingIcon={<Download size={14} />}
+          onClick={handleExport}
+          className="rounded-xl"
+        >
+          Export Results (CSV)
+        </Button>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {statCards.map((stat) => (
           <Card key={stat.label} className="p-5 flex flex-col gap-3">
@@ -112,7 +158,6 @@ function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Management Section */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted">Management Tools</h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -130,7 +175,6 @@ function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Recent Activity */}
         <div className="space-y-6">
           <h2 className="text-sm font-bold uppercase tracking-widest text-muted">Recent Signups</h2>
           <Card className="divide-y divide-border overflow-hidden">
@@ -142,7 +186,7 @@ function AdminDashboardPage() {
                   <Avatar name={user.fullName} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-foreground-strong truncate">{user.fullName}</p>
-                    <p className="text-[10px] text-muted truncate">{user.email}</p>
+                    <p className="text-[10px] text-muted truncate">{maskEmail(user.email)}</p>
                   </div>
                   {user.isEmailVerified && (
                     <CheckCircle2 className="w-3.5 h-3.5 text-success flex-shrink-0" />

@@ -65,15 +65,7 @@ function LoginPage() {
             {...register('password')}
           />
         </Field>
-        <div className="text-right">
-          <Link
-            to="/forgot-password"
-            className="text-sm text-muted transition-colors hover:text-foreground"
-          >
-            Forgot password?
-          </Link>
-        </div>
-        <Button type="submit" fullWidth loading={isSubmitting}>
+        <Button type="submit" fullWidth loading={isSubmitting} className="mt-2 h-12 text-base shadow-lg shadow-primary/20">
           Sign in
         </Button>
       </form>

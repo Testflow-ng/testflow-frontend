@@ -33,7 +33,7 @@ function Header() {
     { to: '/history', label: 'History', Icon: History },
   ];
 
-  if (user?.role === 'admin') {
+  if (['admin', 'super_admin'].includes(user?.role)) {
     authLinks.push({ to: '/admin', label: 'Admin', Icon: ShieldAlert });
   }
 
@@ -53,7 +53,7 @@ function Header() {
             to="/"
             className="flex items-center gap-2 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Logo size={32} />
+            <Logo size={32} withWordmark={false} />
             <span className="hidden font-display text-xl font-bold tracking-tight text-foreground-strong sm:block">
               TestFlow
             </span>

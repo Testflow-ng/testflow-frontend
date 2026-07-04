@@ -1,4 +1,4 @@
-import { cloneElement, useId } from 'react';
+import { cloneElement, useId, Children, isValidElement } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { cn } from '../../utils/cn.js';
 
@@ -14,13 +14,17 @@ function Field({ label, hint, error, required, id, className, children }) {
   const errorId = error ? `${fieldId}-error` : undefined;
   const describedBy = (error ? errorId : hintId) || undefined;
 
-  const control = cloneElement(children, {
-    id: fieldId,
-    'aria-invalid': error ? true : undefined,
-    'aria-describedby': describedBy,
-    'aria-required': required || undefined,
-    required: required ?? children.props.required,
-  });
+  // Defensive: ensure we only clone if children is a single valid element
+  let control = children;
+  if (isValidElement(children)) {
+    control = cloneElement(children, {
+      id: fieldId,
+      'aria-invalid': error ? true : undefined,
+      'aria-describedby': describedBy,
+      'aria-required': required || undefined,
+      required: required ?? children.props?.required,
+    });
+  }
 
   return (
     <div className={cn('flex flex-col', className)}>

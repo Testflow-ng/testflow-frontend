@@ -46,6 +46,45 @@ function AuthProvider({ children }) {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await authApi.me();
+      setUser(currentUser);
+      return currentUser;
+    } catch {
+      setUser(null);
+      setStatus('unauthenticated');
+      return null;
+    }
+  }, []);
+
+  // Professional Idle Timer (Auto Logout after 30 mins)
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    let timeout;
+    const IDLE_TIME = 30 * 60 * 1000; // 30 minutes
+
+    const resetTimer = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        alert('Your session has expired due to inactivity. Please sign in again.');
+        logout();
+      }, IDLE_TIME);
+    };
+
+    // Events to track activity
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timeout);
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [status, logout]);
+
   const value = useMemo(
     () => ({
       user,
@@ -54,9 +93,10 @@ function AuthProvider({ children }) {
       isLoading: status === 'loading',
       login,
       logout,
+      refreshUser,
       setUser,
     }),
-    [user, status, login, logout],
+    [user, status, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,19 +1,36 @@
 import { useState } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { adminApi } from '../api.js';
 import {
   Button,
   Input,
   Card,
   Spinner,
-  Field
+  Field,
+  IconButton,
+  Alert,
+  Modal
 } from '../../../components/ui/index.js';
-import { Search, ChevronLeft, ChevronRight, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, User, CheckCircle2, Eye, EyeOff, Lock, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 
+const maskEmail = (email) => {
+  const [name, domain] = email.split('@');
+  if (name.length <= 2) return `${name[0]}***@${domain}`;
+  return `${name[0]}${name[1]}***${name[name.length - 1]}@${domain}`;
+};
+
 function StudentManagementPage() {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [showSensitive, setShowSensitive] = useState(false);
+
+  // Reset Password State
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['adminStudents', { page, search }],
@@ -21,14 +38,49 @@ function StudentManagementPage() {
     placeholderData: keepPreviousData,
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ id, password }) => adminApi.resetStudentPassword(id, password),
+    onSuccess: () => {
+      setResetSuccess(true);
+      setNewPassword('');
+      setTimeout(() => {
+        setResetModalOpen(false);
+        setResetSuccess(false);
+        setSelectedStudent(null);
+      }, 2000);
+    }
+  });
+
+  const toggleStatusMutation = useMutation({
+    mutationFn: adminApi.toggleStudentStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminStudents']);
+    }
+  });
+
   const students = data?.items || [];
   const totalPages = data?.pages || 1;
 
+  const handleOpenReset = (student) => {
+    setSelectedStudent(student);
+    setResetModalOpen(true);
+  };
+
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground-strong">Student Management</h1>
-        <p className="text-muted text-sm">View and manage registered students</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground-strong tracking-tight">Student Management</h1>
+          <p className="text-muted text-sm">View and manage registered students</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowSensitive(!showSensitive)}
+          leadingIcon={showSensitive ? <EyeOff size={14} /> : <Eye size={14} />}
+        >
+          {showSensitive ? 'Privacy Mode' : 'Reveal Data'}
+        </Button>
       </div>
 
       <Card className="p-4 mb-6">
@@ -59,17 +111,18 @@ function StudentManagementPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          <div className="hidden sm:grid grid-cols-[1fr_1.5fr_1fr_1fr] gap-4 px-5 py-2 text-xs font-bold uppercase tracking-wider text-muted">
+          <div className="hidden sm:grid grid-cols-[1.5fr_1.5fr_1fr_1fr_100px] gap-4 px-5 py-2 text-xs font-bold uppercase tracking-wider text-muted">
             <span>Name</span>
             <span>Email</span>
             <span>Matric No.</span>
             <span>Status</span>
+            <span className="text-right">Actions</span>
           </div>
           {students.map((student) => (
             <Card key={student.id} className="p-5">
-              <div className="flex flex-col sm:grid sm:grid-cols-[1fr_1.5fr_1fr_1fr] items-start sm:items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex flex-col sm:grid sm:grid-cols-[1.5fr_1.5fr_1fr_1fr_100px] items-start sm:items-center gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                     <User className="w-4 h-4" />
                   </div>
                   <span className="text-sm font-semibold text-foreground-strong truncate">
@@ -77,26 +130,47 @@ function StudentManagementPage() {
                   </span>
                 </div>
 
-                <span className="text-sm text-muted truncate">
-                  {student.email}
+                <span className="text-sm text-muted truncate w-full">
+                  {showSensitive ? student.email : maskEmail(student.email)}
                 </span>
 
                 <span className="text-sm font-mono text-foreground-strong">
-                  {student.matricNumber || 'N/A'}
+                  {student.matricNumber ? (showSensitive ? student.matricNumber : `${student.matricNumber.slice(0, 3)}***`) : 'N/A'}
                 </span>
 
                 <div className="flex items-center gap-1.5">
                   {student.isEmailVerified ? (
                     <>
                       <CheckCircle2 className="w-4 h-4 text-success" />
-                      <span className="text-xs font-medium text-success">Verified</span>
+                      <span className="text-xs font-medium text-success">Active</span>
                     </>
                   ) : (
                     <>
-                      <XCircle className="w-4 h-4 text-muted" />
-                      <span className="text-xs font-medium text-muted">Unverified</span>
+                      <ShieldAlert className="w-4 h-4 text-danger" />
+                      <span className="text-xs font-medium text-danger">Suspended</span>
                     </>
                   )}
+                </div>
+
+                <div className="flex items-center justify-end gap-1 w-full">
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleOpenReset(student)}
+                    icon={<Lock size={14} className="text-muted" />}
+                    aria-label="Reset Password"
+                  />
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to ${student.isEmailVerified ? 'suspend' : 'activate'} this student?`)) {
+                        toggleStatusMutation.mutate(student.id);
+                      }
+                    }}
+                    icon={student.isEmailVerified ? <ShieldAlert size={14} className="text-warning" /> : <ShieldCheck size={14} className="text-success" />}
+                    aria-label={student.isEmailVerified ? 'Suspend Student' : 'Activate Student'}
+                  />
                 </div>
               </div>
             </Card>
@@ -129,6 +203,44 @@ function StudentManagementPage() {
           )}
         </div>
       )}
+
+      {/* Password Reset Modal */}
+      <Modal
+        open={resetModalOpen}
+        onOpenChange={setResetModalOpen}
+        title="Administrative Password Reset"
+        description={`Set a temporary password for ${selectedStudent?.fullName}`}
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setResetModalOpen(false)}>Cancel</Button>
+            <Button
+              loading={resetPasswordMutation.isPending}
+              onClick={() => resetPasswordMutation.mutate({ id: selectedStudent.id, password: newPassword })}
+            >
+              Reset Password
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          {resetSuccess && <Alert variant="success">Password updated. User has been signed out of all devices.</Alert>}
+          <Field label="New Temporary Password">
+            <Input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="••••••••"
+              leadingAdornment={<Lock size={16} className="text-muted" />}
+            />
+          </Field>
+          <div className="rounded-xl bg-amber-500/5 p-4 border border-amber-500/10">
+            <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Impact</p>
+            <p className="text-[11px] leading-relaxed text-muted font-medium">
+              Resetting a password will immediately invalidate all active login sessions for this student.
+            </p>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

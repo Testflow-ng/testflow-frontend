@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Clock, Flag, LayoutGrid, CheckCircle2 } from 'lucide-react';
-import { Alert, Button, Modal } from '../../components/ui/index.js';
+import { Alert, Button, Modal, Card } from '../../components/ui/index.js';
 import PageLoader from '../../components/PageLoader.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
@@ -42,6 +42,45 @@ function ExamRuntime({ session }) {
   };
 
   const remaining = useCountdown(session.expiresAt, submit);
+
+  // Anti-Cheating & Integrity Protection
+  useEffect(() => {
+    // 1. Focus Detection
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        try {
+          const result = await examApi.recordStrike(id);
+          if (result.status === 'submitted') {
+            alert('Integrity Violation: Exam auto-submitted due to multiple tab switches.');
+            navigate(`/exam/${id}/result`, { replace: true });
+          } else {
+            alert(`Integrity Warning: Please stay on this tab. Strike ${result.strikes}/3`);
+          }
+        } catch (err) {
+          console.error('Strike Error:', err);
+        }
+      }
+    };
+
+    // 2. Prevent Right-Click
+    const handleContextMenu = (e) => e.preventDefault();
+
+    // 3. Prevent Copy-Paste
+    const handleCopy = (e) => {
+      e.preventDefault();
+      alert('Content protection enabled: copying is disabled during exams.');
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('copy', handleCopy);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('copy', handleCopy);
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
