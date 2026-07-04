@@ -84,6 +84,7 @@ function BulkImportModal({ open, onOpenChange }) {
           <p className="font-bold mb-1 uppercase tracking-wider">Required Format:</p>
           <ul className="list-disc pl-4 space-y-1">
             <li><strong>subject</strong>: Subject code (e.g., "PHY102") or ID</li>
+            <li><strong>topic</strong>: Question category/topic (optional)</li>
             <li><strong>stem</strong>: The question text</li>
             <li><strong>options</strong>: Array of 2-6 strings</li>
             <li><strong>correctIndex</strong>: 0-based index of the correct option</li>

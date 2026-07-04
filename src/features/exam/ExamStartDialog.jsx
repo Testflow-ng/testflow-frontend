@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Modal } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
-import { Check, Info } from 'lucide-react';
+import { Check, Info, Filter } from 'lucide-react';
+import { subjectsApi } from '../subjects/api.js';
 
-const DURATIONS = [5, 10, 15, 30, 45, 60];
+const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
 
 function Chip({ active, onClick, children }) {
   return (
@@ -28,21 +29,29 @@ function Chip({ active, onClick, children }) {
   );
 }
 
-/** Configure and start a practice exam for a subject (question count + time). */
+/** Configure and start a practice exam for a subject (question count + time + topic). */
 function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
-  const maxQuestions = subject.questionCount ?? 0;
+  const [topics, setTopics] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [isLoadingTopics, setIsLoadingTopics] = useState(true);
 
-  // Professional threshold: only show precise counts for large banks
+  const maxQuestions = subject.questionCount ?? 0;
   const isLargeBank = maxQuestions >= 20;
 
-  const questionChoices = [...new Set([5, 10, 20, maxQuestions].filter((n) => n > 0 && n <= maxQuestions))].sort(
-    (a, b) => a - b,
-  );
+  const questionChoices = [
+    ...new Set([5, 10, 20, 40, 60, 100, maxQuestions].filter((n) => n > 0 && n <= maxQuestions)),
+  ].sort((a, b) => a - b);
 
   const [count, setCount] = useState(() =>
     questionChoices.includes(10) ? 10 : questionChoices[questionChoices.length - 1],
   );
   const [duration, setDuration] = useState(15);
+
+  useEffect(() => {
+    subjectsApi.topics(subject.code)
+      .then(setTopics)
+      .finally(() => setIsLoadingTopics(false));
+  }, [subject.code]);
 
   return (
     <Modal
@@ -60,7 +69,11 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
           <Button
             size="md"
             loading={isStarting}
-            onClick={() => onConfirm({ questionCount: count, durationMinutes: duration })}
+            onClick={() => onConfirm({
+              questionCount: count,
+              durationMinutes: duration,
+              topic: selectedTopic || undefined
+            })}
             className="px-8"
           >
             Start Exam
@@ -69,10 +82,30 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
       }
     >
       <div className="flex flex-col gap-6 pt-2">
+        {/* Topic Selection */}
+        {!isLoadingTopics && topics.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+               <Filter size={14} className="text-primary" />
+               <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Select Topic</p>
+            </div>
+            <select
+              className="w-full h-11 rounded-xl border-2 border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              value={selectedTopic}
+              onChange={(e) => setSelectedTopic(e.target.value)}
+            >
+              <option value="">Full Subject (Random Mix)</option>
+              {topics.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Number of Questions</p>
-            <span className="text-[10px] font-bold text-muted bg-surface-strong px-2 py-0.5 rounded uppercase tracking-tighter">
+            <span className="text-[10px] font-bold text-muted bg-surface-strong px-2 py-0.5 rounded uppercase tracking-tighter tabular-nums">
               {isLargeBank ? `${maxQuestions} Total Available` : 'Growing Bank'}
             </span>
           </div>
