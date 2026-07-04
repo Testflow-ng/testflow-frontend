@@ -14,6 +14,7 @@ export const adminApi = {
   // Admin Roster (Super Admin)
   listAdmins: () => apiClient.get('/api/admin/roster').then((res) => res.data.admins),
   createAdmin: (payload) => apiClient.post('/api/admin/create', payload).then((res) => res.data.user),
+  promoteAdmin: (email) => apiClient.post('/api/admin/promote', { email }).then((res) => res.data.user),
 
   // Questions
   listQuestions: (params) => apiClient.get('/api/questions', { params }).then((res) => res.data),

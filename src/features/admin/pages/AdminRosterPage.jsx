@@ -11,7 +11,7 @@ import {
   Modal,
   Avatar
 } from '../../../components/ui/index.js';
-import { UserPlus, Shield, ShieldCheck, Mail, Lock, User } from 'lucide-react';
+import { UserPlus, Shield, ShieldCheck, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
@@ -20,8 +20,15 @@ function AdminRosterPage() {
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Create Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' });
+
+  // Promote Modal State
+  const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
+  const [promoteEmail, setPromoteEmail] = useState('');
+
   const [error, setError] = useState(null);
 
   const { data: admins, isLoading, isError } = useQuery({
@@ -43,6 +50,20 @@ function AdminRosterPage() {
     }
   });
 
+  const promoteMutation = useMutation({
+    mutationFn: adminApi.promoteAdmin,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminRoster']);
+      setIsPromoteModalOpen(false);
+      setPromoteEmail('');
+      setError(null);
+      alert('User successfully promoted to Administrator.');
+    },
+    onError: (err) => {
+      setError(err.message || 'Promotion failed. Ensure the email is correct and user is a student.');
+    }
+  });
+
   const handleCreate = (e) => {
     e?.preventDefault();
     if (!form.fullName || !form.email || !form.password) {
@@ -52,6 +73,12 @@ function AdminRosterPage() {
       return setError('Passwords do not match');
     }
     createMutation.mutate(form);
+  };
+
+  const handlePromote = (e) => {
+    e?.preventDefault();
+    if (!promoteEmail) return setError('Email is required');
+    promoteMutation.mutate(promoteEmail);
   };
 
   if (currentUser?.role !== 'super_admin') {
@@ -72,13 +99,23 @@ function AdminRosterPage() {
           <h1 className="text-3xl font-black text-foreground-strong tracking-tight font-display">Admin Roster</h1>
           <p className="text-muted text-sm font-medium">Manage executive and technical platform administrators</p>
         </div>
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          leadingIcon={<UserPlus size={18} />}
-          className="shadow-lg shadow-primary/20 rounded-xl px-6"
-        >
-          Add New Admin
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => { setError(null); setIsPromoteModalOpen(true); }}
+            leadingIcon={<UserCheck size={18} />}
+            className="rounded-xl px-6"
+          >
+            Promote User
+          </Button>
+          <Button
+            onClick={() => { setError(null); setIsAddModalOpen(true); }}
+            leadingIcon={<UserPlus size={18} />}
+            className="shadow-lg shadow-primary/20 rounded-xl px-6"
+          >
+            Create Admin
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -119,11 +156,12 @@ function AdminRosterPage() {
         </div>
       )}
 
+      {/* Create Admin Modal */}
       <Modal
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        title="Add Administrator"
-        description="Grant administrative access to a new user"
+        title="Create Administrator"
+        description="Add a completely new staff member"
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
@@ -176,10 +214,44 @@ function AdminRosterPage() {
               />
             </Field>
           </div>
-          <div className="rounded-2xl bg-primary/5 p-5 border border-primary/10">
-            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Security Protocol</p>
-            <p className="text-[11px] leading-relaxed text-muted font-medium italic">
-              "New admins are verified by default. Advise them to change their password immediately after their first login."
+        </form>
+      </Modal>
+
+      {/* Promote User Modal */}
+      <Modal
+        open={isPromoteModalOpen}
+        onOpenChange={setIsPromoteModalOpen}
+        title="Promote to Administrator"
+        description="Grant admin privileges to an existing student by email"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsPromoteModalOpen(false)}>Cancel</Button>
+            <Button
+              loading={promoteMutation.isPending}
+              onClick={handlePromote}
+              className="px-8 shadow-lg shadow-primary/10"
+            >
+              Confirm Promotion
+            </Button>
+          </>
+        }
+      >
+        <form onSubmit={handlePromote} className="space-y-4 pt-2">
+          {error && <Alert variant="danger" className="rounded-xl">{error}</Alert>}
+          <Field label="Student Email Address">
+            <Input
+              type="email"
+              value={promoteEmail}
+              onChange={(e) => setPromoteEmail(e.target.value)}
+              placeholder="student@example.com"
+              leadingAdornment={<Mail size={16} className="text-muted" />}
+            />
+          </Field>
+          <div className="rounded-2xl bg-amber-500/5 p-5 border border-amber-500/10">
+            <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1">Administrative Warning</p>
+            <p className="text-[11px] leading-relaxed text-muted font-medium">
+              Promoting a user will give them full access to manage subjects and questions.
+              The user will be logged out and must sign in again to see their new dashboard.
             </p>
           </div>
         </form>
