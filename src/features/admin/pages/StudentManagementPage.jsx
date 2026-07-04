@@ -11,7 +11,7 @@ import {
   Alert,
   Modal
 } from '../../../components/ui/index.js';
-import { Search, ChevronLeft, ChevronRight, User, CheckCircle2, Eye, EyeOff, Lock, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, User, CheckCircle2, Eye, EyeOff, Lock, ShieldAlert, ShieldCheck, Trash2, Plus } from 'lucide-react';
 
 const maskEmail = (email) => {
   const [name, domain] = email.split('@');
@@ -30,6 +30,11 @@ function StudentManagementPage() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  // Add Student State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addForm, setAddForm] = useState({ fullName: '', email: '', matricNumber: '', password: '' });
+  const [addError, setAddError] = useState(null);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['adminStudents', { page, search }],
@@ -57,6 +62,28 @@ function StudentManagementPage() {
     }
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: adminApi.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminStudents']);
+      alert('Student account deleted successfully.');
+    }
+  });
+
+  const createStudentMutation = useMutation({
+    mutationFn: adminApi.createStudent,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminStudents']);
+      setIsAddModalOpen(false);
+      setAddForm({ fullName: '', email: '', matricNumber: '', password: '' });
+      setAddError(null);
+      alert('Student added successfully.');
+    },
+    onError: (err) => {
+      setAddError(err.message || 'Failed to add student.');
+    }
+  });
+
   const students = data?.items || [];
   const totalPages = data?.pages || 1;
 
@@ -72,14 +99,23 @@ function StudentManagementPage() {
           <h1 className="text-2xl font-bold text-foreground-strong tracking-tight">Student Management</h1>
           <p className="text-muted text-sm">View and manage registered students</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowSensitive(!showSensitive)}
-          leadingIcon={showSensitive ? <EyeOff size={14} /> : <Eye size={14} />}
-        >
-          {showSensitive ? 'Privacy Mode' : 'Reveal Data'}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSensitive(!showSensitive)}
+            leadingIcon={showSensitive ? <EyeOff size={14} /> : <Eye size={14} />}
+          >
+            {showSensitive ? 'Privacy Mode' : 'Reveal Data'}
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setIsAddModalOpen(true)}
+            leadingIcon={<Plus size={14} />}
+          >
+            Add Student
+          </Button>
+        </div>
       </div>
 
       <Card className="p-4 mb-6">
@@ -170,6 +206,17 @@ function StudentManagementPage() {
                     icon={student.isEmailVerified ? <ShieldAlert size={14} className="text-warning" /> : <ShieldCheck size={14} className="text-success" />}
                     aria-label={student.isEmailVerified ? 'Suspend Student' : 'Activate Student'}
                   />
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to PERMANENTLY delete ${student.fullName}? This will also delete their exam history.`)) {
+                        deleteUserMutation.mutate(student.id);
+                      }
+                    }}
+                    icon={<Trash2 size={14} className="text-danger" />}
+                    aria-label="Delete Student"
+                  />
                 </div>
               </div>
             </Card>
@@ -238,6 +285,59 @@ function StudentManagementPage() {
               Resetting a password will immediately invalidate all active login sessions for this student.
             </p>
           </div>
+        </div>
+      </Modal>
+
+      {/* Add Student Modal */}
+      <Modal
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        title="Add New Student"
+        description="Manually register a new student account"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+            <Button
+              loading={createStudentMutation.isPending}
+              onClick={() => createStudentMutation.mutate(addForm)}
+            >
+              Create Account
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4 pt-2">
+          {addError && <Alert variant="danger">{addError}</Alert>}
+          <Field label="Full Name">
+            <Input
+              value={addForm.fullName}
+              onChange={(e) => setAddForm(f => ({ ...f, fullName: e.target.value }))}
+              placeholder="e.g. Jane Doe"
+            />
+          </Field>
+          <Field label="Email Address">
+            <Input
+              type="email"
+              value={addForm.email}
+              onChange={(e) => setAddForm(f => ({ ...f, email: e.target.value }))}
+              placeholder="jane@example.com"
+            />
+          </Field>
+          <Field label="Matric Number">
+            <Input
+              value={addForm.matricNumber}
+              onChange={(e) => setAddForm(f => ({ ...f, matricNumber: e.target.value }))}
+              placeholder="e.g. CSC/2024/001"
+            />
+          </Field>
+          <Field label="Password">
+            <Input
+              type="password"
+              value={addForm.password}
+              onChange={(e) => setAddForm(f => ({ ...f, password: e.target.value }))}
+              placeholder="••••••••"
+            />
+          </Field>
         </div>
       </Modal>
     </div>

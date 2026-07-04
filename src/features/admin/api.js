@@ -6,6 +6,7 @@ export const adminApi = {
 
   // Students
   listStudents: (params) => apiClient.get('/api/admin/students', { params }).then((res) => res.data),
+  createStudent: (payload) => apiClient.post('/api/admin/students', payload).then((res) => res.data.user),
   resetStudentPassword: (id, password) =>
     apiClient.patch(`/api/admin/students/${id}/reset-password`, { password }).then((res) => res.data),
   toggleStudentStatus: (id) =>
@@ -15,6 +16,8 @@ export const adminApi = {
   listAdmins: () => apiClient.get('/api/admin/roster').then((res) => res.data.admins),
   createAdmin: (payload) => apiClient.post('/api/admin/create', payload).then((res) => res.data.user),
   promoteAdmin: (email) => apiClient.post('/api/admin/promote', { email }).then((res) => res.data.user),
+  demoteAdmin: (id) => apiClient.patch(`/api/admin/demote/${id}`).then((res) => res.data.user),
+  deleteUser: (id) => apiClient.delete(`/api/admin/users/${id}`).then((res) => res.data),
 
   // Questions
   listQuestions: (params) => apiClient.get('/api/questions', { params }).then((res) => res.data),

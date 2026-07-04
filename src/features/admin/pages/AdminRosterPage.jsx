@@ -11,10 +11,11 @@ import {
   Modal,
   Avatar
 } from '../../../components/ui/index.js';
-import { UserPlus, Shield, ShieldCheck, Mail, Lock, User, UserCheck } from 'lucide-react';
+import { UserPlus, Shield, ShieldCheck, Mail, Lock, User, UserCheck, Trash2, UserMinus } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
+import IconButton from '../../../components/ui/IconButton.jsx';
 
 function AdminRosterPage() {
   const { user: currentUser } = useAuth();
@@ -61,6 +62,28 @@ function AdminRosterPage() {
     },
     onError: (err) => {
       setError(err.message || 'Promotion failed. Ensure the email is correct and user is a student.');
+    }
+  });
+
+  const demoteMutation = useMutation({
+    mutationFn: adminApi.demoteAdmin,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminRoster']);
+      alert('Administrator successfully demoted to Student.');
+    },
+    onError: (err) => {
+      setError(err.message || 'Demotion failed.');
+    }
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: adminApi.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['adminRoster']);
+      alert('User successfully deleted.');
+    },
+    onError: (err) => {
+      setError(err.message || 'Deletion failed.');
     }
   });
 
@@ -150,6 +173,33 @@ function AdminRosterPage() {
                   <ShieldCheck size={12} />
                   {admin.role.replace('_', ' ')}
                 </div>
+
+                {admin.role !== 'super_admin' && (
+                  <div className="flex items-center gap-1 ml-4 border-l border-border pl-2">
+                    <IconButton
+                      icon={<UserMinus size={14} className="text-warning" />}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to demote ${admin.fullName} back to a student?`)) {
+                          demoteMutation.mutate(admin.id);
+                        }
+                      }}
+                      aria-label="Demote to Student"
+                    />
+                    <IconButton
+                      icon={<Trash2 size={14} className="text-danger" />}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to PERMANENTLY delete ${admin.fullName}? This cannot be undone.`)) {
+                          deleteUserMutation.mutate(admin.id);
+                        }
+                      }}
+                      aria-label="Delete Admin"
+                    />
+                  </div>
+                )}
               </div>
             </Card>
           ))}
