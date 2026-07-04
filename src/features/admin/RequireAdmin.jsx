@@ -14,7 +14,7 @@ function RequireAdmin() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.role !== 'admin') {
+  if (!['admin', 'super_admin'].includes(user?.role)) {
     return <Navigate to="/dashboard" replace />;
   }
 
