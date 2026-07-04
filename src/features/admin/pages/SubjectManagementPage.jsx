@@ -12,7 +12,7 @@ import {
   Modal,
   Alert
 } from '../../../components/ui/index.js';
-import { Plus, Edit2, Trash2, ChevronLeft } from 'lucide-react';
+import { Plus, Edit2, Trash2, ChevronLeft, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,11 +22,17 @@ function SubjectManagementPage() {
   const queryClient = useQueryClient();
   const [editingSubject, setEditingSubject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: subjects, isLoading } = useQuery({
     queryKey: ['subjects'],
     queryFn: subjectsApi.list,
   });
+
+  const filteredSubjects = subjects?.filter(s =>
+    s.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const {
     register,
@@ -96,40 +102,57 @@ function SubjectManagementPage() {
         </Button>
       </div>
 
+      <Card className="p-4 mb-6">
+        <Field label="Search Subjects">
+          <Input
+            placeholder="Search by code or title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            leadingAdornment={<Search size={16} />}
+          />
+        </Field>
+      </Card>
+
       {isLoading ? (
         <div className="flex justify-center py-12">
           <Spinner size="lg" />
         </div>
+      ) : filteredSubjects?.length === 0 ? (
+        <div className="text-center py-12 bg-surface rounded-2xl border border-dashed border-border">
+          <p className="text-muted">No subjects found.</p>
+        </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {subjects?.map((s) => (
-            <Card key={s.id} className="p-5 flex justify-between items-center">
-              <div className="min-w-0">
-                <p className="font-mono text-xs font-medium text-muted">{s.code}</p>
-                <h3 className="truncate font-semibold text-foreground-strong">{s.title}</h3>
+          {filteredSubjects?.map((s) => (
+            <Card key={s.id} className="p-5 flex justify-between items-center group hover:border-primary/30 transition-all">
+              <div className="min-w-0 pr-4">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted">{s.code}</p>
+                <h3 className="truncate font-bold text-foreground-strong tracking-tight">{s.title}</h3>
                 {!s.isActive && (
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-danger/10 text-danger mt-1 inline-block">
-                    Inactive
+                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-danger/10 text-danger mt-1.5 inline-block">
+                    Hidden from students
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1">
-                <IconButton
-                  icon={<Edit2 className="w-4 h-4" />}
-                  variant="ghost"
-                  aria-label="Edit"
+              <div className="flex items-center gap-2 shrink-0">
+                <button
                   onClick={() => handleEdit(s)}
-                />
-                <IconButton
-                  icon={<Trash2 className="w-4 h-4 text-danger" />}
-                  variant="ghost"
-                  aria-label="Delete"
+                  className="p-2.5 rounded-xl bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-primary/10"
+                  title="Edit Subject"
+                >
+                  <Edit2 size={16} />
+                </button>
+                <button
                   onClick={() => {
                     if (window.confirm(`Are you sure you want to delete ${s.code}?`)) {
                       deleteMutation.mutate(s.id);
                     }
                   }}
-                />
+                  className="p-2.5 rounded-xl bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-danger/10"
+                  title="Delete Subject"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </Card>
           ))}
