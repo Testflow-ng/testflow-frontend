@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button, Modal } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
-import { Check, Info, Filter } from 'lucide-react';
-import { subjectsApi } from '../subjects/api.js';
+import { Check, Info } from 'lucide-react';
 
 const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
 
@@ -29,12 +28,8 @@ function Chip({ active, onClick, children }) {
   );
 }
 
-/** Configure and start a practice exam for a subject (question count + time + topic). */
+/** Configure and start a practice exam for a subject (question count + time). */
 function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
-  const [topics, setTopics] = useState([]);
-  const [selectedTopic, setSelectedTopic] = useState('');
-  const [isLoadingTopics, setIsLoadingTopics] = useState(true);
-
   const maxQuestions = subject.questionCount ?? 0;
   const isLargeBank = maxQuestions >= 20;
 
@@ -46,12 +41,6 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
     questionChoices.includes(10) ? 10 : questionChoices[questionChoices.length - 1],
   );
   const [duration, setDuration] = useState(15);
-
-  useEffect(() => {
-    subjectsApi.topics(subject.code)
-      .then(setTopics)
-      .finally(() => setIsLoadingTopics(false));
-  }, [subject.code]);
 
   return (
     <Modal
@@ -71,8 +60,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
             loading={isStarting}
             onClick={() => onConfirm({
               questionCount: count,
-              durationMinutes: duration,
-              topic: selectedTopic || undefined
+              durationMinutes: duration
             })}
             className="px-8"
           >
@@ -82,26 +70,6 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
       }
     >
       <div className="flex flex-col gap-6 pt-2">
-        {/* Topic Selection */}
-        {!isLoadingTopics && topics.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-               <Filter size={14} className="text-primary" />
-               <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Select Topic</p>
-            </div>
-            <select
-              className="w-full h-11 rounded-xl border-2 border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              value={selectedTopic}
-              onChange={(e) => setSelectedTopic(e.target.value)}
-            >
-              <option value="">Full Subject (Random Mix)</option>
-              {topics.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
         <div>
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Number of Questions</p>

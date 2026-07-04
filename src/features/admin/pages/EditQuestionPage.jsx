@@ -46,7 +46,6 @@ function EditQuestionPage() {
     resolver: zodResolver(questionSchema),
     defaultValues: {
       subject: '',
-      topic: '',
       stem: '',
       options: ['', ''],
       correctIndex: 0,
@@ -137,13 +136,6 @@ function EditQuestionPage() {
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
               </select>
-            </Field>
-
-            <Field label="Topic (Optional)" error={errors.topic?.message}>
-              <Input
-                placeholder="e.g. Differentiation, Microeconomics"
-                {...register('topic')}
-              />
             </Field>
 
             <Field label="Question Text (Stem)" error={errors.stem?.message}>
