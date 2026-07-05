@@ -137,10 +137,10 @@ function SubjectManagementPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleEdit(s)}
-                  className="p-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-primary/20"
+                  className="p-2.5 rounded-xl bg-surface-strong text-foreground-strong hover:bg-primary hover:text-white transition-all shadow-sm border border-border group-hover:border-primary/20"
                   title="Edit Subject"
                 >
-                  <Edit2 size={16} />
+                  <Edit2 size={16} className="text-primary group-hover:text-current" />
                 </button>
                 <button
                   onClick={() => {
@@ -148,10 +148,10 @@ function SubjectManagementPage() {
                       deleteMutation.mutate(s.id);
                     }
                   }}
-                  className="p-2.5 rounded-xl bg-danger/10 text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-danger/20"
+                  className="p-2.5 rounded-xl bg-surface-strong text-foreground-strong hover:bg-danger hover:text-white transition-all shadow-sm border border-border group-hover:border-danger/20"
                   title="Delete Subject"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={16} className="text-danger group-hover:text-current" />
                 </button>
               </div>
             </Card>

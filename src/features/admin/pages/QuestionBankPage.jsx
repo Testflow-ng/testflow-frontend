@@ -119,23 +119,28 @@ function QuestionBankPage() {
                     {q.options?.length} options • Correct: {q.options?.[q.correctIndex] || 'N/A'}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 shrink-0">
                   <Link to={`/admin/questions/${q.id}/edit`}>
-                    <IconButton icon={<Edit2 className="w-4 h-4" />} variant="ghost" aria-label="Edit" />
+                    <button
+                      className="p-2.5 rounded-xl bg-surface-strong text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-border"
+                      title="Edit Question"
+                    >
+                      <Edit2 size={16} />
+                    </button>
                   </Link>
-                  <IconButton
-                    icon={<Trash2 className="w-4 h-4 text-danger" />}
-                    variant="ghost"
-                    aria-label="Delete"
+                  <button
                     onClick={() => {
                       if (window.confirm('Are you sure you want to delete this question?')) {
                         adminApi.deleteQuestion(q.id).then(() => {
-                           // Ideally use queryClient.invalidateQueries
                            window.location.reload();
                         });
                       }
                     }}
-                  />
+                    className="p-2.5 rounded-xl bg-surface-strong text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-border"
+                    title="Delete Question"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             </Card>
