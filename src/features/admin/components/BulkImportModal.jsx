@@ -34,16 +34,15 @@ function BulkImportModal({ open, onOpenChange }) {
     },
     onError: (err) => {
       const serverError = err.response?.data?.error;
-      if (serverError?.details?.fieldErrors?.body) {
-        // Zod array error: body is the key for the array
-        const arrayErrors = serverError.details.fieldErrors.body;
-        setError(`Import failed: ${arrayErrors.join(' | ')}`);
-      } else if (serverError?.details?.fieldErrors) {
-        // Standard object error
-        const details = Object.entries(serverError.details.fieldErrors)
-          .map(([key, val]) => `${key}: ${val.join(', ')}`)
-          .join(' | ');
-        setError(`Validation Error: ${details}`);
+      const issues = serverError?.details?.issues;
+
+      if (issues && Array.isArray(issues)) {
+        // Zod issue array: very specific
+        const detailedErrors = issues.map(issue => {
+          const path = issue.path.join(' > ');
+          return `[${path}]: ${issue.message}`;
+        }).join(' | ');
+        setError(`Import failed: ${detailedErrors.slice(0, 200)}...`);
       } else {
         setError(serverError?.message || 'Import failed. Ensure all fields are correct and question indices are within range.');
       }
