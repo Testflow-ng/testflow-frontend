@@ -18,24 +18,24 @@ function MathText({ children, className }) {
   const text = children;
 
   // Regex to find $$block$$, $inline$, \(inline\), or \[block\]
-  // Uses [\s\S] to match across multiple lines
-  const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\(.*?\\\)|\\\[[\s\S]*?\\\])/g;
+  // Use [\s\S] to match across multiple lines
+  const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\\\([\s\S]*?\\\\\)|\\\\\[[\s\S]*?\\\\\])/g;
   const parts = text.split(regex);
 
   return (
     <div className={className}>
       {parts.map((part, index) => {
-        if ((part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\[') && part.endsWith('\\]'))) {
+        if ((part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\['))) {
           // Block math
           const math = part.startsWith('$$') ? part.slice(2, -2) : part.slice(2, -2);
           return <BlockMath key={index} math={math} />;
-        } else if ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\(') && part.endsWith('\\)'))) {
+        } else if ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\('))) {
           // Inline math
           const math = part.startsWith('$') ? part.slice(1, -1) : part.slice(2, -2);
           return <InlineMath key={index} math={math} />;
         } else {
           // Plain text
-          return <span key={index}>{part}</span>;
+          return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
         }
       })}
     </div>
