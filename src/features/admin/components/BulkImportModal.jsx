@@ -120,14 +120,13 @@ function BulkImportModal({ open, onOpenChange }) {
         </div>
 
         <div className="text-[10px] text-muted leading-relaxed">
-          <p className="font-bold mb-1 uppercase tracking-wider">Required Format:</p>
+          <p className="font-bold mb-1 uppercase tracking-wider text-foreground-strong">Required Format:</p>
           <ul className="list-disc pl-4 space-y-1">
-            <li><strong>subject</strong>: Subject code (e.g., "PHY102") or ID</li>
-            <li><strong>stem</strong>: The question text</li>
+            <li><strong>subject</strong>: Subject code (e.g., "PHY102")</li>
+            <li><strong>stem</strong>: Wrap math in <code>\\( ... \\)</code> (use double backslashes in JSON)</li>
             <li><strong>options</strong>: Array of 2-6 strings</li>
             <li><strong>correctIndex</strong>: 0-based index of the correct option</li>
             <li><strong>difficulty</strong>: "easy", "medium", or "hard" (optional)</li>
-            <li><strong>LaTeX Support</strong>: Wrap math in <code>$...$</code> for inline or <code>$$...$$</code> for blocks.</li>
           </ul>
         </div>
 

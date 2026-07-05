@@ -12,7 +12,13 @@ function MathText({ children, className }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    if (!containerRef.current || !window.katex) return;
+    if (!containerRef.current) return;
+
+    if (!window.katex) {
+      // If KaTeX isn't loaded yet, just show plain text as a fallback
+      containerRef.current.textContent = String(children || '');
+      return;
+    }
 
     const text = String(children || '');
     const container = containerRef.current;

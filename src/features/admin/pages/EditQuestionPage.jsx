@@ -141,13 +141,19 @@ function EditQuestionPage() {
             <Field label="Question Text (Stem)" error={errors.stem?.message}>
               <textarea
                 className="w-full min-h-[120px] rounded-md border border-border bg-surface p-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                placeholder="Type the question here... Use $ for math."
+                placeholder="Type the question here... Wrap formulas in \( \) or $ $."
                 {...register('stem')}
               />
+              <p className="mt-1.5 text-[10px] text-muted leading-tight italic">
+                Tip: Use <strong>\( \Delta x \)</strong> for delta x, or <strong>$ E = mc^2 $</strong> for inline math.
+              </p>
               {watch('stem') && (
-                <div className="mt-2 p-3 rounded-lg bg-surface-strong border border-border">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Live Preview</p>
-                  <MathText className="text-sm">{watch('stem')}</MathText>
+                <div className="mt-3 p-4 rounded-xl bg-surface-strong border border-border">
+                  <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <span className="size-1.5 rounded-full bg-success animate-pulse" />
+                    Live Math Preview
+                  </p>
+                  <MathText className="text-sm font-medium leading-relaxed">{watch('stem')}</MathText>
                 </div>
               )}
             </Field>
