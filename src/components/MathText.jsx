@@ -20,15 +20,14 @@ function MathText({ children, className }) {
     // Clear container
     container.innerHTML = '';
 
-    // Regex to find $$block$$ or $inline$
-    // Note: this is a simplified parser for CBT performance
-    const regex = /(\$\$.*?\$\$|\$.*?\$)/g;
+    // Regex to find $$block$$, $inline$, \(inline\), or \[block\]
+    const regex = /(\$\$.*?\$\$|\$.*?\$|\\\(.*?\\\)|\\\[.*?\\\])/g;
     const parts = text.split(regex);
 
     parts.forEach(part => {
-      if (part.startsWith('$$') && part.endsWith('$$')) {
+      if ((part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\[') && part.endsWith('\\]'))) {
         // Block math
-        const math = part.slice(2, -2);
+        const math = part.startsWith('$$') ? part.slice(2, -2) : part.slice(2, -2);
         const el = document.createElement('div');
         el.className = 'my-4 flex justify-center overflow-x-auto';
         try {
@@ -37,9 +36,9 @@ function MathText({ children, className }) {
           el.textContent = part;
         }
         container.appendChild(el);
-      } else if (part.startsWith('$') && part.endsWith('$')) {
+      } else if ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\(') && part.endsWith('\\)'))) {
         // Inline math
-        const math = part.slice(1, -1);
+        const math = part.startsWith('$') ? part.slice(1, -1) : part.slice(2, -2);
         const el = document.createElement('span');
         try {
           window.katex.render(math, el, { displayMode: false, throwOnError: false });
