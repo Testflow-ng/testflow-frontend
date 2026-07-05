@@ -10,6 +10,7 @@ import {
   IconButton,
   Field
 } from '../../../components/ui/index.js';
+import MathText from '../../../components/MathText.jsx';
 import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BulkImportModal from '../components/BulkImportModal.jsx';
@@ -112,12 +113,15 @@ function QuestionBankPage() {
                       {q.type}
                     </span>
                   </div>
-                  <p className="text-foreground-strong font-medium line-clamp-2 mb-2">
+                  <MathText className="text-foreground-strong font-medium line-clamp-2 mb-2">
                     {q.stem}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {q.options?.length} options • Correct: {q.options?.[q.correctIndex] || 'N/A'}
-                  </p>
+                  </MathText>
+                  <div className="text-xs text-muted flex flex-wrap gap-x-3 gap-y-1">
+                    <span>{q.options?.length} options</span>
+                    <span className="flex items-center gap-1">
+                      Correct: <MathText className="inline-block">{q.options?.[q.correctIndex] || 'N/A'}</MathText>
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Link to={`/admin/questions/${q.id}/edit`}>

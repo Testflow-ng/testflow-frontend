@@ -124,6 +124,13 @@ function ExamRuntime({ session }) {
   const answer = answers[current];
   const lowTime = remaining <= 60;
 
+  useEffect(() => {
+    if (question) {
+      console.log('Math Debug - Raw Stem:', question.stem);
+      if (question.options?.[0]) console.log('Math Debug - Raw Option 0:', question.options[0]);
+    }
+  }, [question]);
+
   if (!question) return null;
 
   const jumpTo = (index) => {

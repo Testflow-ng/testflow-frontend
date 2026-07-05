@@ -109,10 +109,10 @@ function ExamResultPage() {
             </div>
 
             {question.explanation ? (
-              <MathText className="mt-3 rounded-md bg-surface-strong p-3 text-xs leading-relaxed text-muted">
+              <div className="mt-3 rounded-md bg-surface-strong p-3 text-xs leading-relaxed text-muted">
                 <span className="font-semibold text-foreground-strong">Explanation. </span>
-                {question.explanation}
-              </MathText>
+                <MathText className="inline">{question.explanation}</MathText>
+              </div>
             ) : null}
           </li>
         ))}
