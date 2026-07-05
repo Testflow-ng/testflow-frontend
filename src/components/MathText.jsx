@@ -21,7 +21,8 @@ function MathText({ children, className }) {
     container.innerHTML = '';
 
     // Regex to find $$block$$, $inline$, \(inline\), or \[block\]
-    const regex = /(\$\$.*?\$\$|\$.*?\$|\\\(.*?\\\)|\\\[.*?\\\])/g;
+    // Use [\s\S] instead of . to match across multiple lines (important for MTH derivations)
+    const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\(.*?\\\)|\\\[[\s\S]*?\\\])/g;
     const parts = text.split(regex);
 
     parts.forEach(part => {
