@@ -137,7 +137,7 @@ function SubjectManagementPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleEdit(s)}
-                  className="p-2.5 rounded-xl bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-primary/10"
+                  className="p-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-primary/20"
                   title="Edit Subject"
                 >
                   <Edit2 size={16} />
@@ -148,7 +148,7 @@ function SubjectManagementPage() {
                       deleteMutation.mutate(s.id);
                     }
                   }}
-                  className="p-2.5 rounded-xl bg-danger/5 text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-danger/10"
+                  className="p-2.5 rounded-xl bg-danger/10 text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-danger/20"
                   title="Delete Subject"
                 >
                   <Trash2 size={16} />

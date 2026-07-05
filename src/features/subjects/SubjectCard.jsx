@@ -43,7 +43,7 @@ function SubjectCard({ subject, onSelect }) {
           {isAdmin && (
             <div
               onClick={handleEdit}
-              className="p-2 rounded-lg bg-surface border border-border text-muted hover:text-primary hover:border-primary/30 transition-all shadow-sm"
+              className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all shadow-sm"
               title="Manage Subject"
             >
               <Edit2 size={14} />
@@ -74,7 +74,5 @@ function SubjectCard({ subject, onSelect }) {
     </button>
   );
 }
-
-export default SubjectCard;
 
 export default SubjectCard;
