@@ -37,14 +37,15 @@ function BulkImportModal({ open, onOpenChange }) {
       const issues = serverError?.details?.issues;
 
       if (issues && Array.isArray(issues)) {
-        // Zod issue array: very specific
-        const detailedErrors = issues.map(issue => {
-          const path = issue.path.join(' > ');
-          return `[${path}]: ${issue.message}`;
-        }).join(' | ');
-        setError(`Import failed: ${detailedErrors.slice(0, 200)}...`);
+        // Find the first meaningful error
+        const first = issues[0];
+        // Path like [body, 15, stem] -> "Question #16 (Stem): too long"
+        const questionIndex = first.path.findIndex(p => typeof p === 'number');
+        const questionNum = questionIndex !== -1 ? first.path[questionIndex] + 1 : 'General';
+        const field = first.path[first.path.length - 1];
+        setError(`Error in Question #${questionNum}: The "${field}" field is ${first.message}.`);
       } else {
-        setError(serverError?.message || 'Import failed. Ensure all fields are correct and question indices are within range.');
+        setError(serverError?.message || 'Import failed. Check for duplicate options or missing fields.');
       }
     }
   });
