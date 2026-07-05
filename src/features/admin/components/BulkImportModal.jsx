@@ -63,9 +63,29 @@ function BulkImportModal({ open, onOpenChange }) {
       if (!Array.isArray(data)) {
         throw new Error('Data must be an array of questions.');
       }
+
+      // Pre-validation logic
+      for (let i = 0; i < data.length; i++) {
+        const q = data[i];
+        if (!q.subject || !q.stem || !q.options || q.correctIndex === undefined) {
+          throw new Error(`Question #${i + 1} is missing a required field (subject, stem, options, or correctIndex).`);
+        }
+        if (!Array.isArray(q.options) || q.options.length < 2) {
+          throw new Error(`Question #${i + 1} must have at least 2 options.`);
+        }
+        if (q.correctIndex < 0 || q.correctIndex >= q.options.length) {
+          throw new Error(`Question #${i + 1} has an invalid correctIndex (${q.correctIndex}). It must be between 0 and ${q.options.length - 1}.`);
+        }
+        // Check for exact duplicates in options
+        const uniqueOptions = new Set(q.options.map(o => String(o).trim()));
+        if (uniqueOptions.size !== q.options.length) {
+          throw new Error(`Question #${i + 1} has duplicate options.`);
+        }
+      }
+
       mutation.mutate(data);
     } catch (e) {
-      setError(e.message === 'Data must be an array of questions.' ? e.message : 'Invalid JSON format.');
+      setError(e.message || 'Invalid JSON format.');
     }
   };
 
