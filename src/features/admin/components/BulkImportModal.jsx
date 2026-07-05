@@ -34,14 +34,18 @@ function BulkImportModal({ open, onOpenChange }) {
     },
     onError: (err) => {
       const serverError = err.response?.data?.error;
-      if (serverError?.details?.fieldErrors) {
-        // Flatten specific field errors for display
+      if (serverError?.details?.fieldErrors?.body) {
+        // Zod array error: body is the key for the array
+        const arrayErrors = serverError.details.fieldErrors.body;
+        setError(`Import failed: ${arrayErrors.join(' | ')}`);
+      } else if (serverError?.details?.fieldErrors) {
+        // Standard object error
         const details = Object.entries(serverError.details.fieldErrors)
           .map(([key, val]) => `${key}: ${val.join(', ')}`)
           .join(' | ');
         setError(`Validation Error: ${details}`);
       } else {
-        setError(serverError?.message || 'Import failed. Ensure all fields are correct.');
+        setError(serverError?.message || 'Import failed. Ensure all fields are correct and question indices are within range.');
       }
     }
   });
