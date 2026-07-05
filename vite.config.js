@@ -35,7 +35,7 @@ export default defineConfig({
       workbox: {
         // Offline app shell: precache the built assets and fall back to the SPA
         // entry for navigations. API calls stay network-only (server-authoritative).
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,woff,woff2,ttf}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
@@ -46,15 +46,7 @@ export default defineConfig({
   build: {
     target: 'es2020',
     reportCompressedSize: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
-          }
-        },
-      },
-    },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     port: 5173,
