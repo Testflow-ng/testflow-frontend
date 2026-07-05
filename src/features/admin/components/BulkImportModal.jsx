@@ -35,17 +35,23 @@ function BulkImportModal({ open, onOpenChange }) {
     onError: (err) => {
       const serverError = err.response?.data?.error;
       const issues = serverError?.details?.issues;
+      const details = serverError?.details;
 
       if (issues && Array.isArray(issues)) {
-        // Find the first meaningful error
-        const first = issues[0];
-        // Path like [body, 15, stem] -> "Question #16 (Stem): too long"
-        const questionIndex = first.path.findIndex(p => typeof p === 'number');
-        const questionNum = questionIndex !== -1 ? first.path[questionIndex] + 1 : 'General';
-        const field = first.path[first.path.length - 1];
-        setError(`Error in Question #${questionNum}: The "${field}" field is ${first.message}.`);
+        const questionIndex = issues[0].path.findIndex(p => typeof p === 'number');
+        const questionNum = questionIndex !== -1 ? issues[0].path[questionIndex] + 1 : 'General';
+        const field = issues[0].path[issues[0].path.length - 1];
+        setError(`Error in Question #${questionNum}: The "${field}" field is ${issues[0].message}.`);
+      } else if (details && typeof details === 'object') {
+        // Mongoose validation errors
+        const firstErrorKey = Object.keys(details)[0];
+        const firstError = details[firstErrorKey];
+        // Key might be like "0.options" or "questions.0.stem"
+        const match = firstErrorKey.match(/\d+/);
+        const qNum = match ? parseInt(match[0]) + 1 : 'Unknown';
+        setError(`Error in Question #${qNum}: ${firstError.message || 'Validation failed'}`);
       } else {
-        setError(serverError?.message || 'Import failed. Check for duplicate options or missing fields.');
+        setError(serverError?.message || 'Import failed. Ensure all fields are present and options are unique.');
       }
     }
   });
