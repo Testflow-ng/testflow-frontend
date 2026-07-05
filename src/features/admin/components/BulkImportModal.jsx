@@ -33,7 +33,16 @@ function BulkImportModal({ open, onOpenChange }) {
       alert(`Successfully imported ${res.count} questions.`);
     },
     onError: (err) => {
-      setError(err.response?.data?.message || err.response?.data?.error?.message || 'Import failed. Check your format.');
+      const serverError = err.response?.data?.error;
+      if (serverError?.details?.fieldErrors) {
+        // Flatten specific field errors for display
+        const details = Object.entries(serverError.details.fieldErrors)
+          .map(([key, val]) => `${key}: ${val.join(', ')}`)
+          .join(' | ');
+        setError(`Validation Error: ${details}`);
+      } else {
+        setError(serverError?.message || 'Import failed. Ensure all fields are correct.');
+      }
     }
   });
 
