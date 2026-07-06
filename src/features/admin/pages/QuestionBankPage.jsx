@@ -125,7 +125,7 @@ function QuestionBankPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Link to={`/admin/questions/${q.id}/edit`}>
                     <button
-                      className="p-2.5 rounded-xl bg-surface-strong text-primary hover:bg-primary hover:text-white transition-all shadow-sm border border-border"
+                      className="p-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all shadow-md shadow-primary/10 border border-primary/20"
                       title="Edit Question"
                     >
                       <Edit2 size={16} />
@@ -139,7 +139,7 @@ function QuestionBankPage() {
                         });
                       }
                     }}
-                    className="p-2.5 rounded-xl bg-surface-strong text-danger hover:bg-danger hover:text-white transition-all shadow-sm border border-border"
+                    className="p-2.5 rounded-xl bg-danger text-white hover:bg-danger/90 transition-all shadow-md shadow-danger/10 border border-danger/20"
                     title="Delete Question"
                   >
                     <Trash2 size={16} />
