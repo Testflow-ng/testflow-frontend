@@ -33,9 +33,15 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
   const maxQuestions = subject.questionCount ?? 0;
   const isLargeBank = maxQuestions >= 20;
 
-  const questionChoices = [
-    ...new Set([5, 10, 20, 40, 60, 100, maxQuestions].filter((n) => n > 0 && n <= maxQuestions)),
-  ].sort((a, b) => a - b);
+  const PRESETS = [5, 10, 20, 40, 60, 100];
+  let questionChoices = [...new Set(PRESETS.filter((n) => n > 0 && n <= maxQuestions))].sort(
+    (a, b) => a - b,
+  );
+  // Full-bank selection removed. Fallback only for very small banks so the
+  // dialog never renders with no options.
+  if (questionChoices.length === 0 && maxQuestions > 0) {
+    questionChoices = [maxQuestions];
+  }
 
   const [count, setCount] = useState(() =>
     questionChoices.includes(10) ? 10 : questionChoices[questionChoices.length - 1],
@@ -80,7 +86,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
           <div className="mt-3 flex flex-wrap gap-2.5">
             {questionChoices.map((n) => (
               <Chip key={n} active={count === n} onClick={() => setCount(n)}>
-                {n === maxQuestions ? `Full Bank (${n})` : n}
+                {n}
               </Chip>
             ))}
           </div>
