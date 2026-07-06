@@ -62,7 +62,7 @@ function ExamResultPage() {
           <li key={question.index} className="rounded-lg border border-border bg-surface p-4">
             <div className="flex items-start justify-between gap-3">
               <MathText className="text-sm font-medium text-foreground-strong">
-                {question.index + 1}. {question.stem}
+                {`${question.index + 1}. ${question.stem}`}
               </MathText>
               <span
                 className={cn(

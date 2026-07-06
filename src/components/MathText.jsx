@@ -1,5 +1,5 @@
 import 'katex/dist/katex.min.css';
-import { InlineMath, BlockMath } from 'react-katex';
+import katex from 'katex';
 
 /**
  * Renders text that may contain LaTeX. Supported delimiters (one or two
@@ -7,13 +7,44 @@ import { InlineMath, BlockMath } from 'react-katex';
  *   inline:  $ ... $     \( ... \)
  *   block:   $$ ... $$    \[ ... \]
  *
+ * We call KaTeX directly (rather than react-katex) so the app renders through
+ * a single, known KaTeX build. react-katex 3.x pulls in its own mismatched
+ * KaTeX copy that failed to parse valid \frac expressions in the browser.
+ *
  * Invalid LaTeX renders as its raw source (in danger color) instead of
  * throwing, so a single bad expression can never crash an exam.
  */
 const SEGMENT =
   /(\$\$[\s\S]*?\$\$|\$[\s\S]+?\$|\\{1,2}\([\s\S]*?\\{1,2}\)|\\{1,2}\[[\s\S]*?\\{1,2}\])/g;
 
-const rawFallback = (source) => () => <span className="text-danger">{source}</span>;
+// Normalize "smart" characters that pasted/imported questions carry but KaTeX
+// rejects (e.g. curly quotes inside \frac). Keeps the math renderable.
+const normalizeMath = (math) =>
+  math
+    .replace(/[‘’ʼ]/g, "'") // ‘ ’ ʼ -> '
+    .replace(/[“”]/g, '"') // “ ” -> "
+    .replace(/[−–—]/g, '-') // − – — -> -
+    .replace(/ /g, ' '); // nbsp -> space
+
+/**
+ * Render one math segment to KaTeX HTML. On any parse error, fall back to the
+ * raw source (in danger color) so a single bad expression never crashes an exam.
+ */
+function renderMath(source, math, displayMode, key) {
+  try {
+    const html = katex.renderToString(normalizeMath(math), {
+      displayMode,
+      throwOnError: true,
+    });
+    return <span key={key} dangerouslySetInnerHTML={{ __html: html }} />;
+  } catch {
+    return (
+      <span key={key} className="text-danger">
+        {source}
+      </span>
+    );
+  }
+}
 
 function MathText({ children, className }) {
   if (typeof children !== 'string') {
@@ -29,20 +60,20 @@ function MathText({ children, className }) {
 
         // Block math
         if (part.startsWith('$$') && part.endsWith('$$')) {
-          return <BlockMath key={index} math={part.slice(2, -2)} renderError={rawFallback(part)} />;
+          return renderMath(part, part.slice(2, -2), true, index);
         }
         if (/^\\{1,2}\[/.test(part)) {
           const math = part.replace(/^\\{1,2}\[/, '').replace(/\\{1,2}\]$/, '');
-          return <BlockMath key={index} math={math} renderError={rawFallback(part)} />;
+          return renderMath(part, math, true, index);
         }
 
         // Inline math
         if (part.length > 1 && part.startsWith('$') && part.endsWith('$')) {
-          return <InlineMath key={index} math={part.slice(1, -1)} renderError={rawFallback(part)} />;
+          return renderMath(part, part.slice(1, -1), false, index);
         }
         if (/^\\{1,2}\(/.test(part)) {
           const math = part.replace(/^\\{1,2}\(/, '').replace(/\\{1,2}\)$/, '');
-          return <InlineMath key={index} math={math} renderError={rawFallback(part)} />;
+          return renderMath(part, math, false, index);
         }
 
         // Plain text
