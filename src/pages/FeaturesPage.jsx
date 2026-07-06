@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import {
   Clock,
   ShieldCheck,
-  ListChecks,
   Target,
   BarChart3,
   CheckCircle2,

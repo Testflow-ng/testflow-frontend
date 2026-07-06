@@ -2,41 +2,55 @@ import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 
 /**
- * Renders text with LaTeX support using react-katex.
+ * Renders text that may contain LaTeX. Supported delimiters (one or two
+ * backslashes, to tolerate different import/escaping formats):
+ *   inline:  $ ... $     \( ... \)
+ *   block:   $$ ... $$    \[ ... \]
  *
- * Supports:
- * - Inline math: \( ... \) or $ ... $
- * - Block math: \[ ... \] or $$ ... $$
+ * Invalid LaTeX renders as its raw source (in danger color) instead of
+ * throwing, so a single bad expression can never crash an exam.
  */
+const SEGMENT =
+  /(\$\$[\s\S]*?\$\$|\$[\s\S]+?\$|\\{1,2}\([\s\S]*?\\{1,2}\)|\\{1,2}\[[\s\S]*?\\{1,2}\])/g;
+
+const rawFallback = (source) => () => <span className="text-danger">{source}</span>;
+
 function MathText({ children, className }) {
-  // If children is not a string, we might have a mix of elements.
-  // We only want to process the string content for LaTeX.
   if (typeof children !== 'string') {
     return <div className={className}>{children}</div>;
   }
 
-  const text = children;
-
-  // Regex to find $$block$$, $inline$, \(inline\), or \[block\]
-  // Use [\s\S] to match across multiple lines
-  const regex = /(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\\\([\s\S]*?\\\\\)|\\\\\[[\s\S]*?\\\\\])/g;
-  const parts = text.split(regex);
+  const parts = children.split(SEGMENT);
 
   return (
     <div className={className}>
       {parts.map((part, index) => {
-        if ((part.startsWith('$$') && part.endsWith('$$')) || (part.startsWith('\\['))) {
-          // Block math
-          const math = part.startsWith('$$') ? part.slice(2, -2) : part.slice(2, -2);
-          return <BlockMath key={index} math={math} />;
-        } else if ((part.startsWith('$') && part.endsWith('$')) || (part.startsWith('\\('))) {
-          // Inline math
-          const math = part.startsWith('$') ? part.slice(1, -1) : part.slice(2, -2);
-          return <InlineMath key={index} math={math} />;
-        } else {
-          // Plain text
-          return <span key={index} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
+        if (!part) return null;
+
+        // Block math
+        if (part.startsWith('$$') && part.endsWith('$$')) {
+          return <BlockMath key={index} math={part.slice(2, -2)} renderError={rawFallback(part)} />;
         }
+        if (/^\\{1,2}\[/.test(part)) {
+          const math = part.replace(/^\\{1,2}\[/, '').replace(/\\{1,2}\]$/, '');
+          return <BlockMath key={index} math={math} renderError={rawFallback(part)} />;
+        }
+
+        // Inline math
+        if (part.length > 1 && part.startsWith('$') && part.endsWith('$')) {
+          return <InlineMath key={index} math={part.slice(1, -1)} renderError={rawFallback(part)} />;
+        }
+        if (/^\\{1,2}\(/.test(part)) {
+          const math = part.replace(/^\\{1,2}\(/, '').replace(/\\{1,2}\)$/, '');
+          return <InlineMath key={index} math={math} renderError={rawFallback(part)} />;
+        }
+
+        // Plain text
+        return (
+          <span key={index} style={{ whiteSpace: 'pre-wrap' }}>
+            {part}
+          </span>
+        );
       })}
     </div>
   );
