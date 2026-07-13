@@ -5,12 +5,15 @@ import { useStats } from '../analytics/useStats.js';
 import { Trophy, Zap, Flame, Star, Filter } from 'lucide-react';
 import Avatar from '../../components/ui/Avatar.jsx';
 import UsernameSetupModal from '../auth/components/UsernameSetupModal.jsx';
+import CourseSelectionModal from '../subjects/components/CourseSelectionModal.jsx';
 import { cn } from '../../utils/cn.js';
+import { Plus, Settings2 } from 'lucide-react';
 
 function DashboardPage() {
   const { user } = useAuth();
   const { data: stats } = useStats();
   const [showSetup, setShowSetup] = useState(false);
+  const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
   const [filter, setFilter] = useState('all'); // all, 100, 200, 300, 400, 500, pinned
 
   useEffect(() => {
@@ -25,6 +28,7 @@ function DashboardPage() {
   return (
     <section className="mx-auto w-full max-w-5xl flex-1 px-5 py-8">
       <UsernameSetupModal open={showSetup} onComplete={() => setShowSetup(false)} />
+      <CourseSelectionModal open={isSelectionModalOpen} onOpenChange={setIsSelectionModalOpen} />
 
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -83,21 +87,29 @@ function DashboardPage() {
             <Filter size={14} />
             Filter Subjects
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {levels.map((lvl) => (
               <button
                 key={lvl}
                 onClick={() => setFilter(lvl)}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border",
+                  "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all border shrink-0",
                   filter === lvl
                     ? "bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105"
                     : "bg-surface border-border text-muted hover:border-border-strong"
                 )}
               >
-                {lvl === 'pinned' ? <span className="flex items-center gap-1.5"><Star size={12} className="fill-amber-400 text-amber-400" /> My Courses</span> : `${lvl}${lvl !== 'all' ? 'L' : ''}`}
+                {lvl === 'pinned' ? <span className="flex items-center gap-1.5"><Star size={12} className={cn(filter === 'pinned' ? "fill-white text-white" : "fill-amber-400 text-amber-400")} /> My Courses</span> : `${lvl}${lvl !== 'all' ? 'L' : ''}`}
               </button>
             ))}
+
+            <button
+              onClick={() => setIsSelectionModalOpen(true)}
+              className="p-2 rounded-xl border border-dashed border-primary/40 text-primary hover:bg-primary/5 transition-all group"
+              title="Add or Manage Courses"
+            >
+              <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300" />
+            </button>
           </div>
         </div>
 
@@ -107,7 +119,7 @@ function DashboardPage() {
              Available Courses
              <span className="h-px flex-1 bg-border" />
           </h2>
-          <SubjectGrid filter={filter} />
+          <SubjectGrid filter={filter} onOpenSelection={() => setIsSelectionModalOpen(true)} />
         </div>
       </div>
     </section>

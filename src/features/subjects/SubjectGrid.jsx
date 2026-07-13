@@ -6,8 +6,11 @@ import { useSubjects } from './useSubjects.js';
 import SubjectCard from './SubjectCard.jsx';
 
 import { useAuth } from '../auth/useAuth.js';
+import SubjectCard from './SubjectCard.jsx';
+import { Plus } from 'lucide-react';
+import { Button } from '../../components/ui/index.js';
 
-function SubjectGrid({ filter = 'all' }) {
+function SubjectGrid({ filter = 'all', onOpenSelection }) {
   const { user } = useAuth();
   const { data: subjects, isLoading, isError, error } = useSubjects();
   const { start, isStarting, error: startError } = useStartExam();
@@ -32,6 +35,27 @@ function SubjectGrid({ filter = 'all' }) {
   }) || [];
 
   if (!filteredSubjects.length) {
+    if (filter === 'pinned') {
+      return (
+        <div className="text-center py-16 bg-surface-strong rounded-[2.5rem] border-2 border-dashed border-border p-8">
+           <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Plus className="text-primary w-8 h-8" />
+           </div>
+           <h3 className="text-lg font-black text-foreground-strong uppercase tracking-tight">Your Course List is Empty</h3>
+           <p className="text-xs text-muted mt-2 max-w-xs mx-auto leading-relaxed">
+             Select the courses you are currently offering to keep them easily accessible on your dashboard.
+           </p>
+           <Button
+             variant="primary"
+             className="mt-8 rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px]"
+             onClick={onOpenSelection}
+           >
+             Add My Courses
+           </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="text-center py-16 bg-surface-strong rounded-3xl border-2 border-dashed border-border">
          <p className="text-sm font-bold text-muted uppercase tracking-widest">No subjects found</p>
