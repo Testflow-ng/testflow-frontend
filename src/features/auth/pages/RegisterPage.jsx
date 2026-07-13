@@ -19,7 +19,14 @@ function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: '', email: '', matricNumber: '', password: '', confirmPassword: '' },
+    defaultValues: {
+      fullName: '',
+      username: '',
+      email: '',
+      matricNumber: '',
+      password: '',
+      confirmPassword: ''
+    },
   });
 
   const onSubmit = async (values) => {
@@ -51,6 +58,9 @@ function RegisterPage() {
         {formError ? <Alert variant="danger">{formError}</Alert> : null}
         <Field label="Full name" error={errors.fullName?.message} required>
           <Input autoComplete="name" placeholder="Ada Lovelace" {...register('fullName')} />
+        </Field>
+        <Field label="Username" error={errors.username?.message} required hint="Unique handle for leaderboards">
+          <Input autoComplete="username" placeholder="ada_l1" {...register('username')} />
         </Field>
         <Field label="Email" error={errors.email?.message} required>
           <Input

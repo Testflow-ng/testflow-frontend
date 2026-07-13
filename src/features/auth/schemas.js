@@ -17,6 +17,13 @@ export const loginSchema = z.object({
 export const registerSchema = z
   .object({
     fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+    username: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(3, 'At least 3 characters')
+      .max(20, 'At most 20 characters')
+      .regex(/^[a-z0-9_]+$/, 'Only letters, numbers, and underscores'),
     email,
     matricNumber: z.preprocess(
       (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
