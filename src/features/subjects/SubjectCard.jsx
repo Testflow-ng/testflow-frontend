@@ -1,21 +1,29 @@
-import { ArrowRight, Edit2 } from 'lucide-react';
+import { ArrowRight, Edit2, Star } from 'lucide-react';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from './subjectMeta.js';
 import { useAuth } from '../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
+import { useTogglePin } from './useSubjects.js';
 
 /** Premium subject card for the student dashboard. */
 function SubjectCard({ subject, onSelect }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { mutate: togglePin, isPending: isPinning } = useTogglePin();
   const { Icon, accent } = subjectMeta(subject.code);
   const count = subject.questionCount ?? 0;
   const disabled = count === 0;
   const isAdmin = ['admin', 'super_admin'].includes(user?.role);
+  const isPinned = user?.pinnedSubjects?.includes(subject.id);
 
   const handleEdit = (e) => {
     e.stopPropagation();
     navigate('/admin/subjects'); // Takes them to management where the modal can be opened
+  };
+
+  const handlePin = (e) => {
+    e.stopPropagation();
+    togglePin(subject.id);
   };
 
   return (
@@ -35,11 +43,32 @@ function SubjectCard({ subject, onSelect }) {
       )}
     >
       <div className="flex w-full items-center justify-between gap-2">
-        <span className={cn('flex size-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110', accent)}>
-          <Icon size={24} aria-hidden="true" />
-        </span>
+        <div className="flex items-center gap-3">
+          <span className={cn('flex size-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110', accent)}>
+            <Icon size={24} aria-hidden="true" />
+          </span>
+          {subject.level && (
+            <span className="bg-surface-strong text-muted text-[10px] font-black px-2 py-0.5 rounded-md border border-border">
+              {subject.level}L
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
+          {!isAdmin && (
+            <button
+              onClick={handlePin}
+              disabled={isPinning}
+              className={cn(
+                "p-2 rounded-lg transition-all border",
+                isPinned
+                  ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
+                  : "bg-surface-strong border-border text-muted hover:text-amber-500"
+              )}
+            >
+              <Star size={14} className={cn(isPinned && "fill-amber-500")} />
+            </button>
+          )}
           {isAdmin && (
             <div
               onClick={handleEdit}
