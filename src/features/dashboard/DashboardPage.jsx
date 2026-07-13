@@ -14,8 +14,8 @@ function DashboardPage() {
   const [filter, setFilter] = useState('all'); // all, 100, 200, 300, 400, 500, pinned
 
   useEffect(() => {
-    // If user is a student and has no username, show the setup prompt
-    if (user && user.role === 'student' && !user.username) {
+    // If user has no username, show the setup prompt
+    if (user && !user.username) {
       setShowSetup(true);
     }
   }, [user]);

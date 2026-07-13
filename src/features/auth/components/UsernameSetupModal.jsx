@@ -10,6 +10,12 @@ function UsernameSetupModal({ open, onComplete }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const isAdmin = ['admin', 'super_admin'].includes(user?.role);
+  const title = isAdmin ? "Secure Your Admin Handle" : "Welcome to the New TestFlow!";
+  const description = isAdmin
+    ? "Please set a unique username for your administrative account. This will be used in audit logs and management views."
+    : "Exams are coming up! We've added new features to help you prepare better.";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -30,30 +36,34 @@ function UsernameSetupModal({ open, onComplete }) {
     <Modal
       open={open}
       onOpenChange={() => {}} // Prevent closing without setup
-      title="Welcome to the New TestFlow!"
-      description="Exams are coming up! We've added new features to help you prepare better."
+      title={title}
+      description={description}
     >
       <div className="space-y-6 pt-2">
-        {/* Features Preview */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
-            <Trophy className="w-5 h-5 text-amber-500 mb-2" />
-            <p className="text-[11px] font-bold uppercase tracking-tight text-foreground-strong">Leaderboards</p>
-            <p className="text-[10px] text-muted">Compete with others in your courses.</p>
+        {/* Features Preview - Students only */}
+        {!isAdmin && (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+              <Trophy className="w-5 h-5 text-amber-500 mb-2" />
+              <p className="text-[11px] font-bold uppercase tracking-tight text-foreground-strong">Leaderboards</p>
+              <p className="text-[10px] text-muted">Compete with others in your courses.</p>
+            </div>
+            <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
+              <Flame className="w-5 h-5 text-orange-500 mb-2" />
+              <p className="text-[11px] font-bold uppercase tracking-tight text-foreground-strong">Study Streaks</p>
+              <p className="text-[10px] text-muted">Stay consistent and grow your fire.</p>
+            </div>
           </div>
-          <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
-            <Flame className="w-5 h-5 text-orange-500 mb-2" />
-            <p className="text-[11px] font-bold uppercase tracking-tight text-foreground-strong">Study Streaks</p>
-            <p className="text-[10px] text-muted">Stay consistent and grow your fire.</p>
-          </div>
-        </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground-strong">Pick a Unique Username</label>
-            <p className="text-xs text-muted italic">This name will appear on the subject leaderboards.</p>
+            <label className="text-sm font-bold text-foreground-strong">
+              {isAdmin ? "Admin Username" : "Pick a Unique Username"}
+            </label>
+            {!isAdmin && <p className="text-xs text-muted italic">This name will appear on the subject leaderboards.</p>}
             <Input
-              placeholder="e.g. Scholar_King"
+              placeholder={isAdmin ? "e.g. Admin_Jane" : "e.g. Scholar_King"}
               value={username}
               onChange={(e) => setUsername(e.target.value.replace(/\s/g, '_'))}
               leadingAdornment={<UserIcon size={16} />}
@@ -67,7 +77,7 @@ function UsernameSetupModal({ open, onComplete }) {
           {error && <Alert variant="danger">{error}</Alert>}
 
           <Button type="submit" className="w-full h-12 text-base font-bold" loading={loading}>
-            Save & Enter Dashboard
+            {isAdmin ? "Complete Setup" : "Save & Enter Dashboard"}
           </Button>
         </form>
       </div>
