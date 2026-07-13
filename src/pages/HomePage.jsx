@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { publicApi } from '../api/public.js';
 import {
   ArrowRight,
   Zap,
@@ -19,6 +21,11 @@ import { cn } from '../utils/cn.js';
 
 function HomePage() {
   const { isAuthenticated } = useAuth();
+  const { data: stats } = useQuery({
+    queryKey: ['publicStats'],
+    queryFn: publicApi.getStats,
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
 
   const features = [
     {
@@ -118,16 +125,22 @@ function HomePage() {
 
               <div className="mt-12 grid grid-cols-3 gap-8 border-t border-border pt-8">
                 <div>
-                  <p className="text-2xl font-black text-foreground-strong">5k+</p>
+                  <p className="text-2xl font-black text-foreground-strong">
+                    {stats?.totalQuestions?.toLocaleString() || '1,500'}+
+                  </p>
                   <p className="text-xs font-bold text-muted uppercase tracking-widest">Questions</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-foreground-strong">1k+</p>
+                  <p className="text-2xl font-black text-foreground-strong">
+                    {stats?.totalStudents?.toLocaleString() || '1,300'}+
+                  </p>
                   <p className="text-xs font-bold text-muted uppercase tracking-widest">Active Users</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-foreground-strong">98%</p>
-                  <p className="text-xs font-bold text-muted uppercase tracking-widest">Success Rate</p>
+                  <p className="text-2xl font-black text-foreground-strong">
+                    {stats?.totalExams?.toLocaleString() || '500'}+
+                  </p>
+                  <p className="text-xs font-bold text-muted uppercase tracking-widest">Tests Taken</p>
                 </div>
               </div>
             </motion.div>
@@ -155,8 +168,10 @@ function HomePage() {
                   <CheckCircle2 size={20} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-foreground-strong">Score: 95%</p>
-                  <p className="text-[10px] text-muted">MTH101 Practice</p>
+                  <p className="text-xs font-bold text-foreground-strong">
+                    {stats?.totalExams?.toLocaleString() || '500'}+
+                  </p>
+                  <p className="text-[10px] text-muted">Completed Tests</p>
                 </div>
               </div>
 
@@ -184,7 +199,7 @@ function HomePage() {
               <p className="text-3xl font-black text-foreground-strong tracking-tight">Practice for your hardest courses.</p>
             </div>
             <Link to="/register" className="text-sm font-bold text-primary flex items-center gap-2 hover:underline group">
-              View all 50+ subjects <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              View all {stats?.totalSubjects || '50'}+ subjects <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -304,7 +319,7 @@ function HomePage() {
               Don't leave your <br className="sm:hidden" /> grades to chance.
             </h2>
             <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-white/80 font-medium">
-              Join 1,000+ students already using TestFlow to prepare for their exams. Your first simulation takes less than 60 seconds to set up.
+              Join {stats?.totalStudents?.toLocaleString() || '1,300'}+ students already using TestFlow to prepare for their exams. Your first simulation takes less than 60 seconds to set up.
             </p>
             <div className="mt-12 flex items-center justify-center gap-x-6">
               <Link
