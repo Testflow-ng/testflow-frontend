@@ -254,7 +254,8 @@ function AdminDashboardPage() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 export default AdminDashboardPage;
