@@ -378,9 +378,6 @@ function HomePage() {
             <p className="text-xs font-bold text-muted uppercase tracking-widest">
               &copy; {new Date().getFullYear()} Eddyrus Media. Proudly built for OAU.
             </p>
-            <div className="flex items-center gap-2 text-xs font-bold text-muted uppercase tracking-widest">
-               Status: <span className="flex items-center gap-1 text-success"><div className="w-2 h-2 rounded-full bg-success animate-pulse" /> Operational</span>
-            </div>
           </div>
         </div>
       </footer>

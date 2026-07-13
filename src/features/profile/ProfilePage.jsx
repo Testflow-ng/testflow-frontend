@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Edit2, Lock, Save, History, TrendingUp } from 'lucide-react';
+import { Edit2, Lock, Save, History, TrendingUp, Eye, EyeOff } from 'lucide-react';
 import { Alert, Avatar, Button, Input, Field, Modal } from '../../components/ui/index.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import { Link } from 'react-router-dom';
+import { cn } from '../../utils/cn.js';
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
@@ -14,6 +15,7 @@ function ProfilePage() {
   // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(user.fullName);
+  const [showOnLeaderboard, setShowOnLeaderboard] = useState(user.showOnLeaderboard !== false);
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState(null);
 
@@ -31,7 +33,7 @@ function ProfilePage() {
     setIsSaving(true);
     setEditError(null);
     try {
-      await authApi.updateProfile({ fullName });
+      await authApi.updateProfile({ fullName, showOnLeaderboard });
       await refreshUser();
       setIsEditing(false);
     } catch (err) {
@@ -76,6 +78,10 @@ function ProfilePage() {
           : user.role === 'super_admin'
             ? 'Super Admin'
             : 'Student',
+    },
+    {
+      label: 'Leaderboard',
+      value: user.showOnLeaderboard !== false ? 'Visible' : 'Hidden',
     },
     ...(user.createdAt ? [{ label: 'Member since', value: formatDate(user.createdAt) }] : []),
   ];
@@ -202,6 +208,37 @@ function ProfilePage() {
               Email address cannot be changed for security reasons.
             </p>
           </Field>
+
+          <div className="pt-2">
+            <label className="text-sm font-bold text-foreground-strong block mb-3 uppercase tracking-wider">Privacy Settings</label>
+            <button
+              type="button"
+              onClick={() => setShowOnLeaderboard(!showOnLeaderboard)}
+              className={cn(
+                "w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all",
+                showOnLeaderboard
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border bg-surface text-muted hover:border-border-strong"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                {showOnLeaderboard ? <Eye size={20} /> : <EyeOff size={20} />}
+                <div className="text-left">
+                  <p className="text-sm font-bold">Show on Leaderboards</p>
+                  <p className="text-[10px] opacity-80">Whether other students can see your scores.</p>
+                </div>
+              </div>
+              <div className={cn(
+                "w-10 h-6 rounded-full relative transition-colors",
+                showOnLeaderboard ? "bg-primary" : "bg-muted/30"
+              )}>
+                <div className={cn(
+                  "absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm",
+                  showOnLeaderboard ? "right-1" : "left-1"
+                )} />
+              </div>
+            </button>
+          </div>
         </div>
       </Modal>
 
