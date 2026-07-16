@@ -25,13 +25,13 @@ function SubjectManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: subjects, isLoading } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: subjectsApi.list,
+    queryKey: ['subjects', { all: true }],
+    queryFn: () => subjectsApi.list({ all: true }),
   });
 
   const filteredSubjects = subjects?.filter(s =>
-    s.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.title.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.code?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (s.title?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const {

@@ -21,8 +21,8 @@ function QuestionBankPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { data: subjects } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: subjectsApi.list,
+    queryKey: ['subjects', { all: true }],
+    queryFn: () => subjectsApi.list({ all: true }),
   });
 
   const { data, isLoading, isError } = useQuery({

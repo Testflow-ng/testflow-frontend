@@ -26,7 +26,8 @@ function BulkImportModal({ open, onOpenChange }) {
   const mutation = useMutation({
     mutationFn: (data) => adminApi.bulkCreateQuestions(data),
     onSuccess: (res) => {
-      queryClient.invalidateQueries(['questions']);
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
       onOpenChange(false);
       setJson('');
       setError(null);
