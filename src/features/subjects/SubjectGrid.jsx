@@ -1,14 +1,11 @@
 import { useState } from 'react';
-import { Alert, Spinner } from '../../components/ui/index.js';
+import { useAuth } from '../auth/useAuth.js';
+import { Alert, Spinner, Button } from '../../components/ui/index.js';
 import { useStartExam } from '../exam/useStartExam.js';
 import ExamStartDialog from '../exam/ExamStartDialog.jsx';
 import { useSubjects } from './useSubjects.js';
 import SubjectCard from './SubjectCard.jsx';
-
-import { useAuth } from '../auth/useAuth.js';
-import SubjectCard from './SubjectCard.jsx';
 import { Plus } from 'lucide-react';
-import { Button } from '../../components/ui/index.js';
 
 function SubjectGrid({ filter = 'all', onOpenSelection }) {
   const { user } = useAuth();

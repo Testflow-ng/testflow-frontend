@@ -109,8 +109,13 @@ function QuestionBankPage() {
                       {q.subject?.code}
                     </span>
                     <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-strong text-muted">
-                      {q.type}
+                      {q.difficulty}
                     </span>
+                    {q.topic && (
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">
+                        {q.topic}
+                      </span>
+                    )}
                   </div>
                   <MathText className="text-foreground-strong font-medium line-clamp-2 mb-2">
                     {q.stem}

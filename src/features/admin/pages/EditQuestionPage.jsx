@@ -46,6 +46,8 @@ function EditQuestionPage() {
     resolver: zodResolver(questionSchema),
     defaultValues: {
       subject: '',
+      topicId: '',
+      topic: '',
       stem: '',
       options: ['', ''],
       correctIndex: 0,
@@ -64,6 +66,8 @@ function EditQuestionPage() {
     if (question) {
       reset({
         subject: question.subject?.id || question.subject,
+        topicId: question.topicId || '',
+        topic: question.topic || '',
         stem: question.stem,
         options: question.options,
         correctIndex: question.correctIndex,
@@ -137,6 +141,15 @@ function EditQuestionPage() {
                 <option value="hard">Hard</option>
               </select>
             </Field>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Topic ID (e.g. T1)" error={errors.topicId?.message}>
+                <Input placeholder="T1" {...register('topicId')} />
+              </Field>
+              <Field label="Topic Name" error={errors.topic?.message}>
+                <Input placeholder="Newton's Laws" {...register('topic')} />
+              </Field>
+            </div>
 
             <Field label="Question Text (Stem)" error={errors.stem?.message}>
               <textarea
