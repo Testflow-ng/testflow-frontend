@@ -67,7 +67,12 @@ function LeaderboardTab({ subjectId }) {
               </p>
               <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted font-bold uppercase tracking-tighter">
                 <span className="flex items-center gap-1"><Hash size={10} /> {entry.totalQuestions} Qs</span>
-                <span className="flex items-center gap-1"><Clock size={10} /> {entry.timeTaken}m</span>
+                <span className="flex items-center gap-1">
+                  <Clock size={10} />
+                  {entry.timeTakenSeconds ? (
+                    entry.timeTakenSeconds < 60 ? `${entry.timeTakenSeconds}s` : `${Math.floor(entry.timeTakenSeconds / 60)}m`
+                  ) : 'N/A'}
+                </span>
               </div>
             </div>
           </div>

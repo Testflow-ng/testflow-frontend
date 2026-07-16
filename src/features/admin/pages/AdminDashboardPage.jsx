@@ -116,10 +116,10 @@ function AdminDashboardPage() {
   const { stats, recentUsers } = data;
 
   const statCards = [
-    { label: 'Total Signups', value: stats.users.students, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { label: 'Active Students', value: stats.users.activity?.daily || 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { label: 'Total Exams', value: stats.usage.totalSessions, icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { label: 'Platform Avg', value: `${stats.usage.averageScore}%`, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10' },
-    { label: 'Most Popular', value: stats.usage.topSubject, icon: Activity, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { label: 'Total Qs', value: stats.content.questions, icon: FileQuestion, color: 'text-rose-500', bg: 'bg-rose-500/10' },
     { label: 'Active Now', value: stats.usage.activeNow, icon: Clock, color: 'text-purple-500', bg: 'bg-purple-500/10' },
   ];
 
@@ -185,6 +185,27 @@ function AdminDashboardPage() {
                   </Card>
                 </Link>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted">Engagement & Activity</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card className="p-5 bg-primary/[0.02] border-primary/10">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Daily Active (DAU)</p>
+                <p className="text-2xl font-black text-foreground-strong tabular-nums">{stats.users.activity?.daily || 0}</p>
+                <p className="text-[9px] text-muted font-medium mt-1">Users active in last 24h</p>
+              </Card>
+              <Card className="p-5 bg-primary/[0.02] border-primary/10">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Weekly Active (WAU)</p>
+                <p className="text-2xl font-black text-foreground-strong tabular-nums">{stats.users.activity?.weekly || 0}</p>
+                <p className="text-[9px] text-muted font-medium mt-1">Users active in last 7 days</p>
+              </Card>
+              <Card className="p-5 bg-primary/[0.02] border-primary/10">
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Monthly Active (MAU)</p>
+                <p className="text-2xl font-black text-foreground-strong tabular-nums">{stats.users.activity?.monthly || 0}</p>
+                <p className="text-[9px] text-muted font-medium mt-1">Users active in last 30 days</p>
+              </Card>
             </div>
           </div>
 
