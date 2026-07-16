@@ -23,7 +23,7 @@ function DashboardPage() {
     }
   }, [user]);
 
-  const levels = ['all', '100', '200', '300', 'pinned'];
+  const levels = ['all', '100', '200', '300', '400', '500', 'pinned'];
 
   return (
     <section className="mx-auto w-full max-w-5xl flex-1 px-5 py-8">

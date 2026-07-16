@@ -43,7 +43,7 @@ function CourseSelectionModal({ open, onOpenChange }) {
             leadingAdornment={<Search size={16} className="text-muted" />}
           />
           <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-            {['all', '100', '200', '300', '400'].map(lvl => (
+            {['all', '100', '200', '300', '400', '500'].map(lvl => (
               <button
                 key={lvl}
                 onClick={() => setLevelFilter(lvl)}
