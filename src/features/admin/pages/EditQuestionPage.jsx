@@ -142,14 +142,9 @@ function EditQuestionPage() {
               </select>
             </Field>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Topic ID (e.g. T1)" error={errors.topicId?.message}>
-                <Input placeholder="T1" {...register('topicId')} />
-              </Field>
-              <Field label="Topic Name" error={errors.topic?.message}>
-                <Input placeholder="Newton's Laws" {...register('topic')} />
-              </Field>
-            </div>
+            <Field label="Topic (e.g. Newton's Laws)" error={errors.topic?.message}>
+              <Input placeholder="Newton's Laws" {...register('topic')} />
+            </Field>
 
             <Field label="Question Text (Stem)" error={errors.stem?.message}>
               <textarea

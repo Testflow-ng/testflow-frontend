@@ -50,24 +50,24 @@ function LeaderboardTab({ subjectId }) {
         <div
           key={i}
           className={cn(
-            "flex items-center justify-between p-3 rounded-xl border transition-all",
+            "flex items-center justify-between p-3 sm:p-4 rounded-xl border transition-all",
             i === 0 ? "bg-amber-500/5 border-amber-500/20" : "bg-surface border-border"
           )}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className={cn(
-              "size-8 flex items-center justify-center rounded-lg font-black text-xs",
-              i === 0 ? "bg-amber-500 text-white" : "bg-surface-strong text-muted"
+              "shrink-0 size-8 sm:size-10 flex items-center justify-center rounded-lg font-black text-xs sm:text-sm",
+              i === 0 ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-surface-strong text-muted border border-border"
             )}>
               {i + 1}
             </div>
-            <div>
-              <p className="text-sm font-bold text-foreground-strong">
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-foreground-strong truncate">
                 {entry.username ? `@${entry.username}` : entry.fullName}
               </p>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted font-bold uppercase tracking-tighter">
-                <span className="flex items-center gap-1"><Hash size={10} /> {entry.totalQuestions} Qs</span>
-                <span className="flex items-center gap-1">
+              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted font-bold uppercase tracking-tighter overflow-hidden">
+                <span className="flex items-center gap-1 shrink-0"><Hash size={10} /> {entry.totalQuestions} Qs</span>
+                <span className="flex items-center gap-1 truncate">
                   <Clock size={10} />
                   {entry.timeTakenSeconds ? (
                     entry.timeTakenSeconds < 60 ? `${entry.timeTakenSeconds}s` : `${Math.floor(entry.timeTakenSeconds / 60)}m`
@@ -76,10 +76,10 @@ function LeaderboardTab({ subjectId }) {
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-lg font-black text-primary leading-none">{entry.score}%</p>
+          <div className="text-right shrink-0 ml-2">
+            <p className="text-lg sm:text-xl font-black text-primary leading-none">{entry.score}%</p>
             <p className="text-[9px] text-muted font-bold uppercase tracking-tighter mt-1 flex items-center justify-end gap-1">
-               <Calendar size={10} /> {new Date(entry.date).toLocaleDateString()}
+               <Calendar size={10} /> {new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </p>
           </div>
         </div>
@@ -125,7 +125,6 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
     onConfirm({
       questionCount: count,
       durationMinutes: duration,
-      topicId: selectedTopicName === 'all' ? undefined : currentTopic?.id,
       topic: selectedTopicName === 'all' ? undefined : selectedTopicName
     });
   };
