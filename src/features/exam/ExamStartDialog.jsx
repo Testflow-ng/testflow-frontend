@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, Modal, Spinner, Alert } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
-import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar, BookOpen } from 'lucide-react';
+import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar, BookOpen, ChevronRight, Layers } from 'lucide-react';
 import { useLeaderboard, useSubjectTopics } from '../subjects/useSubjects.js';
 
 const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
@@ -93,8 +93,16 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
   const [activeTab, setActiveTab] = useState('setup'); // setup | leaderboard
   const { data: topics, isLoading: isLoadingTopics } = useSubjectTopics(subject.id);
   const [selectedTopic, setSelectedTopic] = useState('all');
+  const [selectedSubtopic, setSelectedSubtopic] = useState(null);
 
-  const maxQuestions = subject.questionCount ?? 0;
+  const currentTopic = topics?.find(t => t.id === selectedTopic);
+
+  const maxQuestions = selectedTopic === 'all'
+    ? (subject.questionCount ?? 0)
+    : (selectedSubtopic
+        ? currentTopic?.subtopics.find(st => st.name === selectedSubtopic)?.count
+        : currentTopic?.totalQuestions) ?? 0;
+
   const isLargeBank = maxQuestions >= 20;
 
   const PRESETS = [5, 10, 20, 40, 60, 100];
@@ -109,7 +117,22 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
   const [count, setCount] = useState(() =>
     questionChoices.includes(10) ? 10 : questionChoices[questionChoices.length - 1],
   );
+
+  // Re-adjust count if maxQuestions changes due to topic selection
+  useState(() => {
+     if (count > maxQuestions) setCount(maxQuestions);
+  }, [maxQuestions]);
+
   const [duration, setDuration] = useState(15);
+
+  const handleStart = () => {
+    onConfirm({
+      questionCount: count,
+      durationMinutes: duration,
+      topicId: selectedTopic === 'all' ? undefined : selectedTopic,
+      subtopic: selectedSubtopic || undefined
+    });
+  };
 
   return (
     <Modal
@@ -128,12 +151,9 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
             <Button
               size="md"
               loading={isStarting}
-              onClick={() => onConfirm({
-                questionCount: count,
-                durationMinutes: duration,
-                topicId: selectedTopic === 'all' ? undefined : selectedTopic
-              })}
+              onClick={handleStart}
               className="px-8"
+              disabled={maxQuestions === 0}
             >
               Start Exam
             </Button>
@@ -170,29 +190,94 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
 
         {activeTab === 'setup' ? (
           <>
-            {topics && topics.length > 0 && (
-              <div>
-                <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider mb-3 flex items-center gap-2">
-                   <BookOpen size={16} className="text-primary" /> Select Topic
-                </p>
-                <div className="flex flex-wrap gap-2.5">
-                  <Chip active={selectedTopic === 'all'} onClick={() => setSelectedTopic('all')}>
-                    All Topics (Mixed)
-                  </Chip>
-                  {topics.map((t) => (
-                    <Chip key={t.id} active={selectedTopic === t.id} onClick={() => setSelectedTopic(t.id)}>
-                      {t.name}
-                    </Chip>
+            {/* Topic Selection Overhaul */}
+            <div>
+              <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-4">Module Selection</p>
+
+              <div className="space-y-3">
+                {/* Global "All" Option */}
+                <button
+                  onClick={() => {
+                    setSelectedTopic('all');
+                    setSelectedSubtopic(null);
+                  }}
+                  className={cn(
+                    "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
+                    selectedTopic === 'all' ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-surface hover:bg-surface-strong"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={cn("size-10 rounded-xl flex items-center justify-center", selectedTopic === 'all' ? "bg-primary text-white" : "bg-surface-strong text-muted")}>
+                      <Layers size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-foreground-strong uppercase tracking-tight">Full Subject Mix</p>
+                      <p className="text-[10px] text-muted font-medium">Practice everything in this course</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-primary">{subject.questionCount || 0}</p>
+                    <p className="text-[8px] font-bold text-muted uppercase">Questions</p>
+                  </div>
+                </button>
+
+                {/* Topics List */}
+                <div className="max-h-[200px] overflow-y-auto pr-1 space-y-2 custom-scrollbar">
+                  {isLoadingTopics ? (
+                    <div className="py-4 flex justify-center"><Spinner size="sm" /></div>
+                  ) : topics?.map(topic => (
+                    <div key={topic.id} className="space-y-1">
+                      <button
+                        onClick={() => {
+                          setSelectedTopic(topic.id);
+                          setSelectedSubtopic(null);
+                        }}
+                        className={cn(
+                          "w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left group",
+                          selectedTopic === topic.id ? "border-primary bg-primary/5" : "border-border bg-surface hover:border-muted-foreground/30"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                           <div className="text-[10px] font-black text-primary bg-primary/10 size-6 flex items-center justify-center rounded-lg">{topic.id}</div>
+                           <p className="text-xs font-bold text-foreground-strong line-clamp-1">{topic.name}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] font-bold text-muted">{topic.totalQuestions}</span>
+                           <ChevronRight size={14} className={cn("text-muted transition-transform", selectedTopic === topic.id && "rotate-90")} />
+                        </div>
+                      </button>
+
+                      {/* Subtopics Nested */}
+                      {selectedTopic === topic.id && topic.subtopics.length > 0 && (
+                        <div className="pl-6 pr-2 py-1 flex flex-wrap gap-2">
+                          <Chip
+                            active={!selectedSubtopic}
+                            onClick={() => setSelectedSubtopic(null)}
+                          >
+                            All {topic.id}
+                          </Chip>
+                          {topic.subtopics.map(st => (
+                            <Chip
+                              key={st.name}
+                              active={selectedSubtopic === st.name}
+                              onClick={() => setSelectedSubtopic(st.name)}
+                            >
+                              {st.name} ({st.count})
+                            </Chip>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
-            )}
+            </div>
 
             <div>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Number of Questions</p>
                 <span className="text-[10px] font-bold text-muted bg-surface-strong px-2 py-0.5 rounded uppercase tracking-tighter tabular-nums">
-                  {isLargeBank ? `${maxQuestions} Total Available` : 'Growing Bank'}
+                  {maxQuestions} available in {selectedTopic === 'all' ? 'total' : (selectedSubtopic ? 'this subtopic' : 'this topic')}
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2.5">
