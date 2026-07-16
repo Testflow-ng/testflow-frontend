@@ -7,7 +7,7 @@ export function useSubjects() {
   // set staleTime to 0 to ensure fresh counts on every visit.
   return useQuery({
     queryKey: ['subjects'],
-    queryFn: subjectsApi.list,
+    queryFn: () => subjectsApi.list(),
     staleTime: 0
   });
 }

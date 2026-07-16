@@ -26,7 +26,7 @@ function EditQuestionPage() {
 
   const { data: subjects } = useQuery({
     queryKey: ['subjects'],
-    queryFn: subjectsApi.list,
+    queryFn: () => subjectsApi.list(),
   });
 
   const { data: question, isLoading: isLoadingQuestion } = useQuery({
