@@ -126,7 +126,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
               onClick={() => onConfirm({
                 questionCount: count,
                 durationMinutes: duration,
-                topic: selectedTopic === 'all' ? undefined : selectedTopic
+                topicId: selectedTopic === 'all' ? undefined : selectedTopic
               })}
               className="px-8"
             >
@@ -175,8 +175,8 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
                     All Topics (Mixed)
                   </Chip>
                   {topics.map((t) => (
-                    <Chip key={t} active={selectedTopic === t} onClick={() => setSelectedTopic(t)}>
-                      {t}
+                    <Chip key={t.id} active={selectedTopic === t.id} onClick={() => setSelectedTopic(t.id)}>
+                      {t.name}
                     </Chip>
                   ))}
                 </div>
