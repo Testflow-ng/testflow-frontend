@@ -92,11 +92,11 @@ function LeaderboardTab({ subjectId }) {
 function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
   const [activeTab, setActiveTab] = useState('setup'); // setup | leaderboard
   const { data: topics, isLoading: isLoadingTopics } = useSubjectTopics(subject.id);
-  const [selectedTopicName, setSelectedTopicName] = useState('all');
+  const [selectedTopicId, setSelectedTopicId] = useState('all');
 
-  const currentTopic = topics?.find(t => t.name === selectedTopicName);
+  const currentTopic = topics?.find(t => t.id === selectedTopicId);
 
-  const maxQuestions = selectedTopicName === 'all'
+  const maxQuestions = selectedTopicId === 'all'
     ? (subject.questionCount ?? 0)
     : (currentTopic?.totalQuestions ?? 0);
 
@@ -125,7 +125,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
     onConfirm({
       questionCount: count,
       durationMinutes: duration,
-      topic: selectedTopicName === 'all' ? undefined : selectedTopicName
+      topicId: selectedTopicId === 'all' ? undefined : selectedTopicId
     });
   };
 
@@ -161,7 +161,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
         )
       }
     >
-      <div className="flex flex-col gap-5 pt-2">
+      <div className="flex flex-col gap-4 sm:gap-6 pt-2">
         {/* Tab Switcher - More compact on mobile */}
         <div className="flex p-1 bg-surface-strong rounded-xl border border-border">
           <button
@@ -185,21 +185,21 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
         </div>
 
         {activeTab === 'setup' ? (
-          <div className="space-y-6">
-            {/* Topic Selection - Improved Responsiveness */}
+          <div className="space-y-5 sm:space-y-6">
+            {/* Topic Selection - Improved Responsiveness and Grouping */}
             <div>
               <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Targeted Practice</p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] sm:max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                 <button
-                  onClick={() => setSelectedTopicName('all')}
+                  onClick={() => setSelectedTopicId('all')}
                   className={cn(
                     "flex items-center justify-between p-3 rounded-xl border transition-all text-left",
-                    selectedTopicName === 'all' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:bg-surface-strong"
+                    selectedTopicId === 'all' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:bg-surface-strong"
                   )}
                 >
                   <div className="flex items-center gap-3">
-                    <Layers size={16} className={selectedTopicName === 'all' ? "text-primary" : "text-muted"} />
+                    <Layers size={16} className={selectedTopicId === 'all' ? "text-primary" : "text-muted"} />
                     <span className="text-xs font-bold text-foreground-strong">All Topics</span>
                   </div>
                   <span className="text-[10px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded">
@@ -211,15 +211,18 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
                    <div className="col-span-full py-4 flex justify-center"><Spinner size="sm" /></div>
                 ) : topics?.map(topic => (
                   <button
-                    key={topic.name}
-                    onClick={() => setSelectedTopicName(topic.name)}
+                    key={topic.id}
+                    onClick={() => setSelectedTopicId(topic.id)}
                     className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border transition-all text-left",
-                      selectedTopicName === topic.name ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:border-muted-foreground/30"
+                      "flex items-center justify-between p-3 rounded-xl border transition-all text-left group",
+                      selectedTopicId === topic.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:border-muted-foreground/30"
                     )}
                   >
-                    <span className="text-xs font-bold text-foreground-strong truncate pr-2">{topic.name}</span>
-                    <span className="shrink-0 text-[10px] font-black text-muted bg-surface-strong px-1.5 py-0.5 rounded">
+                    <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                       <span className="text-xs font-bold text-foreground-strong truncate">{topic.name}</span>
+                       <span className="text-[9px] text-muted font-bold truncate opacity-60 group-hover:opacity-100">{topic.id}</span>
+                    </div>
+                    <span className="shrink-0 text-[10px] font-black text-muted bg-surface-strong px-1.5 py-0.5 rounded self-center">
                       {topic.totalQuestions}
                     </span>
                   </button>
@@ -227,7 +230,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
               <div>
                 <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Questions</p>
                 <div className="flex flex-wrap gap-2">
@@ -251,12 +254,12 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl bg-primary/5 p-4 border border-primary/10">
+            <div className="flex items-start gap-3 rounded-xl bg-primary/5 p-3 sm:p-4 border border-primary/10">
               <Info size={16} className="shrink-0 text-primary mt-0.5" />
-              <p className="text-[11px] leading-relaxed text-foreground/80 font-medium">
-                {selectedTopicName === 'all'
+              <p className="text-[10px] sm:text-[11px] leading-relaxed text-foreground/80 font-medium">
+                {selectedTopicId === 'all'
                   ? "Random mix from all modules."
-                  : `Focusing exclusively on ${selectedTopicName}.`}
+                  : `Focusing on: ${currentTopic?.name}.`}
                 {" "}Questions and options will be shuffled.
               </p>
             </div>
