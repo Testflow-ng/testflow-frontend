@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Button, Modal, Spinner, Alert } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
-import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar } from 'lucide-react';
-import { useLeaderboard } from '../subjects/useSubjects.js';
+import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar, BookOpen } from 'lucide-react';
+import { useLeaderboard, useSubjectTopics } from '../subjects/useSubjects.js';
 
 const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
 
@@ -86,6 +86,9 @@ function LeaderboardTab({ subjectId }) {
 /** Configure and start a practice exam for a subject (question count + time). */
 function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
   const [activeTab, setActiveTab] = useState('setup'); // setup | leaderboard
+  const { data: topics, isLoading: isLoadingTopics } = useSubjectTopics(subject.id);
+  const [selectedTopic, setSelectedTopic] = useState('all');
+
   const maxQuestions = subject.questionCount ?? 0;
   const isLargeBank = maxQuestions >= 20;
 
@@ -122,7 +125,8 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
               loading={isStarting}
               onClick={() => onConfirm({
                 questionCount: count,
-                durationMinutes: duration
+                durationMinutes: duration,
+                topic: selectedTopic === 'all' ? undefined : selectedTopic
               })}
               className="px-8"
             >
@@ -161,6 +165,24 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
 
         {activeTab === 'setup' ? (
           <>
+            {topics && topics.length > 0 && (
+              <div>
+                <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider mb-3 flex items-center gap-2">
+                   <BookOpen size={16} className="text-primary" /> Select Topic
+                </p>
+                <div className="flex flex-wrap gap-2.5">
+                  <Chip active={selectedTopic === 'all'} onClick={() => setSelectedTopic('all')}>
+                    All Topics (Mixed)
+                  </Chip>
+                  {topics.map((t) => (
+                    <Chip key={t} active={selectedTopic === t} onClick={() => setSelectedTopic(t)}>
+                      {t}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
               <div className="flex items-center justify-between">
                 <p className="text-sm font-bold text-foreground-strong uppercase tracking-wider">Number of Questions</p>
