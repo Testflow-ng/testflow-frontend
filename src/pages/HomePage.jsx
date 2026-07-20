@@ -1,18 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import {
-  ArrowRight,
-  Clock,
-  Zap,
-  BarChart3,
-  ShieldCheck,
-  Star,
-} from 'lucide-react';
+import { ArrowRight, Clock, Zap, BarChart3, ShieldCheck, Star } from 'lucide-react';
 import { publicApi } from '../api/public.js';
 import { buttonClasses } from '../components/ui/index.js';
 import { useAuth } from '../features/auth/useAuth.js';
 import { cn } from '../utils/cn.js';
 import HomeHero from '../components/landing/HomeHero.jsx';
+import SubjectMarquee from '../components/landing/SubjectMarquee.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
 import Reveal from '../components/landing/Reveal.jsx';
 
@@ -51,15 +45,6 @@ const FEATURES = [
   },
 ];
 
-const SUBJECTS = [
-  { code: 'MTH101', title: 'Elementary Mathematics I', color: 'bg-blue-500' },
-  { code: 'CSC101', title: 'Introduction to Computer Science', color: 'bg-green-500' },
-  { code: 'PHY101', title: 'General Physics I', color: 'bg-purple-500' },
-  { code: 'CHM101', title: 'General Chemistry I', color: 'bg-amber-500' },
-  { code: 'ECO101', title: 'Principles of Economics I', color: 'bg-rose-500' },
-  { code: 'GNS101', title: 'Use of English I', color: 'bg-indigo-500' },
-];
-
 const STEPS = [
   {
     title: 'Pick a subject',
@@ -93,9 +78,9 @@ function HomePage() {
 
       <TrustBar stats={stats} />
 
-      <SubjectsSection stats={stats} />
-
       <FeaturesSection />
+
+      <SubjectMarquee />
 
       <HowItWorksSection isAuthenticated={isAuthenticated} />
 
@@ -134,67 +119,16 @@ function TrustBar({ stats }) {
   );
 }
 
-function SubjectsSection({ stats }) {
-  return (
-    <section id="subjects" className="scroll-mt-24 bg-background py-16 sm:py-24">
-      <Reveal className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="mb-8 flex flex-col gap-2">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
-            Built for your hardest courses
-          </h2>
-          <p className="max-w-2xl text-muted">
-            Full question banks for the first-year courses students struggle
-            with most, with new subjects added every semester.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {SUBJECTS.map((s) => (
-            <div
-              key={s.code}
-              className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-colors hover:border-primary/40"
-            >
-              <div
-                className={cn(
-                  'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xs font-extrabold text-white',
-                  s.color,
-                )}
-              >
-                {s.code.substring(0, 3)}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-muted">
-                  {s.code}
-                </p>
-                <h3 className="truncate font-semibold text-foreground-strong">
-                  {s.title}
-                </h3>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-8">
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-primary"
-          >
-            See all {stats?.totalSubjects ?? 50}+ subjects
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
 function FeaturesSection() {
   return (
     <section className="border-y border-border bg-surface py-16 sm:py-24">
       <Reveal className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-10 max-w-2xl">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
-            Everything you need to prepare
+          <p className="text-sm font-bold uppercase tracking-wide text-primary">
+            What TestFlow does
+          </p>
+          <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
+            Everything you need to pass
           </h2>
           <p className="mt-3 text-muted">
             No fluff. Just the tools that actually move your grade.
