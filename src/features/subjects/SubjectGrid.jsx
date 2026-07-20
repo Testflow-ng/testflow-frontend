@@ -7,7 +7,7 @@ import { useSubjects } from './useSubjects.js';
 import SubjectCard from './SubjectCard.jsx';
 import { Plus } from 'lucide-react';
 
-function SubjectGrid({ filter = 'all', onOpenSelection }) {
+function SubjectGrid({ filter = 'all', search = '', onOpenSelection }) {
   const { user } = useAuth();
   const { data: subjects, isLoading, isError, error } = useSubjects();
   const { start, isStarting, error: startError } = useStartExam();
@@ -25,13 +25,35 @@ function SubjectGrid({ filter = 'all', onOpenSelection }) {
     return <Alert variant="danger">{error?.message ?? 'Could not load subjects.'}</Alert>;
   }
 
-  const filteredSubjects = subjects?.filter((s) => {
-    if (filter === 'all') return true;
-    if (filter === 'pinned') return user?.pinnedSubjects?.includes(s.id);
-    return s.level === filter;
-  }) || [];
+  const query = search.trim().toLowerCase();
+  const filteredSubjects =
+    subjects
+      ?.filter((s) => {
+        if (filter === 'pinned') return user?.pinnedSubjects?.includes(s.id);
+        if (filter !== 'all') return s.level === filter;
+        return true;
+      })
+      .filter((s) => {
+        if (!query) return true;
+        return (
+          s.code?.toLowerCase().includes(query) ||
+          s.title?.toLowerCase().includes(query)
+        );
+      }) || [];
 
   if (!filteredSubjects.length) {
+    if (query) {
+      return (
+        <div className="rounded-3xl border border-dashed border-border bg-surface-strong py-16 text-center">
+          <p className="text-sm font-semibold text-foreground-strong">
+            No subjects match "{search.trim()}"
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Try a different course code or title.
+          </p>
+        </div>
+      );
+    }
     if (filter === 'pinned') {
       return (
         <div className="text-center py-16 bg-surface-strong rounded-[2.5rem] border-2 border-dashed border-border p-8">

@@ -17,6 +17,8 @@ import { cn } from '../utils/cn.js';
 import Logo from './Logo.jsx';
 import EqualsMenuIcon from './EqualsMenuIcon.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import WhatsAppIcon from './icons/WhatsAppIcon.jsx';
+import { WHATSAPP_CHANNEL_URL, WHATSAPP_GREEN } from '../constants/social.js';
 import { useAuth } from '../features/auth/useAuth.js';
 import { buttonClasses } from './ui/index.js';
 import Avatar from './ui/Avatar.jsx';
@@ -105,6 +107,18 @@ function Header() {
           )}
 
           <div className="flex items-center gap-2">
+            <a
+              href={WHATSAPP_CHANNEL_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Follow EDDYRUS MEDIA on WhatsApp"
+              title="Follow EDDYRUS MEDIA on WhatsApp"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-transform active:scale-95"
+              style={{ backgroundColor: WHATSAPP_GREEN }}
+            >
+              <WhatsAppIcon size={20} />
+            </a>
+
             {!isLoading &&
               (isAuthenticated ? (
                 <div className="relative hidden lg:block">
@@ -240,6 +254,24 @@ function Header() {
                   </span>
                   <ThemeToggle />
                 </div>
+
+                <a
+                  href={WHATSAPP_CHANNEL_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-2 flex items-center gap-3 rounded-2xl bg-surface-strong px-4 py-3"
+                >
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-white"
+                    style={{ backgroundColor: WHATSAPP_GREEN }}
+                  >
+                    <WhatsAppIcon size={16} />
+                  </span>
+                  <span className="text-sm font-semibold text-foreground-strong">
+                    Follow EDDYRUS MEDIA
+                  </span>
+                </a>
 
                 <div className="mt-3 border-t border-border pt-4">
                   {isAuthenticated ? (

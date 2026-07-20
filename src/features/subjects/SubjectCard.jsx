@@ -38,7 +38,7 @@ function SubjectCard({ subject, onSelect }) {
         'group relative flex w-full flex-col items-start gap-4 rounded-2xl border border-border bg-surface p-5 text-left transition-all duration-300',
         disabled && !isAdmin
           ? 'cursor-not-allowed opacity-60'
-          : 'hover:border-primary/50 hover:bg-surface-strong hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1',
+          : 'hover:border-primary/40 hover:bg-surface-strong',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
       )}
     >
@@ -60,7 +60,7 @@ function SubjectCard({ subject, onSelect }) {
               onClick={handlePin}
               disabled={isPinning}
               className={cn(
-                "p-2 rounded-lg transition-all border",
+                "p-2 rounded-full transition-colors border",
                 isPinned
                   ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
                   : "bg-surface-strong border-border text-muted hover:text-amber-500"
