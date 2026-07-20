@@ -161,7 +161,7 @@ function Header() {
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong transition-colors hover:bg-surface-strong lg:hidden"
+              className="group flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong transition-colors hover:bg-surface-strong active:scale-95 lg:hidden"
             >
               <EqualsMenuIcon size={22} />
             </button>

@@ -71,7 +71,7 @@ function HomeHero({ stats, isAuthenticated }) {
 
           <div className="mt-8 flex items-center gap-2 text-sm text-muted">
             <CheckCircle2 size={16} className="text-success" />
-            Free to start. No card needed.
+            Free to start
           </div>
         </motion.div>
 

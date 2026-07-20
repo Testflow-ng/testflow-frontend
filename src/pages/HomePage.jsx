@@ -14,6 +14,7 @@ import { useAuth } from '../features/auth/useAuth.js';
 import { cn } from '../utils/cn.js';
 import HomeHero from '../components/landing/HomeHero.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
+import Reveal from '../components/landing/Reveal.jsx';
 
 const FEATURES = [
   {
@@ -136,7 +137,7 @@ function TrustBar({ stats }) {
 function SubjectsSection({ stats }) {
   return (
     <section id="subjects" className="scroll-mt-24 bg-background py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-8 flex flex-col gap-2">
           <h2 className="font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
             Built for your hardest courses
@@ -182,7 +183,7 @@ function SubjectsSection({ stats }) {
             <ArrowRight size={16} />
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -190,7 +191,7 @@ function SubjectsSection({ stats }) {
 function FeaturesSection() {
   return (
     <section className="border-y border-border bg-surface py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-10 max-w-2xl">
           <h2 className="font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
             Everything you need to prepare
@@ -223,7 +224,7 @@ function FeaturesSection() {
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -231,7 +232,7 @@ function FeaturesSection() {
 function HowItWorksSection({ isAuthenticated }) {
   return (
     <section id="how-it-works" className="scroll-mt-24 bg-background py-16 sm:py-24">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
+      <Reveal className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
         <div className="order-2 lg:order-1">
           <p className="text-sm font-bold uppercase tracking-wide text-primary">
             How it works
@@ -278,7 +279,7 @@ function HowItWorksSection({ isAuthenticated }) {
             className="aspect-[4/5] w-full rounded-3xl border border-border object-cover"
           />
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -286,7 +287,7 @@ function HowItWorksSection({ isAuthenticated }) {
 function ResultsBand({ stats }) {
   return (
     <section className="border-y border-border bg-surface py-16 sm:py-24">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
+      <Reveal className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-16">
         <img
           src="/photos/graduate.webp"
           alt="A graduate celebrating"
@@ -310,7 +311,7 @@ function ResultsBand({ stats }) {
             </span>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -318,7 +319,7 @@ function ResultsBand({ stats }) {
 function FinalCta({ stats, isAuthenticated }) {
   return (
     <section className="bg-background py-16 sm:py-24">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="rounded-3xl bg-primary px-6 py-14 text-center sm:px-12 sm:py-20">
           <h2 className="mx-auto max-w-2xl font-heading text-3xl font-extrabold tracking-tight text-primary-foreground sm:text-4xl">
             Your next exam starts with one practice test
@@ -346,7 +347,7 @@ function FinalCta({ stats, isAuthenticated }) {
             )}
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

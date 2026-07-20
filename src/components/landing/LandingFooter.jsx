@@ -37,8 +37,14 @@ const COLUMNS = [
 
 function LandingFooter() {
   return (
-    <footer className="border-t border-border bg-surface">
-      <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+    <footer className="relative overflow-hidden border-t border-border bg-surface">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 -bottom-4 select-none text-center font-heading text-[22vw] font-extrabold leading-none tracking-tighter text-foreground-strong/[0.04] sm:-bottom-8 sm:text-[20vw]"
+      >
+        TESTFLOW
+      </span>
+      <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
             <Logo size={28} />
