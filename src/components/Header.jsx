@@ -70,11 +70,7 @@ function Header() {
         )}
       </AnimatePresence>
 
-      <motion.div
-        animate={{ borderRadius: menuOpen ? 24 : 9999 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="relative z-50 mx-auto max-w-6xl overflow-hidden border border-border/70 bg-background/80 shadow-sm backdrop-blur-xl"
-      >
+      <div className="relative z-50 mx-auto max-w-6xl overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/80 shadow-sm backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between gap-3 pl-4 pr-3 sm:h-16 sm:pl-6">
           <Link
             to="/"
@@ -295,7 +291,7 @@ function Header() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </header>
   );
 }

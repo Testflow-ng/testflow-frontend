@@ -8,6 +8,7 @@ import { cn } from '../utils/cn.js';
 import HomeHero from '../components/landing/HomeHero.jsx';
 import SubjectMarquee from '../components/landing/SubjectMarquee.jsx';
 import AppComingSoon from '../components/landing/AppComingSoon.jsx';
+import WhatsAppBanner from '../components/landing/WhatsAppBanner.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
 import Reveal from '../components/landing/Reveal.jsx';
 
@@ -90,6 +91,8 @@ function HomePage() {
       <AppComingSoon />
 
       <FinalCta stats={stats} isAuthenticated={isAuthenticated} />
+
+      <WhatsAppBanner />
 
       <LandingFooter />
     </div>
