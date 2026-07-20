@@ -1,0 +1,5 @@
+/* The App Store badge ships black-on-transparent; invert it on the dark theme
+   so it reads as the white badge Apple recommends for dark surfaces. */
+:root[data-theme='dark'] .store-badge--invert {
+  filter: invert(1);
+}

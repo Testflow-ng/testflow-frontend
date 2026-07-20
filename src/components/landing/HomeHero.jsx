@@ -17,7 +17,6 @@ function HomeHero({ stats, isAuthenticated }) {
           transition={{ duration: 0.5 }}
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-foreground-strong">
-            <span className="h-2 w-2 rounded-full bg-success" />
             Now covering ECO102 and PHY102
           </span>
 
@@ -26,9 +25,8 @@ function HomeHero({ stats, isAuthenticated }) {
           </h1>
 
           <p className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
-            TestFlow is the CBT practice platform for OAU students. Sit timed
-            mock exams, get instant corrections, and track your progress until
-            you are ready.
+            TestFlow is the CBT practice platform for OAU students. Sit timed mock exams, get
+            instant corrections, and track your progress until you are ready.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
