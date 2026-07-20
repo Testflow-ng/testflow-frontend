@@ -7,6 +7,7 @@ import { useAuth } from '../features/auth/useAuth.js';
 import { cn } from '../utils/cn.js';
 import HomeHero from '../components/landing/HomeHero.jsx';
 import SubjectMarquee from '../components/landing/SubjectMarquee.jsx';
+import AppComingSoon from '../components/landing/AppComingSoon.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
 import Reveal from '../components/landing/Reveal.jsx';
 
@@ -85,6 +86,8 @@ function HomePage() {
       <HowItWorksSection isAuthenticated={isAuthenticated} />
 
       <ResultsBand stats={stats} />
+
+      <AppComingSoon />
 
       <FinalCta stats={stats} isAuthenticated={isAuthenticated} />
 

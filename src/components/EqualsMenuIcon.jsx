@@ -1,8 +1,12 @@
+import { cn } from '../utils/cn.js';
+
 /**
- * Two stacked rounded bars, the "equals" hamburger mark used in the header.
- * The bars slide in opposite directions on hover/press of the parent `group`.
+ * Two stacked rounded bars. On hover/press of the parent `group` the bars slide
+ * apart; when `open` they morph into an X.
  */
-function EqualsMenuIcon({ size = 22, className }) {
+function EqualsMenuIcon({ size = 22, open = false, className }) {
+  const barStyle = { transformBox: 'fill-box', transformOrigin: 'center' };
+
   return (
     <svg
       width={size}
@@ -19,7 +23,13 @@ function EqualsMenuIcon({ size = 22, className }) {
         height="2.4"
         rx="1.2"
         fill="currentColor"
-        className="origin-center transition-transform duration-300 ease-out group-hover:translate-x-[2px] group-active:translate-x-[3px]"
+        style={barStyle}
+        className={cn(
+          'transition-transform duration-300 ease-out',
+          open
+            ? 'translate-y-[2.3px] rotate-45'
+            : 'group-hover:translate-x-[2px] group-active:translate-x-[3px]',
+        )}
       />
       <rect
         x="4"
@@ -28,7 +38,13 @@ function EqualsMenuIcon({ size = 22, className }) {
         height="2.4"
         rx="1.2"
         fill="currentColor"
-        className="origin-center transition-transform duration-300 ease-out group-hover:-translate-x-[2px] group-active:-translate-x-[3px]"
+        style={barStyle}
+        className={cn(
+          'transition-transform duration-300 ease-out',
+          open
+            ? '-translate-y-[2.3px] -rotate-45'
+            : 'group-hover:-translate-x-[2px] group-active:-translate-x-[3px]',
+        )}
       />
     </svg>
   );

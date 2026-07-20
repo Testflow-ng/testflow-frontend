@@ -25,7 +25,7 @@ function RegisterPage() {
       email: '',
       matricNumber: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     },
   });
 
@@ -57,9 +57,14 @@ function RegisterPage() {
       <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
         {formError ? <Alert variant="danger">{formError}</Alert> : null}
         <Field label="Full name" error={errors.fullName?.message} required>
-          <Input autoComplete="name" placeholder="Ada Lovelace" {...register('fullName')} />
+          <Input autoComplete="name" placeholder="Feranmi oresajo" {...register('fullName')} />
         </Field>
-        <Field label="Username" error={errors.username?.message} required hint="Unique handle for leaderboards">
+        <Field
+          label="Username"
+          error={errors.username?.message}
+          required
+          hint="Unique handle for leaderboards"
+        >
           <Input autoComplete="username" placeholder="ada_l1" {...register('username')} />
         </Field>
         <Field label="Email" error={errors.email?.message} required>
@@ -75,22 +80,14 @@ function RegisterPage() {
           <Input autoComplete="off" placeholder="e.g. CSC/2021/001" {...register('matricNumber')} />
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field
-            label="Password"
-            error={errors.password?.message}
-            required
-          >
+          <Field label="Password" error={errors.password?.message} required>
             <PasswordInput
               autoComplete="new-password"
               placeholder="••••••••"
               {...register('password')}
             />
           </Field>
-          <Field
-            label="Confirm Password"
-            error={errors.confirmPassword?.message}
-            required
-          >
+          <Field label="Confirm Password" error={errors.confirmPassword?.message} required>
             <PasswordInput
               autoComplete="new-password"
               placeholder="••••••••"
@@ -101,7 +98,12 @@ function RegisterPage() {
         <p className="text-[10px] text-muted -mt-2">
           Use at least 8 characters, including a letter and a number.
         </p>
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-2 h-12 text-base shadow-lg shadow-primary/20">
+        <Button
+          type="submit"
+          fullWidth
+          loading={isSubmitting}
+          className="mt-2 h-12 text-base shadow-lg shadow-primary/20"
+        >
           Create account
         </Button>
       </form>
