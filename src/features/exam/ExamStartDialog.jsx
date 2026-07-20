@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Modal, Spinner, Alert } from '../../components/ui/index.js';
 import { cn } from '../../utils/cn.js';
-import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar, BookOpen, ChevronRight, Layers } from 'lucide-react';
+import { Check, Info, Trophy, Settings2, Clock, Hash, Calendar, Layers } from 'lucide-react';
 import { useLeaderboard, useSubjectTopics } from '../subjects/useSubjects.js';
 
 const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
@@ -113,11 +113,13 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
     questionChoices.includes(10) ? 10 : questionChoices[questionChoices.length - 1],
   );
 
-  // Re-adjust count if maxQuestions changes due to topic selection
-  useEffect(() => {
-     if (count > maxQuestions && maxQuestions > 0) setCount(maxQuestions);
-     if (maxQuestions > 0 && count === 0) setCount(Math.min(10, maxQuestions));
-  }, [maxQuestions, count]);
+  // Adjust the count during render when topic selection changes the available
+  // maximum. Guarded so it converges in a single extra render.
+  if (maxQuestions > 0 && count > maxQuestions) {
+    setCount(maxQuestions);
+  } else if (maxQuestions > 0 && count === 0) {
+    setCount(Math.min(10, maxQuestions));
+  }
 
   const [duration, setDuration] = useState(15);
 

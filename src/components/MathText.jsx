@@ -24,7 +24,7 @@ const normalizeMath = (math) =>
     .replace(/[‘’ʼ]/g, "'") // ‘ ’ ʼ -> '
     .replace(/[“”]/g, '"') // “ ” -> "
     .replace(/[−–—]/g, '-') // − – — -> -
-    .replace(/ /g, ' '); // nbsp -> space
+    .replace(/\u00A0/g, ' '); // nbsp -> space
 
 /**
  * Render one math segment to KaTeX HTML. On any parse error, fall back to the

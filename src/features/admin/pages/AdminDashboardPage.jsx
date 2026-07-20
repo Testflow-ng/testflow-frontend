@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { adminApi } from '../api.js';
 import {
   Card,
@@ -14,7 +14,6 @@ import {
   FileQuestion,
   Users,
   LayoutDashboard,
-  Activity,
   CheckCircle2,
   TrendingUp,
   Clock,
@@ -36,13 +35,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function AdminDashboardPage() {
   const { user: currentUser } = useAuth();
-  const [showSetup, setShowSetup] = useState(false);
-
-  useEffect(() => {
-    if (currentUser && !currentUser.username) {
-      setShowSetup(true);
-    }
-  }, [currentUser]);
+  const [setupDismissed, setSetupDismissed] = useState(false);
+  const showSetup = Boolean(currentUser && !currentUser.username) && !setupDismissed;
 
   const handleExport = () => {
     window.open(`${API_URL}/api/admin/export-results`, '_blank');
@@ -125,7 +119,7 @@ function AdminDashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-8">
-      <UsernameSetupModal open={showSetup} onComplete={() => setShowSetup(false)} />
+      <UsernameSetupModal open={showSetup} onComplete={() => setSetupDismissed(true)} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 p-2.5 rounded-xl">

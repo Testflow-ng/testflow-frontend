@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../auth/useAuth.js';
 import { useSubjects, useTogglePin } from '../useSubjects.js';
 import { Modal, Button, Spinner, Input } from '../../../components/ui/index.js';
-import { Star, Search, Filter, BookOpen, CheckCircle2 } from 'lucide-react';
+import { Star, Search, CheckCircle2 } from 'lucide-react';
 import { cn } from '../../../utils/cn.js';
 
 function CourseSelectionModal({ open, onOpenChange }) {

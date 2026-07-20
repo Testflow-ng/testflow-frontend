@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../useAuth.js';
 import { authApi } from '../api.js';
 import { Modal, Button, Input, Alert } from '../../../components/ui/index.js';
-import { Flame, Trophy, User as UserIcon, Star, ChevronDown, ChevronUp, Sparkles, BookMarked, CheckCircle2 } from 'lucide-react';
+import { Flame, Trophy, User as UserIcon, ChevronDown, ChevronUp, Sparkles, BookMarked, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../../../utils/cn.js';
 
