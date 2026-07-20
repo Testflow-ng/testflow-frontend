@@ -1,7 +1,7 @@
 import { cn } from '../../utils/cn.js';
 
 export const buttonBase =
-  'inline-flex items-center justify-center gap-2 rounded-md font-medium select-none ' +
+  'inline-flex items-center justify-center gap-2 rounded-full font-semibold select-none ' +
   'transition-colors duration-[var(--duration-sm)] ease-[var(--transition-ease)] motion-reduce:transition-none ' +
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ' +
   'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50';

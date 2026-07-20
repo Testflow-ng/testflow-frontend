@@ -1,19 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
-import { LogOut, X, Sun } from 'lucide-react';
+import { ArrowRight, LogOut, X } from 'lucide-react';
 import { cn } from '../utils/cn.js';
-import IconButton from './ui/IconButton.jsx';
+import { buttonClasses } from './ui/index.js';
 import ThemeToggle from './ThemeToggle.jsx';
-import Logo from './Logo.jsx';
-
-const ITEM_CLASS =
-  'flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-base font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary';
 
 /**
- * Slide-in navigation drawer. Redesigned to feel premium.
+ * Full-screen mobile menu sheet. Nav links stacked, a divider, then the
+ * primary auth actions as pill buttons.
  */
-function NavDrawer({ open, onClose, links, onSignOut }) {
+function NavDrawer({ open, onClose, links, isAuthenticated, onSignOut }) {
   const panelRef = useRef(null);
   const previouslyFocused = useRef(null);
   const location = useLocation();
@@ -44,7 +41,7 @@ function NavDrawer({ open, onClose, links, onSignOut }) {
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="absolute inset-0 bg-foreground/20 backdrop-blur-md transition-opacity duration-500"
+        className="absolute inset-0 bg-background/70 backdrop-blur-md"
       />
       <div
         ref={panelRef}
@@ -52,74 +49,86 @@ function NavDrawer({ open, onClose, links, onSignOut }) {
         aria-modal="true"
         aria-label="Menu"
         tabIndex={-1}
-        className={cn(
-          "absolute inset-y-0 right-0 flex w-80 max-w-[85%] flex-col bg-surface shadow-2xl transition-transform duration-500 ease-out focus:outline-none",
-          open ? "translate-x-0" : "translate-x-full"
-        )}
+        className="absolute inset-x-3 top-3 flex max-h-[calc(100svh-1.5rem)] flex-col rounded-3xl border border-border bg-surface p-5 shadow-2xl focus:outline-none"
       >
-        <div className="flex items-center justify-between p-6">
-          <div className="flex items-center gap-2">
-            <Logo size={28} />
-            <span className="font-display text-lg font-bold text-foreground-strong">TestFlow</span>
-          </div>
-          <IconButton variant="ghost" aria-label="Close menu" onClick={onClose}>
-            <X size={20} aria-hidden="true" />
-          </IconButton>
+        <div className="flex items-center justify-between">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-foreground-strong transition-colors hover:bg-surface-strong"
+          >
+            <X size={22} aria-hidden="true" />
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-2">
-          <nav className="flex flex-col gap-2">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted">Navigation</p>
-            {links.map(({ to, label, Icon }) => {
-              const isActive = location.pathname === to;
-              return (
-                <Link
-                  key={label}
-                  to={to}
-                  onClick={onClose}
-                  className={cn(
-                    ITEM_CLASS,
-                    isActive
-                      ? 'bg-primary/10 text-primary shadow-sm shadow-primary/5'
-                      : 'text-muted hover:text-foreground-strong hover:bg-surface-strong'
-                  )}
-                >
-                  <Icon size={20} className={cn("shrink-0", isActive ? "text-primary" : "text-muted")} aria-hidden="true" />
-                  {label}
-                </Link>
-              );
-            })}
-          </nav>
+        <nav className="mt-2 flex flex-col overflow-y-auto">
+          {links.map(({ to, label }) => {
+            const isActive = location.pathname === to;
+            return (
+              <Link
+                key={label}
+                to={to}
+                onClick={onClose}
+                className={cn(
+                  'rounded-2xl px-3 py-4 text-xl font-semibold tracking-tight transition-colors',
+                  isActive
+                    ? 'text-foreground-strong'
+                    : 'text-muted hover:text-foreground-strong',
+                )}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
 
-          <div className="mt-8 space-y-2">
-            <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-muted">Settings</p>
-            <div className="flex items-center justify-between rounded-xl bg-surface-strong px-4 py-3">
-              <div className="flex items-center gap-3">
-                <Sun size={20} className="text-muted" />
-                <span className="text-sm font-semibold text-foreground-strong">Theme</span>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 border-t border-border bg-surface-strong/30">
-          {onSignOut && (
+        <div className="mt-2 border-t border-border pt-5">
+          {isAuthenticated ? (
             <button
               type="button"
               onClick={() => {
                 onClose();
-                onSignOut();
+                onSignOut?.();
               }}
-              className={cn(ITEM_CLASS, 'text-danger hover:bg-danger/10')}
+              className={buttonClasses({
+                variant: 'outline',
+                size: 'lg',
+                fullWidth: true,
+                className: 'gap-2 text-danger',
+              })}
             >
-              <LogOut size={20} className="shrink-0" aria-hidden="true" />
+              <LogOut size={18} aria-hidden="true" />
               Sign out
             </button>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/login"
+                onClick={onClose}
+                className={buttonClasses({
+                  variant: 'outline',
+                  size: 'lg',
+                  fullWidth: true,
+                })}
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                onClick={onClose}
+                className={buttonClasses({
+                  size: 'lg',
+                  fullWidth: true,
+                  className: 'gap-2',
+                })}
+              >
+                Get started
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </div>
           )}
-          <p className="mt-4 text-center text-[10px] text-muted">
-            TestFlow v1.0.0 &bull; Eddyrus Media
-          </p>
         </div>
       </div>
     </div>,
