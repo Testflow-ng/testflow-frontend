@@ -16,6 +16,7 @@ function RegisterPage() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
@@ -37,7 +38,17 @@ function RegisterPage() {
       await login({ email: values.email, password: values.password });
       navigate('/dashboard');
     } catch (error) {
-      setFormError(error.message ?? 'Unable to create your account. Please try again.');
+      const fieldByCode = {
+        EMAIL_TAKEN: 'email',
+        USERNAME_TAKEN: 'username',
+        MATRIC_TAKEN: 'matricNumber',
+      };
+      const field = fieldByCode[error.code];
+      if (field) {
+        setError(field, { type: 'server', message: error.message });
+      } else {
+        setFormError(error.message ?? 'Unable to create your account. Please try again.');
+      }
     }
   };
 
