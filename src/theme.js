@@ -82,24 +82,19 @@ const toggleTheme = () => {
   setTheme(currentTheme === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK);
 };
 
+const THEME_VERSION_KEY = 'theme_v';
+const CURRENT_THEME_VERSION = '2';
+
 const initializeTheme = () => {
-  const storedTheme = getStoredTheme();
-  const theme = storedTheme ?? getSystemTheme();
-  applyTheme(theme);
-
-  if (!storedTheme) {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (event) => {
-      applyTheme(event.matches ? THEMES.DARK : THEMES.LIGHT);
-      notify();
-    };
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else if (mediaQuery.addListener) {
-      mediaQuery.addListener(handleChange);
-    }
+  const version = localStorage.getItem(THEME_VERSION_KEY);
+  if (version !== CURRENT_THEME_VERSION) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(THEME_VERSION_KEY, CURRENT_THEME_VERSION);
   }
+
+  const storedTheme = getStoredTheme();
+  const theme = storedTheme ?? THEMES.LIGHT;
+  applyTheme(theme);
 };
 
 export { THEMES, getTheme, setTheme, toggleTheme, initializeTheme, subscribe };

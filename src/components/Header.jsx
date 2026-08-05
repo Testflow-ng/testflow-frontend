@@ -8,10 +8,12 @@ import {
   History,
   LayoutDashboard,
   LogOut,
+  Settings,
   ShieldAlert,
   Sun,
   TrendingUp,
   User,
+  Users,
 } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import Logo from './Logo.jsx';
@@ -40,7 +42,8 @@ function Header() {
 
   const authLinks = [
     { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-    { to: '/progress', label: 'Analytics', Icon: TrendingUp },
+    { to: '/live', label: 'Live CBT', Icon: Users },
+    { to: '/courses', label: 'Courses', Icon: TrendingUp },
     { to: '/history', label: 'History', Icon: History },
   ];
 
@@ -167,6 +170,13 @@ function Header() {
                         >
                           <Award size={16} /> Achievements
                         </Link>
+                        <Link
+                          to="/settings"
+                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Settings size={16} /> Settings
+                        </Link>
                         <button
                           onClick={() => {
                             logout();
@@ -197,7 +207,7 @@ function Header() {
                 </div>
               ))}
 
-            {!isLoading && (
+            {!isLoading && !isAuthenticated && (
               <button
                 type="button"
                 onClick={() => setMenuOpen((prev) => !prev)}

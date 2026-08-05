@@ -59,7 +59,7 @@ function CourseSelectionModal({ open, onOpenChange }) {
         </div>
 
         {/* Course List */}
-        <div className="max-h-[350px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
+        <div className="max-h-[350px] overflow-y-auto space-y-2 custom-scrollbar">
           {isLoading ? (
             <div className="py-10 flex justify-center"><Spinner /></div>
           ) : filtered.length === 0 ? (

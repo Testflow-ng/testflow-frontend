@@ -1,25 +1,29 @@
 import { useState } from 'react';
-import { Edit2, Lock, Save, History, TrendingUp, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Edit2, Lock, Save, History, TrendingUp, Eye, EyeOff, BookOpen, LogOut, ChevronRight, Moon, Plus, Sun, X } from 'lucide-react';
 import { Alert, Avatar, Button, Input, Field, Modal } from '../../components/ui/index.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
-import { Link } from 'react-router-dom';
 import { cn } from '../../utils/cn.js';
+import { useSubjects, useTogglePin } from '../subjects/useSubjects.js';
+import { useTheme } from '../../hooks/useTheme.js';
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
 
 function ProfilePage() {
   const { user, logout, refreshUser } = useAuth();
+  const { isDark, toggle: toggleTheme } = useTheme();
+  const { data: subjects } = useSubjects();
+  const togglePin = useTogglePin();
 
-  // Edit Profile State
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(user.fullName);
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(user.showOnLeaderboard !== false);
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState(null);
+  const [showSubjectPicker, setShowSubjectPicker] = useState(false);
 
-  // Change Password State
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
@@ -28,6 +32,10 @@ function ProfilePage() {
   });
   const [passwordError, setPasswordError] = useState(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const pinnedIds = new Set(user.pinnedSubjects ?? []);
+  const pinnedSubjects = subjects?.filter((s) => pinnedIds.has(s._id || s.id)) ?? [];
+  const unpinnedSubjects = subjects?.filter((s) => !pinnedIds.has(s._id || s.id)) ?? [];
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
@@ -48,7 +56,6 @@ function ProfilePage() {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       return setPasswordError('New passwords do not match');
     }
-
     setIsChangingPassword(true);
     setPasswordError(null);
     try {
@@ -57,7 +64,6 @@ function ProfilePage() {
         newPassword: passwordForm.newPassword,
       });
       setIsPasswordModalOpen(false);
-      // Backend signs user out on password change for security
       logout();
     } catch (err) {
       setPasswordError(err.message || 'Failed to change password');
@@ -66,115 +72,240 @@ function ProfilePage() {
     }
   };
 
-  const rows = [
-    { label: 'Full name', value: user.fullName },
-    { label: 'Email address', value: user.email },
-    ...(user.matricNumber ? [{ label: 'Matric number', value: user.matricNumber }] : []),
-    {
-      label: 'Role',
-      value:
-        user.role === 'admin'
-          ? 'Administrator'
-          : user.role === 'super_admin'
-            ? 'Super Admin'
-            : 'Student',
-    },
-    {
-      label: 'Leaderboard',
-      value: user.showOnLeaderboard !== false ? 'Visible' : 'Hidden',
-    },
-    ...(user.createdAt ? [{ label: 'Member since', value: formatDate(user.createdAt) }] : []),
-  ];
+  const handleTogglePin = (subjectId) => {
+    togglePin.mutate(subjectId);
+  };
 
   return (
-    <section className="mx-auto w-full max-w-2xl lg:max-w-4xl flex-1 px-5 py-8">
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
-        <Avatar
-          name={user.fullName}
-          size="lg"
-          className="h-24 w-24 text-2xl border-4 border-primary/10 p-1"
-        />
-        <div className="flex-1 text-center md:text-left">
-          <div className="flex items-center justify-center md:justify-start gap-3">
-            <h1 className="text-3xl font-black text-foreground-strong tracking-tight">
-              {user.fullName}
-            </h1>
+    <section className="mx-auto w-full max-w-2xl flex-1 pb-28 lg:pb-8">
+      {/* Cover image + avatar */}
+      <div className="relative">
+        <div className="h-40 sm:h-52 w-full overflow-hidden rounded-b-3xl sm:rounded-b-[2rem]">
+          <img
+            src="/photos/cover-default.png"
+            alt=""
+            className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 rounded-b-3xl bg-gradient-to-t from-background/80 via-background/20 to-transparent sm:rounded-b-[2rem]" />
+        </div>
+
+        <div className="absolute -bottom-14 left-1/2 -translate-x-1/2">
+          <div className="rounded-full border-4 border-background p-0.5">
+            <Avatar
+              name={user.fullName}
+              size="lg"
+              className="h-28 w-28 text-3xl"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Identity block */}
+      <div className="mt-16 text-center px-5">
+        <div className="flex items-center justify-center gap-2">
+          <h1 className="text-2xl font-black tracking-tight text-foreground-strong">
+            {user.fullName}
+          </h1>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="rounded-full p-1.5 text-muted transition-colors hover:bg-surface-strong hover:text-primary"
+          >
+            <Edit2 size={14} />
+          </button>
+        </div>
+        {user.username && (
+          <p className="mt-0.5 text-sm font-medium text-muted">@{user.username}</p>
+        )}
+        <p className="mt-1 text-xs text-muted">{user.email}</p>
+        <div className="mt-3 flex justify-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+            {user.role.replace('_', ' ')}
+          </span>
+          {user.createdAt && (
+            <span className="inline-flex items-center rounded-full bg-surface-strong px-3 py-1 text-[10px] font-bold text-muted">
+              Since {formatDate(user.createdAt)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-6 px-5">
+        {/* My Subjects */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-muted">
+              My Subjects
+            </h2>
             <button
-              onClick={() => setIsEditing(true)}
-              className="p-2 rounded-full hover:bg-surface-strong text-muted hover:text-primary transition-colors"
+              onClick={() => setShowSubjectPicker(true)}
+              className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold text-primary transition-colors hover:bg-primary/20"
             >
-              <Edit2 size={18} />
+              <Plus size={12} />
+              Add
             </button>
           </div>
-          <p className="mt-1 text-muted font-medium">{user.email}</p>
-          <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
-              {user.role.replace('_', ' ')}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPasswordModalOpen(true)}
-            leadingIcon={<Lock size={14} />}
-          >
-            Security
-          </Button>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-danger hover:bg-danger/5">
-            Logout
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted">
-              Account Profile
-            </h2>
-          </div>
-          <dl className="divide-y divide-border rounded-2xl border border-border bg-surface overflow-hidden shadow-sm">
-            {rows.map((row) => (
-              <div key={row.label} className="flex items-center justify-between gap-4 px-6 py-4">
-                <dt className="text-xs font-bold text-muted uppercase tracking-wider">{row.label}</dt>
-                <dd className="truncate text-sm font-bold text-foreground-strong">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <div className="flex flex-col gap-8">
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-muted mb-4">
-              Activity Portal
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Link
-                to="/history"
-                className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm"
-              >
-                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 transition-transform group-hover:scale-110">
-                  <History size={20} />
-                </div>
-                <p className="mt-3 text-sm font-bold text-foreground-strong">Exam History</p>
-                <p className="text-[10px] text-muted font-medium">Review your past attempts</p>
-              </Link>
-              <Link
-                to="/progress"
-                className="group p-5 rounded-2xl border border-border bg-surface hover:border-primary/50 transition-all shadow-sm"
-              >
-                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 transition-transform group-hover:scale-110">
-                  <TrendingUp size={20} />
-                </div>
-                <p className="mt-3 text-sm font-bold text-foreground-strong">My Progress</p>
-                <p className="text-[10px] text-muted font-medium">Track your performance</p>
-              </Link>
+          {pinnedSubjects.length === 0 ? (
+            <button
+              onClick={() => setShowSubjectPicker(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-6 text-sm font-medium text-muted transition-colors hover:border-primary/30 hover:text-primary"
+            >
+              <BookOpen size={18} />
+              Choose your subjects
+            </button>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {pinnedSubjects.map((s) => (
+                <span
+                  key={s._id || s.id}
+                  className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-bold text-foreground-strong transition-colors"
+                >
+                  <span className="text-[10px] font-bold text-primary">{s.code}</span>
+                  {s.title}
+                  <button
+                    onClick={() => handleTogglePin(s._id || s.id)}
+                    className="ml-0.5 rounded-full p-0.5 text-muted opacity-0 transition-opacity hover:text-danger group-hover:opacity-100"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
             </div>
+          )}
+        </div>
+
+        {/* Quick links */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Link
+            to="/history"
+            className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 transition-all hover:border-primary/30"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+              <History size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground-strong">Exam History</p>
+              <p className="text-[10px] text-muted">Review past attempts</p>
+            </div>
+            <ChevronRight size={16} className="shrink-0 text-muted" />
+          </Link>
+          <Link
+            to="/progress"
+            className="group flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 transition-all hover:border-primary/30"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-green-500">
+              <TrendingUp size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground-strong">My Progress</p>
+              <p className="text-[10px] text-muted">Track performance</p>
+            </div>
+            <ChevronRight size={16} className="shrink-0 text-muted" />
+          </Link>
+        </div>
+
+        {/* Account details */}
+        <div>
+          <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-muted">
+            Account
+          </h2>
+          <div className="divide-y divide-border rounded-2xl border border-border bg-surface overflow-hidden">
+            <Row label="Full name" value={user.fullName} />
+            <Row label="Email" value={user.email} />
+            {user.matricNumber && <Row label="Matric number" value={user.matricNumber} />}
+            <Row
+              label="Leaderboard"
+              value={user.showOnLeaderboard !== false ? 'Visible' : 'Hidden'}
+            />
+            <button
+              onClick={toggleTheme}
+              className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-surface-strong"
+            >
+              <div className="flex items-center gap-2.5">
+                {isDark ? <Sun size={14} className="text-muted" /> : <Moon size={14} className="text-muted" />}
+                <span className="text-xs font-bold text-foreground-strong">
+                  {isDark ? 'Light mode' : 'Dark mode'}
+                </span>
+              </div>
+              <div
+                className={cn(
+                  'h-6 w-10 rounded-full relative transition-colors',
+                  isDark ? 'bg-primary' : 'bg-muted/30',
+                )}
+              >
+                <div
+                  className={cn(
+                    'absolute top-1 h-4 w-4 rounded-full bg-white transition-all shadow-sm',
+                    isDark ? 'right-1' : 'left-1',
+                  )}
+                />
+              </div>
+            </button>
+            <button
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-surface-strong"
+            >
+              <div className="flex items-center gap-2.5">
+                <Lock size={14} className="text-muted" />
+                <span className="text-xs font-bold text-foreground-strong">Security</span>
+              </div>
+              <ChevronRight size={14} className="text-muted" />
+            </button>
           </div>
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={logout}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-danger/20 py-3 text-sm font-semibold text-danger transition-colors hover:bg-danger/5"
+        >
+          <LogOut size={16} />
+          Sign out
+        </button>
       </div>
+
+      {/* Subject picker modal */}
+      <Modal
+        open={showSubjectPicker}
+        onOpenChange={setShowSubjectPicker}
+        title="Choose Subjects"
+        description="Pick the courses you are taking this semester"
+      >
+        <div className="space-y-2 py-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+          {unpinnedSubjects.length === 0 && pinnedSubjects.length > 0 && (
+            <p className="py-6 text-center text-sm text-muted">All subjects added</p>
+          )}
+          {(subjects ?? []).map((s) => {
+            const isPinned = pinnedIds.has(s._id || s.id);
+            return (
+              <button
+                key={s._id || s.id}
+                onClick={() => handleTogglePin(s._id || s.id)}
+                className={cn(
+                  'flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all',
+                  isPinned
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-surface hover:border-primary/30',
+                )}
+              >
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-foreground-strong">{s.title}</p>
+                  <p className="text-[10px] font-bold text-muted">{s.code}</p>
+                </div>
+                <div
+                  className={cn(
+                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+                    isPinned
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-border',
+                  )}
+                >
+                  {isPinned && <span className="text-[10px] font-bold">&#10003;</span>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Modal>
 
       {/* Edit Profile Modal */}
       <Modal
@@ -208,17 +339,18 @@ function ProfilePage() {
               Email address cannot be changed for security reasons.
             </p>
           </Field>
-
           <div className="pt-2">
-            <label className="text-sm font-bold text-foreground-strong block mb-3 uppercase tracking-wider">Privacy Settings</label>
+            <label className="text-sm font-bold text-foreground-strong block mb-3 uppercase tracking-wider">
+              Privacy Settings
+            </label>
             <button
               type="button"
               onClick={() => setShowOnLeaderboard(!showOnLeaderboard)}
               className={cn(
-                "w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all",
+                'w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all',
                 showOnLeaderboard
-                  ? "border-primary bg-primary/5 text-primary"
-                  : "border-border bg-surface text-muted hover:border-border-strong"
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-border bg-surface text-muted hover:border-border-strong',
               )}
             >
               <div className="flex items-center gap-3">
@@ -228,14 +360,18 @@ function ProfilePage() {
                   <p className="text-[10px] opacity-80">Whether other students can see your scores.</p>
                 </div>
               </div>
-              <div className={cn(
-                "w-10 h-6 rounded-full relative transition-colors",
-                showOnLeaderboard ? "bg-primary" : "bg-muted/30"
-              )}>
-                <div className={cn(
-                  "absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm",
-                  showOnLeaderboard ? "right-1" : "left-1"
-                )} />
+              <div
+                className={cn(
+                  'w-10 h-6 rounded-full relative transition-colors',
+                  showOnLeaderboard ? 'bg-primary' : 'bg-muted/30',
+                )}
+              >
+                <div
+                  className={cn(
+                    'absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-sm',
+                    showOnLeaderboard ? 'right-1' : 'left-1',
+                  )}
+                />
               </div>
             </button>
           </div>
@@ -251,7 +387,6 @@ function ProfilePage() {
       >
         <form onSubmit={handleChangePassword} className="space-y-4 pt-2">
           {passwordError && <Alert variant="danger">{passwordError}</Alert>}
-
           <Field label="Current Password">
             <Input
               type="password"
@@ -262,9 +397,7 @@ function ProfilePage() {
               }
             />
           </Field>
-
           <div className="h-px bg-border my-2" />
-
           <Field label="New Password">
             <Input
               type="password"
@@ -273,7 +406,6 @@ function ProfilePage() {
               onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
             />
           </Field>
-
           <Field label="Confirm New Password">
             <Input
               type="password"
@@ -284,7 +416,6 @@ function ProfilePage() {
               }
             />
           </Field>
-
           <div className="pt-4 flex justify-end gap-3">
             <Button type="button" variant="ghost" onClick={() => setIsPasswordModalOpen(false)}>
               Cancel
@@ -296,6 +427,15 @@ function ProfilePage() {
         </form>
       </Modal>
     </section>
+  );
+}
+
+function Row({ label, value }) {
+  return (
+    <div className="flex items-center justify-between gap-4 px-5 py-3.5">
+      <dt className="text-xs font-bold text-muted">{label}</dt>
+      <dd className="truncate text-sm font-bold text-foreground-strong">{value}</dd>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/useAuth.js';
-import { Alert, Spinner, Button } from '../../components/ui/index.js';
+import { Alert, SkeletonCard, Button } from '../../components/ui/index.js';
 import { useStartExam } from '../exam/useStartExam.js';
 import ExamStartDialog from '../exam/ExamStartDialog.jsx';
 import { useSubjects } from './useSubjects.js';
@@ -15,8 +15,10 @@ function SubjectGrid({ filter = 'all', search = '', onOpenSelection }) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-10">
-        <Spinner size="md" label="Loading subjects" className="text-primary" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {Array.from({ length: 6 }, (_, i) => (
+          <SkeletonCard key={i} className="h-28" />
+        ))}
       </div>
     );
   }

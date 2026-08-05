@@ -6,6 +6,9 @@ import RequireAuth from '../features/auth/RequireAuth.jsx';
 import PublicOnly from '../features/auth/PublicOnly.jsx';
 import LoginPage from '../features/auth/pages/LoginPage.jsx';
 import RegisterPage from '../features/auth/pages/RegisterPage.jsx';
+import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage.jsx';
+import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
@@ -13,6 +16,12 @@ import HistoryPage from '../features/exam/HistoryPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
+import LiveCBTPage from '../features/live/LiveCBTPage.jsx';
+import AIStudyPage from '../features/ai/AIStudyPage.jsx';
+import CoursesPage from '../features/subjects/CoursesPage.jsx';
+import SetupPage from '../features/auth/pages/SetupPage.jsx';
+import SettingsPage from '../features/settings/SettingsPage.jsx';
+import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
 import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
@@ -23,6 +32,12 @@ import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
 
 export const router = createBrowserRouter([
   {
+    element: <RequireAuth />,
+    children: [
+      { path: 'setup', element: <SetupPage /> },
+    ],
+  },
+  {
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
@@ -31,6 +46,9 @@ export const router = createBrowserRouter([
         children: [
           { path: 'login', element: <LoginPage /> },
           { path: 'register', element: <RegisterPage /> },
+          { path: 'forgot-password', element: <ForgotPasswordPage /> },
+          { path: 'reset-password', element: <ResetPasswordPage /> },
+          { path: 'verify-email', element: <VerifyEmailPage /> },
         ],
       },
       {
@@ -39,8 +57,13 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'progress', element: <ProgressPage /> },
           { path: 'achievements', element: <AchievementsPage /> },
+          { path: 'courses', element: <CoursesPage /> },
           { path: 'history', element: <HistoryPage /> },
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'settings', element: <SettingsPage /> },
+          { path: 'settings/notifications', element: <NotificationPreferencesPage /> },
+          { path: 'live', element: <LiveCBTPage /> },
+          { path: 'ai-study', element: <AIStudyPage /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
           {

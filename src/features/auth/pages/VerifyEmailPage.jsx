@@ -36,7 +36,7 @@ function VerifyEmailPage() {
 
   const footer = (
     <Link
-      className="font-medium text-primary hover:underline"
+      className="font-semibold text-primary hover:underline"
       to={isAuthenticated ? '/dashboard' : '/login'}
     >
       {isAuthenticated ? 'Go to dashboard' : 'Continue to sign in'}

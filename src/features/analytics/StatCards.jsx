@@ -8,9 +8,16 @@ function StatCards({ stats }) {
   return (
     <div className="grid grid-cols-3 gap-3">
       {items.map((item) => (
-        <div key={item.label} className="rounded-lg border border-border bg-surface p-3 text-center">
-          <p className="text-2xl font-bold tabular-nums text-foreground-strong">{item.value}</p>
-          <p className="mt-0.5 text-[11px] text-muted">{item.label}</p>
+        <div
+          key={item.label}
+          className="flex flex-col items-center rounded-2xl border border-border bg-surface py-4"
+        >
+          <p className="font-heading text-xl font-extrabold tabular-nums text-foreground-strong">
+            {item.value}
+          </p>
+          <p className="mt-0.5 text-[10px] font-medium text-muted">
+            {item.label}
+          </p>
         </div>
       ))}
     </div>

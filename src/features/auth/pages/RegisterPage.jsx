@@ -16,14 +16,13 @@ function RegisterPage() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
-      username: '',
       email: '',
-      matricNumber: '',
       password: '',
       confirmPassword: '',
     },
@@ -33,39 +32,59 @@ function RegisterPage() {
     setFormError(null);
     try {
       await authApi.register(values);
-      // Auto-login after registration since verification is disabled
       await login({ email: values.email, password: values.password });
-      navigate('/dashboard');
+      navigate('/setup');
     } catch (error) {
-      setFormError(error.message ?? 'Unable to create your account. Please try again.');
+      if (error.code === 'EMAIL_TAKEN') {
+        setError('email', { type: 'server', message: error.message });
+      } else if (error.code === 'VALIDATION_ERROR' && error.data?.error?.fields) {
+        const fields = error.data.error.fields;
+        let hasFieldError = false;
+        for (const [key, msg] of Object.entries(fields)) {
+          if (['fullName', 'email', 'password', 'confirmPassword'].includes(key)) {
+            setError(key, { type: 'server', message: msg });
+            hasFieldError = true;
+          }
+        }
+        if (!hasFieldError) {
+          setFormError(error.message ?? 'Please check your input and try again.');
+        }
+      } else {
+        setFormError(
+          error.message ?? 'Unable to create your account. Please try again.',
+        );
+      }
     }
   };
 
   return (
     <AuthScreen
       title="Create your account"
-      subtitle="Join TestFlow to start your assessments"
+      subtitle="Join TestFlow and start practicing"
       footer={
         <>
           Already have an account?{' '}
-          <Link className="font-medium text-primary hover:underline" to="/login">
+          <Link
+            className="font-semibold text-primary hover:underline"
+            to="/login"
+          >
             Sign in
           </Link>
         </>
       }
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
-        {formError ? <Alert variant="danger">{formError}</Alert> : null}
+      <form
+        className="flex flex-col gap-5"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
+        {formError && <Alert variant="danger">{formError}</Alert>}
         <Field label="Full name" error={errors.fullName?.message} required>
-          <Input autoComplete="name" placeholder="Feranmi oresajo" {...register('fullName')} />
-        </Field>
-        <Field
-          label="Username"
-          error={errors.username?.message}
-          required
-          hint="Unique handle for leaderboards"
-        >
-          <Input autoComplete="username" placeholder="ada_l1" {...register('username')} />
+          <Input
+            autoComplete="name"
+            placeholder="Feranmi Oresajo"
+            {...register('fullName')}
+          />
         </Field>
         <Field label="Email" error={errors.email?.message} required>
           <Input
@@ -76,33 +95,34 @@ function RegisterPage() {
             {...register('email')}
           />
         </Field>
-        <Field label="Matric number" hint="Optional" error={errors.matricNumber?.message}>
-          <Input autoComplete="off" placeholder="e.g. CSC/2021/001" {...register('matricNumber')} />
-        </Field>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Password" error={errors.password?.message} required>
             <PasswordInput
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="Min. 8 characters"
               {...register('password')}
             />
           </Field>
-          <Field label="Confirm Password" error={errors.confirmPassword?.message} required>
+          <Field
+            label="Confirm password"
+            error={errors.confirmPassword?.message}
+            required
+          >
             <PasswordInput
               autoComplete="new-password"
-              placeholder="••••••••"
+              placeholder="Re-enter password"
               {...register('confirmPassword')}
             />
           </Field>
         </div>
-        <p className="text-[10px] text-muted -mt-2">
+        <p className="-mt-2 text-[10px] text-muted">
           Use at least 8 characters, including a letter and a number.
         </p>
         <Button
           type="submit"
           fullWidth
           loading={isSubmitting}
-          className="mt-2 h-12 text-base shadow-lg shadow-primary/20"
+          className="mt-1 h-12 text-base"
         >
           Create account
         </Button>
