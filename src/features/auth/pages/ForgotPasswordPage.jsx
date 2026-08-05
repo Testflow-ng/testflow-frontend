@@ -31,7 +31,7 @@ function ForgotPasswordPage() {
   };
 
   const backToLogin = (
-    <Link className="font-medium text-primary hover:underline" to="/login">
+    <Link className="font-semibold text-primary hover:underline" to="/login">
       Back to sign in
     </Link>
   );
@@ -52,7 +52,7 @@ function ForgotPasswordPage() {
       subtitle="Enter your email and we'll send you a reset link"
       footer={backToLogin}
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
         {formError ? <Alert variant="danger">{formError}</Alert> : null}
         <Field label="Email" error={errors.email?.message} required>
           <Input
@@ -63,7 +63,7 @@ function ForgotPasswordPage() {
             {...register('email')}
           />
         </Field>
-        <Button type="submit" fullWidth loading={isSubmitting}>
+        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1 h-12 text-base">
           Send reset link
         </Button>
       </form>

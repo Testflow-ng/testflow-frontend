@@ -37,7 +37,7 @@ function ResetPasswordPage() {
       <AuthScreen
         title="Invalid link"
         footer={
-          <Link className="font-medium text-primary hover:underline" to="/forgot-password">
+          <Link className="font-semibold text-primary hover:underline" to="/forgot-password">
             Request a new link
           </Link>
         }
@@ -54,7 +54,7 @@ function ResetPasswordPage() {
       <AuthScreen
         title="Password updated"
         footer={
-          <Link className="font-medium text-primary hover:underline" to="/login">
+          <Link className="font-semibold text-primary hover:underline" to="/login">
             Sign in
           </Link>
         }
@@ -68,17 +68,16 @@ function ResetPasswordPage() {
 
   return (
     <AuthScreen title="Set a new password" subtitle="Choose a strong password you'll remember">
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
         {formError ? <Alert variant="danger">{formError}</Alert> : null}
         <Field
           label="New password"
           error={errors.password?.message}
-          hint="At least 8 characters, including a letter and a number."
           required
         >
           <PasswordInput
             autoComplete="new-password"
-            placeholder="New password"
+            placeholder="Min. 8 characters"
             {...register('password')}
           />
         </Field>
@@ -89,7 +88,10 @@ function ResetPasswordPage() {
             {...register('confirmPassword')}
           />
         </Field>
-        <Button type="submit" fullWidth loading={isSubmitting}>
+        <p className="-mt-2 text-[10px] text-muted">
+          Use at least 8 characters, including a letter and a number.
+        </p>
+        <Button type="submit" fullWidth loading={isSubmitting} className="mt-1 h-12 text-base">
           Reset password
         </Button>
       </form>

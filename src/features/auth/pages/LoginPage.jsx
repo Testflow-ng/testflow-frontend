@@ -30,7 +30,10 @@ function LoginPage() {
       await login(values);
       navigate(from, { replace: true });
     } catch (error) {
-      setFormError(error.message ?? 'Unable to sign in. Please try again.');
+      const msg = error.code === 'VALIDATION_ERROR'
+        ? 'Please enter a valid email and password.'
+        : (error.message ?? 'Unable to sign in. Please try again.');
+      setFormError(msg);
     }
   };
 
@@ -41,14 +44,21 @@ function LoginPage() {
       footer={
         <>
           New here?{' '}
-          <Link className="font-medium text-primary hover:underline" to="/register">
+          <Link
+            className="font-semibold text-primary hover:underline"
+            to="/register"
+          >
             Create an account
           </Link>
         </>
       }
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
-        {formError ? <Alert variant="danger">{formError}</Alert> : null}
+      <form
+        className="flex flex-col gap-5"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
+        {formError && <Alert variant="danger">{formError}</Alert>}
         <Field label="Email" error={errors.email?.message} required>
           <Input
             type="email"
@@ -58,14 +68,29 @@ function LoginPage() {
             {...register('email')}
           />
         </Field>
-        <Field label="Password" error={errors.password?.message} required>
-          <PasswordInput
-            autoComplete="current-password"
-            placeholder="Your password"
-            {...register('password')}
-          />
-        </Field>
-        <Button type="submit" fullWidth loading={isSubmitting} className="mt-2 h-12 text-base shadow-lg shadow-primary/20">
+        <div>
+          <Field label="Password" error={errors.password?.message} required>
+            <PasswordInput
+              autoComplete="current-password"
+              placeholder="Your password"
+              {...register('password')}
+            />
+          </Field>
+          <div className="mt-2 text-right">
+            <Link
+              to="/forgot-password"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        </div>
+        <Button
+          type="submit"
+          fullWidth
+          loading={isSubmitting}
+          className="mt-1 h-12 text-base"
+        >
           Sign in
         </Button>
       </form>

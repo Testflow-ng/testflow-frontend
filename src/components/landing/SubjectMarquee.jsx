@@ -45,15 +45,13 @@ function SubjectMarquee() {
       className="scroll-mt-24 border-y border-border bg-background py-16 sm:py-24"
     >
       <Reveal className="mx-auto mb-10 max-w-6xl px-5 sm:px-8">
-        <p className="text-sm font-bold uppercase tracking-wide text-primary">
-          Every subject, one app
-        </p>
+        <p className="text-sm font-bold uppercase tracking-wide text-primary">Every subject</p>
         <h2 className="mt-3 max-w-2xl font-heading text-3xl font-extrabold tracking-tight text-foreground-strong sm:text-4xl">
           Practice the exact courses on your timetable
         </h2>
         <p className="mt-3 max-w-2xl text-muted">
-          Full question banks across the first-year courses students struggle
-          with most, with new subjects added every semester.
+          Full question banks across the first-year courses students struggle with most, with new
+          subjects added every semester.
         </p>
       </Reveal>
 

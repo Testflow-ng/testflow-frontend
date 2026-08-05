@@ -165,7 +165,7 @@ function ExamRuntime({ session }) {
       {/* Top Bar */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <div className="flex flex-col">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted leading-none mb-1">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted leading-none mb-1 whitespace-nowrap">
             {session.subjectCode} &bull; Examination Mode
           </span>
           <h2 className="text-sm font-bold text-foreground-strong">Question {current + 1} of {total}</h2>

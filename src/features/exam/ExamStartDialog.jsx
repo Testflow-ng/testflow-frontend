@@ -13,7 +13,7 @@ function Chip({ active, onClick, children }) {
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative rounded-xl border-2 px-4 py-2 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'relative rounded-full border-2 px-4 py-2 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         active
           ? 'border-primary bg-primary/5 text-primary shadow-sm shadow-primary/10 scale-[1.02]'
           : 'border-border text-muted hover:border-border-strong hover:bg-surface-strong hover:text-foreground',
@@ -165,11 +165,11 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
     >
       <div className="flex flex-col gap-4 sm:gap-6 pt-2">
         {/* Tab Switcher - More compact on mobile */}
-        <div className="flex p-1 bg-surface-strong rounded-xl border border-border">
+        <div className="flex p-1 bg-surface-strong rounded-full border border-border">
           <button
             onClick={() => setActiveTab('setup')}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
+              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
               activeTab === 'setup' ? "bg-surface text-primary shadow-sm border border-border" : "text-muted hover:text-foreground"
             )}
           >
@@ -178,7 +178,7 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
           <button
             onClick={() => setActiveTab('leaderboard')}
             className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
+              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
               activeTab === 'leaderboard' ? "bg-surface text-amber-500 shadow-sm border border-border" : "text-muted hover:text-foreground"
             )}
           >
