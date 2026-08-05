@@ -50,7 +50,6 @@ function Header() {
 
   const publicLinks = [
     { to: '/', label: 'Home' },
-    { to: '/features', label: 'Features' },
     { to: '/#how-it-works', label: 'How it works' },
     { to: '/#subjects', label: 'Subjects' },
   ];
@@ -58,7 +57,7 @@ function Header() {
   const links = isAuthenticated ? authLinks : publicLinks;
 
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-3 sm:px-5">
+    <header className="sticky top-0 z-50 w-full px-4 pt-2 sm:px-5">
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -73,7 +72,7 @@ function Header() {
       </AnimatePresence>
 
       <div className="relative z-50 mx-auto max-w-6xl overflow-hidden rounded-[1.75rem] border border-border/70 bg-background/80 shadow-sm backdrop-blur-xl">
-        <div className="flex h-14 items-center justify-between gap-3 pl-4 pr-3 sm:h-16 sm:pl-6">
+        <div className="flex h-12 items-center justify-between gap-3 pl-4 pr-2.5 sm:h-14 sm:pl-5">
           <Link
             to="/"
             className="flex items-center gap-2 transition-transform active:scale-95"
@@ -93,7 +92,7 @@ function Header() {
                     key={label}
                     to={to}
                     className={cn(
-                      'rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                      'rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                       isActive
                         ? 'bg-surface text-foreground-strong shadow-sm'
                         : 'text-muted hover:text-foreground-strong',
@@ -113,7 +112,7 @@ function Header() {
               rel="noreferrer"
               aria-label="Follow EDDYRUS MEDIA on WhatsApp"
               title="Follow EDDYRUS MEDIA on WhatsApp"
-              className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-transform active:scale-95"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform active:scale-95"
               style={{ backgroundColor: WHATSAPP_GREEN }}
             >
               <WhatsAppIcon size={20} />
@@ -191,7 +190,7 @@ function Header() {
                   </Link>
                   <Link
                     to="/register"
-                    className={buttonClasses({ size: 'md', className: 'px-5' })}
+                    className={buttonClasses({ size: 'sm', className: 'px-5' })}
                   >
                     Get started
                   </Link>
@@ -204,7 +203,7 @@ function Header() {
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={menuOpen}
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong transition-colors hover:bg-surface-strong active:scale-95 lg:hidden"
+                className="group flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong transition-colors hover:bg-surface-strong active:scale-95 lg:hidden"
               >
                 <EqualsMenuIcon size={22} open={menuOpen} />
               </button>

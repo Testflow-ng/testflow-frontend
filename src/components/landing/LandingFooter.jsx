@@ -5,7 +5,6 @@ const COLUMNS = [
   {
     heading: 'Product',
     links: [
-      { label: 'Features', to: '/features' },
       { label: 'Subjects', to: '/#subjects' },
       { label: 'How it works', to: '/#how-it-works' },
       { label: 'Get started', to: '/register' },
