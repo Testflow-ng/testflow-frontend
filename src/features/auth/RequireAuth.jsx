@@ -4,7 +4,7 @@ import PageLoader from '../../components/PageLoader.jsx';
 
 /** Gate for authenticated-only routes. Redirects to /login, preserving intent. */
 function RequireAuth() {
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -12,6 +12,9 @@ function RequireAuth() {
   }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (user && !user.username && location.pathname !== '/setup') {
+    return <Navigate to="/setup" replace />;
   }
   return <Outlet />;
 }
