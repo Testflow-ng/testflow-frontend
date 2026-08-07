@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Alert, Button, Field, Input, PasswordInput } from '../../../components/ui/index.js';
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  SheetField,
+  sheetClasses,
+} from '../../../components/ui/index.js';
 import { zodResolver } from '../../../utils/zodResolver.js';
 import { loginSchema } from '../schemas.js';
 import { useAuth } from '../useAuth.js';
@@ -39,58 +46,54 @@ function LoginPage() {
 
   return (
     <AuthScreen
-      title="Welcome back"
-      subtitle="Sign in to continue to TestFlow"
+      title="Sign in"
+      subtitle="Your papers, scores and streak are where you left them."
       footer={
         <>
-          New here?{' '}
-          <Link
-            className="font-semibold text-primary hover:underline"
-            to="/register"
-          >
-            Create an account
+          No account yet?{' '}
+          <Link className="font-semibold text-link underline-offset-4 hover:underline" to="/register">
+            Create one
           </Link>
         </>
       }
     >
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
-        {formError && <Alert variant="danger">{formError}</Alert>}
-        <Field label="Email" error={errors.email?.message} required>
-          <Input
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            {...register('email')}
-          />
-        </Field>
-        <div>
-          <Field label="Password" error={errors.password?.message} required>
+      <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)} noValidate>
+        {formError && (
+          <Alert variant="danger" className="mb-4">
+            {formError}
+          </Alert>
+        )}
+
+        <div className={sheetClasses()}>
+          <SheetField label="Email" error={errors.email?.message} required>
+            <Input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="you@example.com"
+              {...register('email')}
+            />
+          </SheetField>
+          <SheetField label="Password" error={errors.password?.message} required>
             <PasswordInput
               autoComplete="current-password"
               placeholder="Your password"
               {...register('password')}
             />
-          </Field>
-          <div className="mt-2 text-right">
-            <Link
-              to="/forgot-password"
-              className="text-xs font-medium text-primary hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          </SheetField>
         </div>
-        <Button
-          type="submit"
-          fullWidth
-          loading={isSubmitting}
-          className="mt-1 h-12 text-base"
+
+        <Link
+          to="/forgot-password"
+          className="tf-pressable mt-3 self-start rounded-full text-[13px] font-semibold text-link underline-offset-4 hover:underline"
         >
+          Forgot password?
+        </Link>
+
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-5">
           Sign in
         </Button>
       </form>

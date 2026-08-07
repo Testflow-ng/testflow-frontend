@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+/* Flo's motion library. Imported here rather than from the component so the
+   cascade order is predictable and the reduced-motion overrides always land
+   after the base animations. */
+@import './components/brand/mascotMotion.css';
+
 /*
   Tailwind v4 token bridge.
   Maps TestFlow's runtime CSS variables (defined in :root and
@@ -49,6 +54,12 @@
   --color-neutral-hover: var(--color-neutral-hover);
   --color-neutral-active: var(--color-neutral-active);
 
+  /* AA-safe text roles: `text-link`, `text-score-good` / `-mid` / `-low`. */
+  --color-link: var(--color-link);
+  --color-score-good: var(--score-good);
+  --color-score-mid: var(--score-mid);
+  --color-score-low: var(--score-low);
+
   /* Radius */
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius);
@@ -66,6 +77,13 @@
   --font-sans: var(--font-family-base);
   --font-heading: var(--font-family-heading);
   --font-mono: var(--font-family-mono);
+
+  /*
+    Small-phone breakpoint. Tailwind's smallest default is `sm` at 640px, which
+    is no help for the 320-360px band where iPhone SE and older Androids live.
+    Anything gated on `xs` is a nicety that a 320px screen genuinely cannot fit.
+  */
+  --breakpoint-xs: 22.5rem; /* 360px */
 }
 
 /*
@@ -129,6 +147,19 @@
   --font-weight-caption: 500;
   --font-weight-small: 400;
 
+  /*
+    Mobile chrome metrics.
+    The bottom nav is `position: fixed`, so every scrollable screen has to
+    reserve its height plus the home-indicator inset itself. Centralising the
+    numbers here keeps the nav and the screen padding from drifting apart.
+  */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --nav-height: 3.375rem; /* 54px bar; each item is a 48px touch target */
+  --screen-gutter: 1rem; /* 16px on phones, matching native edge margins */
+
   /* Spacing scale */
   --space-0: 0;
   --space-1: 0.25rem;
@@ -171,8 +202,21 @@
   --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
   --shadow-xl: 0 24px 80px rgba(15, 23, 42, 0.16);
 
+  /*
+    Easing.
+    The built-in CSS curves are too weak to read as intentional, and
+    `cubic-bezier(0.4, 0, 0.2, 1)` (what this file used to carry) is the
+    generic Material curve nobody chose. These three are the standard strong
+    UI curves: enter/exit, on-screen movement, and the iOS drawer curve used
+    by the bottom sheet. There is deliberately no ease-in token — ease-in on
+    UI starts slow at exactly the moment the user is watching.
+  */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
   /* Transitions */
-  --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-ease: var(--ease-out);
   --transition-in-out: 250ms var(--transition-ease);
   --transition-fast: 150ms var(--transition-ease);
   --transition-slow: 400ms var(--transition-ease);
@@ -245,6 +289,27 @@
   --color-neutral-hover: #475569;
   --color-neutral-active: #334155;
 
+  /*
+    Text-safe variants.
+
+    The base brand colours are tuned for fills — `bg-primary` with white on it,
+    an amber streak pip, a green success chip. As *text on a light surface* three
+    of them fail WCAG AA: success #16a34a is 3.3:1, warning #f59e0b is 2.15:1,
+    and primary #0f6fec is 4.46:1, all under the 4.5:1 floor for normal text.
+
+    That mattered less when scores were small labels. This interface leads with
+    a colour-coded figure and colour-coded score columns, so these are the
+    values those roles use. Each one is an existing brand step (the hover/active
+    shades), not a new hue, so the palette does not grow.
+
+    Dark mode needs no correction: every base colour clears 6.5:1 on the dark
+    surfaces, so the text tokens simply alias the base there.
+  */
+  --color-link: #0b5cc7; /* 6.23:1 on white */
+  --score-good: #15803d; /* 5.02:1 */
+  --score-mid: #b45309; /* 5.02:1 */
+  --score-low: #dc2626; /* 4.83:1 */
+
   --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
@@ -271,6 +336,25 @@
   --color-active: #cbd5e1;
   --color-disabled: #d1d5db;
   --color-disabled-foreground: #94a3b8;
+
+  /*
+    These five were declared only inside the dark-theme block, so in light mode
+    they resolved to nothing. That is not cosmetic: `:focus-visible` sets
+    `outline: ... solid var(--focus)`, and an empty var() makes the whole
+    shorthand invalid, which meant light mode had NO focus ring anywhere in the
+    app. Keyboard users had nothing to follow.
+
+    The ring is a solid brand colour rather than a translucent wash, because a
+    translucent outline changes contrast depending on what it happens to sit
+    over and can disappear against a tinted row.
+  */
+  --color-focus: #0b5cc7;
+  --color-selection: rgba(15, 111, 236, 0.18);
+  --color-selection-foreground: #0f172a;
+  --color-placeholder: #64748b;
+  --color-scrollbar-track: rgba(100, 116, 139, 0.1);
+  --color-scrollbar-thumb: rgba(100, 116, 139, 0.35);
+  --color-scrollbar-thumb-hover: rgba(100, 116, 139, 0.55);
 
   /* Theme aliases */
   --background: var(--color-background);
@@ -321,6 +405,12 @@
   --color-neutral-hover: #d4d4d4;
   --color-neutral-active: #e5e5e5;
 
+  /* Dark surfaces need no correction; the base colours already clear 6.5:1. */
+  --color-link: var(--color-primary);
+  --score-good: var(--color-success);
+  --score-mid: var(--color-warning);
+  --score-low: var(--color-danger);
+
   --gray-50: #0a0a0a;
   --gray-100: #141414;
   --gray-200: #1c1c1c;
@@ -349,7 +439,10 @@
   --color-disabled-foreground: #525252;
   --color-selection: rgba(96, 165, 250, 0.18);
   --color-selection-foreground: #fafafa;
-  --color-focus: rgba(96, 165, 250, 0.32);
+  --color-placeholder: #a3a3a3;
+  /* Solid, for the same reason as light: a 32%-alpha ring was close to
+     invisible against the tinted rows it most often lands on. */
+  --color-focus: #60a5fa;
   --color-scrollbar-track: rgba(148, 163, 184, 0.16);
   --color-scrollbar-thumb: rgba(148, 163, 184, 0.35);
   --color-scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
@@ -547,6 +640,15 @@ html {
   scroll-behavior: smooth;
   font-size: clamp(0.95rem, calc(0.92rem + 0.3vw), 1.05rem);
   min-height: 100%;
+
+  /*
+    Native-feel touch defaults.
+    - No grey flash on tap; we express press state ourselves via :active.
+    - `overscroll-behavior-y: none` kills the rubber-band / pull-to-refresh
+      bounce that makes an installed PWA read as a web page.
+  */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 *,
@@ -604,6 +706,21 @@ button,
   border: none;
   background: transparent;
   color: inherit;
+}
+
+/*
+  `touch-action: manipulation` removes the ~300ms click delay browsers keep
+  around to detect a double-tap-to-zoom. Applied to interactive elements only,
+  so pinch-zoom still works on content.
+*/
+a,
+button,
+label,
+select,
+summary,
+[role='button'],
+[role='tab'] {
+  touch-action: manipulation;
 }
 
 button:disabled,
@@ -719,6 +836,20 @@ textarea::placeholder {
   opacity: 1;
 }
 
+/*
+  iOS Safari zooms the viewport whenever a focused control's text is smaller
+  than 16px, and never zooms back out. Every control therefore renders at 16px
+  on phones and drops to the design size from `sm` up (components that set an
+  explicit size do the same via `text-base sm:text-sm`).
+*/
+@media (max-width: 639px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 button,
 input,
 textarea,
@@ -831,5 +962,142 @@ table {
 
 }
 /* end @layer base */
+
+/*
+  Mobile shell utilities.
+  These live outside @layer base so they win over the reset, but they are plain
+  classes (not utilities) so a Tailwind class on the same element still wins.
+*/
+@media (min-width: 640px) {
+  :root {
+    --screen-gutter: 1.25rem;
+  }
+}
+
+/* Horizontal gutter that also clears landscape notches. */
+.tf-gutter {
+  padding-left: calc(var(--screen-gutter) + var(--safe-left));
+  padding-right: calc(var(--screen-gutter) + var(--safe-right));
+}
+
+/*
+  Bottom clearance for screens that sit behind the fixed bottom nav: bar
+  height + home indicator + a breathing gap, so the last card is never
+  half-hidden or flush against the nav.
+*/
+.tf-nav-clearance {
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 1.25rem);
+}
+
+@media (min-width: 1024px) {
+  .tf-nav-clearance {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Bottom inset only, for elements that dock to the bottom edge themselves. */
+.tf-safe-bottom {
+  padding-bottom: var(--safe-bottom);
+}
+
+/*
+  Touch feedback. Press states must be instant on the way down and settle on
+  the way up, so the scale-down is near-immediate and the release eases out.
+  Pointer devices keep hover; coarse pointers get the scale.
+*/
+.tf-pressable {
+  -webkit-user-select: none;
+  user-select: none;
+  /* Named properties, never `all`. Press feedback sits in the 100-160ms band. */
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+
+.tf-pressable:active {
+  transform: scale(0.975);
+  transition-duration: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-pressable,
+  .tf-pressable:active {
+    transform: none;
+    transition: none;
+  }
+}
+
+/*
+  One-shot entrance for a single element that the eye should land on after the
+  figure it belongs to. A CSS animation rather than a JS one: it is
+  predetermined motion, so it runs off the main thread and still plays cleanly
+  while the dashboard's queries are resolving.
+
+  Transform and opacity only, 260ms, strong ease-out. Under reduced motion the
+  element still fades (comprehension is preserved) but does not travel.
+*/
+@keyframes tf-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tf-rise-in {
+  animation: tf-rise-in 260ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-rise-in {
+    animation: tf-fade-in 200ms ease both;
+  }
+}
+
+@keyframes tf-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+  Horizontal chip/filter rails: snap to each chip and let the row bleed into
+  the screen gutter so the first and last chips align with page content while
+  still scrolling edge to edge.
+*/
+.tf-rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-left: calc(var(--screen-gutter) * -1);
+  margin-right: calc(var(--screen-gutter) * -1);
+  padding-left: var(--screen-gutter);
+  padding-right: var(--screen-gutter);
+  /*
+    `scroll-padding` is what makes the snap respect the gutter, and it is not
+    the same thing as `padding`.
+
+    Padding positions the content; scroll-padding insets the *snapport*, the
+    box snap positions align against. Without it, `scroll-snap-align: start` on
+    the first chip snapped it flush to the scroll container's edge — scrolling
+    straight past the 16px padding — so the first chip sat hard against the
+    screen edge while everything above it lined up on the margin.
+  */
+  scroll-padding-left: var(--screen-gutter);
+  scroll-padding-right: var(--screen-gutter);
+}
+
+.tf-rail > * {
+  scroll-snap-align: start;
+}
 
 

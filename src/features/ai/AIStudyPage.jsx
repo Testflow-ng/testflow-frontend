@@ -7,23 +7,25 @@ import {
   TrendingUp,
   Zap,
 } from 'lucide-react';
+import Screen from '../../components/layout/Screen.jsx';
+import { cardClasses } from '../../components/ui/surfaces.js';
 
 function AIStudyPage() {
   return (
-    <section className="mx-auto w-full max-w-2xl flex-1 px-5 pb-28 pt-6 lg:pb-8">
-      <div className="mb-8">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-info/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-info">
-          <Sparkles size={10} /> Coming soon
+    <Screen width="lg">
+      <div className="mb-6">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-info/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-info">
+          <Sparkles size={11} aria-hidden="true" /> Coming soon
         </span>
-        <h1 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-foreground-strong">
+        <h1 className="mt-2.5 font-heading text-[1.625rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
           AI Study Companion
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm leading-snug text-muted">
           Smart tools to help you study more effectively.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {[
           {
             icon: <Target size={20} />,
@@ -64,16 +66,19 @@ function AIStudyPage() {
         ].map((feature) => (
           <div
             key={feature.title}
-            className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-5 opacity-70"
+            className={cardClasses({
+              padding: 'lg',
+              className: 'flex flex-col gap-3 opacity-70',
+            })}
           >
             <div className={`flex size-10 items-center justify-center rounded-xl ${feature.accent}`}>
               {feature.icon}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground-strong">
+              <h3 className="text-[15px] font-semibold leading-snug text-foreground-strong">
                 {feature.title}
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-muted">
+              <p className="mt-1 text-[13px] leading-relaxed text-muted">
                 {feature.desc}
               </p>
             </div>
@@ -81,18 +86,18 @@ function AIStudyPage() {
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl border border-dashed border-border bg-surface-strong p-6 text-center">
-        <Sparkles size={28} className="mx-auto text-muted/40" />
-        <p className="mt-3 text-sm font-bold text-foreground-strong">
+      <div className="mt-6 rounded-2xl border border-dashed border-border bg-surface-strong px-5 py-6 text-center">
+        <Sparkles size={28} className="mx-auto text-muted/40" aria-hidden="true" />
+        <p className="mt-3 text-[15px] font-semibold text-foreground-strong">
           Under development
         </p>
-        <p className="mt-1 text-xs text-muted">
+        <p className="mx-auto mt-1.5 max-w-[26rem] text-[13px] leading-relaxed text-muted">
           These AI features are being built by our team. They will activate
           automatically once available. Keep practicing to get the most from
           them.
         </p>
       </div>
-    </section>
+    </Screen>
   );
 }
 

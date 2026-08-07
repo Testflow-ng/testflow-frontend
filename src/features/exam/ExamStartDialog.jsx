@@ -6,6 +6,17 @@ import { useLeaderboard, useSubjectTopics } from '../subjects/useSubjects.js';
 
 const DURATIONS = [5, 10, 15, 30, 45, 60, 90, 120];
 
+/** Quiet caps label above each group of controls. */
+function SectionLabel({ children }) {
+  return (
+    <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+      {children}
+    </p>
+  );
+}
+
+/** Selectable option chip. `min-w-14 h-11` keeps every chip a legitimate touch
+ *  target even when its label is a single digit. */
 function Chip({ active, onClick, children }) {
   return (
     <button
@@ -13,16 +24,17 @@ function Chip({ active, onClick, children }) {
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'relative rounded-full border-2 px-4 py-2 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        'tf-pressable relative inline-flex h-11 min-w-14 items-center justify-center rounded-full border-2 px-4 text-sm font-bold',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         active
-          ? 'border-primary bg-primary/5 text-primary shadow-sm shadow-primary/10 scale-[1.02]'
-          : 'border-border text-muted hover:border-border-strong hover:bg-surface-strong hover:text-foreground',
+          ? 'border-primary bg-primary/5 text-primary'
+          : 'border-border text-muted active:bg-surface-strong',
       )}
     >
       {children}
       {active && (
-        <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[8px] text-white">
-          <Check size={10} />
+        <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-primary text-white">
+          <Check size={10} aria-hidden="true" />
         </span>
       )}
     </button>
@@ -37,49 +49,63 @@ function LeaderboardTab({ subjectId }) {
   if (!leaderboard?.length) {
     return (
       <div className="py-12 text-center text-muted">
-        <Trophy size={48} className="mx-auto mb-4 opacity-10" />
-        <p className="text-sm font-bold uppercase tracking-widest">No rankings yet</p>
-        <p className="text-xs mt-1 italic">Be the first to reach the top!</p>
+        <Trophy size={44} className="mx-auto mb-4 opacity-10" aria-hidden="true" />
+        <p className="text-[15px] font-semibold text-foreground-strong">No rankings yet</p>
+        <p className="mt-1 text-[13px]">Be the first to reach the top.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2 py-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+    <div className="flex flex-col gap-2 py-1">
       {leaderboard.map((entry, i) => (
         <div
           key={i}
           className={cn(
-            "flex items-center justify-between p-3 sm:p-4 rounded-xl border transition-all",
-            i === 0 ? "bg-amber-500/5 border-amber-500/20" : "bg-surface border-border"
+            'flex items-center justify-between gap-3 rounded-xl border p-3',
+            i === 0 ? 'border-amber-500/20 bg-amber-500/5' : 'border-border bg-surface',
           )}
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={cn(
-              "shrink-0 size-8 sm:size-10 flex items-center justify-center rounded-lg font-black text-xs sm:text-sm",
-              i === 0 ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20" : "bg-surface-strong text-muted border border-border"
-            )}>
+          <div className="flex min-w-0 items-center gap-3">
+            <div
+              className={cn(
+                'flex size-9 shrink-0 items-center justify-center rounded-lg text-[13px] font-bold',
+                i === 0
+                  ? 'bg-amber-500 text-white'
+                  : 'border border-border bg-surface-strong text-muted',
+              )}
+            >
               {i + 1}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-foreground-strong truncate">
+              <p className="truncate text-[14px] font-semibold text-foreground-strong">
                 {entry.username ? `@${entry.username}` : entry.fullName}
               </p>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted font-bold uppercase tracking-tighter overflow-hidden">
-                <span className="flex items-center gap-1 shrink-0"><Hash size={10} /> {entry.totalQuestions} Qs</span>
+              <div className="mt-0.5 flex items-center gap-2.5 overflow-hidden text-[12px] font-medium text-muted">
+                <span className="flex shrink-0 items-center gap-1">
+                  <Hash size={11} aria-hidden="true" /> {entry.totalQuestions} Qs
+                </span>
                 <span className="flex items-center gap-1 truncate">
-                  <Clock size={10} />
-                  {entry.timeTakenSeconds ? (
-                    entry.timeTakenSeconds < 60 ? `${entry.timeTakenSeconds}s` : `${Math.floor(entry.timeTakenSeconds / 60)}m`
-                  ) : 'N/A'}
+                  <Clock size={11} aria-hidden="true" />
+                  {entry.timeTakenSeconds
+                    ? entry.timeTakenSeconds < 60
+                      ? `${entry.timeTakenSeconds}s`
+                      : `${Math.floor(entry.timeTakenSeconds / 60)}m`
+                    : 'N/A'}
                 </span>
               </div>
             </div>
           </div>
-          <div className="text-right shrink-0 ml-2">
-            <p className="text-lg sm:text-xl font-black text-primary leading-none">{entry.score}%</p>
-            <p className="text-[9px] text-muted font-bold uppercase tracking-tighter mt-1 flex items-center justify-end gap-1">
-               <Calendar size={10} /> {new Date(entry.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          <div className="shrink-0 text-right">
+            <p className="text-lg font-extrabold leading-none tabular-nums text-primary">
+              {entry.score}%
+            </p>
+            <p className="mt-1 flex items-center justify-end gap-1 text-[11px] font-medium text-muted">
+              <Calendar size={11} aria-hidden="true" />
+              {new Date(entry.date).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })}
             </p>
           </div>
         </div>
@@ -142,99 +168,125 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
       size="lg"
       footer={
         activeTab === 'setup' ? (
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:justify-end">
-            <Button variant="ghost" size="md" onClick={onClose} className="order-2 sm:order-1">
+          <>
+            <Button variant="ghost" size="lg" onClick={onClose}>
               Cancel
             </Button>
             <Button
-              size="md"
+              size="lg"
               loading={isStarting}
               onClick={handleStart}
-              className="px-8 order-1 sm:order-2"
+              className="sm:px-8"
               disabled={maxQuestions === 0}
             >
-              Start Exam
+              Start exam
             </Button>
-          </div>
+          </>
         ) : (
-          <Button variant="ghost" size="md" onClick={() => setActiveTab('setup')} className="w-full">
-            Back to Setup
+          <Button variant="ghost" size="lg" onClick={() => setActiveTab('setup')}>
+            Back to setup
           </Button>
         )
       }
     >
-      <div className="flex flex-col gap-4 sm:gap-6 pt-2">
-        {/* Tab Switcher - More compact on mobile */}
-        <div className="flex p-1 bg-surface-strong rounded-full border border-border">
-          <button
-            onClick={() => setActiveTab('setup')}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
-              activeTab === 'setup' ? "bg-surface text-primary shadow-sm border border-border" : "text-muted hover:text-foreground"
-            )}
-          >
-            <Settings2 size={14} /> Setup
-          </button>
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-2 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all",
-              activeTab === 'leaderboard' ? "bg-surface text-amber-500 shadow-sm border border-border" : "text-muted hover:text-foreground"
-            )}
-          >
-            <Trophy size={14} /> Hall of Fame
-          </button>
+      <div className="flex flex-col gap-5 py-1">
+        {/* Segmented control. 40px tall track, 36px thumbs. */}
+        <div
+          role="tablist"
+          aria-label="Exam setup sections"
+          className="flex rounded-full border border-border bg-surface-strong p-1"
+        >
+          {[
+            { id: 'setup', label: 'Setup', Icon: Settings2, tone: 'text-primary' },
+            { id: 'leaderboard', label: 'Hall of fame', Icon: Trophy, tone: 'text-amber-500' },
+          ].map(({ id, label, Icon, tone }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === id}
+              onClick={() => setActiveTab(id)}
+              className={cn(
+                'flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-semibold transition-colors duration-[var(--duration-sm)]',
+                activeTab === id ? `border border-border bg-surface ${tone}` : 'text-muted',
+              )}
+            >
+              <Icon size={14} aria-hidden="true" /> {label}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'setup' ? (
-          <div className="space-y-5 sm:space-y-6">
-            {/* Topic Selection - Improved Responsiveness and Grouping */}
-            <div>
-              <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Targeted Practice</p>
+          <div className="space-y-5">
+            {/* Topic selection. Scrolling is delegated to the sheet. */}
+            <section>
+              <SectionLabel>Targeted practice</SectionLabel>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] sm:max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button
+                  type="button"
                   onClick={() => setSelectedTopicId('all')}
+                  aria-pressed={selectedTopicId === 'all'}
                   className={cn(
-                    "flex items-center justify-between p-3 rounded-xl border transition-all text-left",
-                    selectedTopicId === 'all' ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:bg-surface-strong"
+                    'tf-pressable flex min-h-12 items-center justify-between gap-3 rounded-xl border p-3 text-left',
+                    selectedTopicId === 'all'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border bg-surface',
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Layers size={16} className={selectedTopicId === 'all' ? "text-primary" : "text-muted"} />
-                    <span className="text-xs font-bold text-foreground-strong">All Topics</span>
-                  </div>
-                  <span className="text-[10px] font-black text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <Layers
+                      size={16}
+                      aria-hidden="true"
+                      className={selectedTopicId === 'all' ? 'text-primary' : 'text-muted'}
+                    />
+                    <span className="text-[14px] font-semibold text-foreground-strong">
+                      All topics
+                    </span>
+                  </span>
+                  <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[12px] font-bold text-primary">
                     {subject.questionCount || 0}
                   </span>
                 </button>
 
                 {isLoadingTopics ? (
-                   <div className="col-span-full py-4 flex justify-center"><Spinner size="sm" /></div>
-                ) : topics?.map(topic => (
-                  <button
-                    key={topic.id}
-                    onClick={() => setSelectedTopicId(topic.id)}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-xl border transition-all text-left group",
-                      selectedTopicId === topic.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-surface hover:border-muted-foreground/30"
-                    )}
-                  >
-                    <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                       <span className="text-xs font-bold text-foreground-strong truncate">{topic.name}</span>
-                       <span className="text-[9px] text-muted font-bold truncate opacity-60 group-hover:opacity-100">{topic.id}</span>
-                    </div>
-                    <span className="shrink-0 text-[10px] font-black text-muted bg-surface-strong px-1.5 py-0.5 rounded self-center">
-                      {topic.totalQuestions}
-                    </span>
-                  </button>
-                ))}
+                  <div className="col-span-full flex justify-center py-4">
+                    <Spinner size="sm" />
+                  </div>
+                ) : (
+                  topics?.map((topic) => (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      onClick={() => setSelectedTopicId(topic.id)}
+                      aria-pressed={selectedTopicId === topic.id}
+                      className={cn(
+                        'tf-pressable flex min-h-12 items-center justify-between gap-3 rounded-xl border p-3 text-left',
+                        selectedTopicId === topic.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border bg-surface',
+                      )}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-semibold text-foreground-strong">
+                          {topic.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[11px] font-medium text-muted">
+                          {topic.id}
+                        </span>
+                      </span>
+                      <span className="shrink-0 self-center rounded bg-surface-strong px-1.5 py-0.5 text-[12px] font-bold text-muted">
+                        {topic.totalQuestions}
+                      </span>
+                    </button>
+                  ))
+                )}
               </div>
-            </div>
+            </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-              <div>
-                <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Questions</p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <section>
+                <SectionLabel>Questions</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {questionChoices.map((n) => (
                     <Chip key={n} active={count === n} onClick={() => setCount(n)}>
@@ -242,27 +294,31 @@ function ExamStartDialog({ subject, onClose, onConfirm, isStarting }) {
                     </Chip>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              <div>
-                <p className="text-[10px] font-black text-muted uppercase tracking-[0.2em] mb-3">Time Limit</p>
+              <section>
+                <SectionLabel>Time limit</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {DURATIONS.map((minutes) => (
-                    <Chip key={minutes} active={duration === minutes} onClick={() => setDuration(minutes)}>
+                    <Chip
+                      key={minutes}
+                      active={duration === minutes}
+                      onClick={() => setDuration(minutes)}
+                    >
                       {minutes}m
                     </Chip>
                   ))}
                 </div>
-              </div>
+              </section>
             </div>
 
-            <div className="flex items-start gap-3 rounded-xl bg-primary/5 p-3 sm:p-4 border border-primary/10">
-              <Info size={16} className="shrink-0 text-primary mt-0.5" />
-              <p className="text-[10px] sm:text-[11px] leading-relaxed text-foreground/80 font-medium">
+            <div className="flex items-start gap-3 rounded-xl border border-primary/10 bg-primary/5 p-3.5">
+              <Info size={16} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+              <p className="text-[13px] font-medium leading-relaxed text-foreground/80">
                 {selectedTopicId === 'all'
-                  ? "Random mix from all modules."
-                  : `Focusing on: ${currentTopic?.name}.`}
-                {" "}Questions and options will be shuffled.
+                  ? 'Random mix from all modules.'
+                  : `Focusing on: ${currentTopic?.name}.`}{' '}
+                Questions and options will be shuffled.
               </p>
             </div>
           </div>

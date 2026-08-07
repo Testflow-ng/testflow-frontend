@@ -10,34 +10,59 @@ const items = [
   { to: '/profile', label: 'Profile', Icon: User },
 ];
 
+/**
+ * Mobile tab bar.
+ *
+ * Deliberately flat: a solid surface with a hairline top rule, no blur, no
+ * shadow, no elevation. The bar itself is 54px (`--nav-height`) while each
+ * item stretches to a 48px touch target, which clears the 44px minimum
+ * without the bar eating vertical space. The home-indicator inset is applied
+ * below the row, so the inset never inflates the visual bar height.
+ */
 function BottomNav() {
   const location = useLocation();
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-surface/95 backdrop-blur-lg lg:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      aria-label="Primary"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface tf-safe-bottom lg:hidden"
     >
-      <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1.5">
+      <ul
+        className="mx-auto flex max-w-lg items-stretch px-1"
+        style={{ height: 'var(--nav-height)' }}
+      >
         {items.map(({ to, label, Icon }) => {
           const active = location.pathname === to || location.pathname.startsWith(to + '/');
           return (
-            <Link
-              key={to}
-              to={to}
-              className={cn(
-                'flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition-colors',
-                active
-                  ? 'text-primary'
-                  : 'text-muted hover:text-foreground-strong',
-              )}
-            >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span className="text-[10px] font-semibold">{label}</span>
-            </Link>
+            <li key={to} className="flex flex-1">
+              <Link
+                to={to}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'group flex min-h-12 flex-1 select-none flex-col items-center justify-center gap-1',
+                  'transition-colors duration-[var(--duration-xs)]',
+                  active ? 'text-primary' : 'text-muted',
+                )}
+              >
+                <Icon
+                  size={22}
+                  strokeWidth={active ? 2.4 : 1.8}
+                  aria-hidden="true"
+                  className="transition-transform duration-[var(--duration-xs)] ease-[var(--transition-ease)] group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
+                />
+                <span
+                  className={cn(
+                    'text-[10px] leading-none tracking-tight',
+                    active ? 'font-semibold' : 'font-medium',
+                  )}
+                >
+                  {label}
+                </span>
+              </Link>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </nav>
   );
 }

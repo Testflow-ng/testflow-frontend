@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Alert, Button, Field, Input, PasswordInput } from '../../../components/ui/index.js';
+import {
+  Alert,
+  Button,
+  Input,
+  PasswordInput,
+  SheetField,
+  sheetClasses,
+} from '../../../components/ui/index.js';
 import { zodResolver } from '../../../utils/zodResolver.js';
 import { registerSchema } from '../schemas.js';
 import { authApi } from '../api.js';
@@ -60,70 +67,70 @@ function RegisterPage() {
   return (
     <AuthScreen
       title="Create your account"
-      subtitle="Join TestFlow and start practicing"
+      /*
+        No invented proof. There is no real user count to quote, and a made-up
+        one would be the first thing a sceptical student could check and
+        disprove. What is true and worth saying is what it costs and how long
+        it takes.
+      */
+      subtitle="Free, and no card. You can be sitting your first paper in about a minute."
       footer={
         <>
           Already have an account?{' '}
-          <Link
-            className="font-semibold text-primary hover:underline"
-            to="/login"
-          >
+          <Link className="font-semibold text-link underline-offset-4 hover:underline" to="/login">
             Sign in
           </Link>
         </>
       }
     >
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
-        {formError && <Alert variant="danger">{formError}</Alert>}
-        <Field label="Full name" error={errors.fullName?.message} required>
-          <Input
-            autoComplete="name"
-            placeholder="Feranmi Oresajo"
-            {...register('fullName')}
-          />
-        </Field>
-        <Field label="Email" error={errors.email?.message} required>
-          <Input
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            {...register('email')}
-          />
-        </Field>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Password" error={errors.password?.message} required>
-            <PasswordInput
-              autoComplete="new-password"
-              placeholder="Min. 8 characters"
-              {...register('password')}
+      <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)} noValidate>
+        {formError && (
+          <Alert variant="danger" className="mb-4">
+            {formError}
+          </Alert>
+        )}
+
+        <div className={sheetClasses()}>
+          {/*
+            No sample-name placeholder. The old one used a real person's name,
+            and with the label already visible a placeholder here only competes
+            with the value the user is about to type.
+          */}
+          <SheetField label="Full name" error={errors.fullName?.message} required>
+            <Input autoComplete="name" {...register('fullName')} />
+          </SheetField>
+          <SheetField label="Email" error={errors.email?.message} required>
+            <Input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="you@example.com"
+              {...register('email')}
             />
-          </Field>
-          <Field
+          </SheetField>
+          <SheetField
+            label="Password"
+            error={errors.password?.message}
+            // The rule lives on the field it applies to, not in a detached
+            // line under the whole form where it is read after the mistake.
+            hint={errors.password ? undefined : 'At least 8 characters, with a letter and a number.'}
+            required
+          >
+            <PasswordInput autoComplete="new-password" {...register('password')} />
+          </SheetField>
+          <SheetField
             label="Confirm password"
             error={errors.confirmPassword?.message}
             required
           >
-            <PasswordInput
-              autoComplete="new-password"
-              placeholder="Re-enter password"
-              {...register('confirmPassword')}
-            />
-          </Field>
+            <PasswordInput autoComplete="new-password" {...register('confirmPassword')} />
+          </SheetField>
         </div>
-        <p className="-mt-2 text-[10px] text-muted">
-          Use at least 8 characters, including a letter and a number.
-        </p>
-        <Button
-          type="submit"
-          fullWidth
-          loading={isSubmitting}
-          className="mt-1 h-12 text-base"
-        >
+
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-5">
           Create account
         </Button>
       </form>

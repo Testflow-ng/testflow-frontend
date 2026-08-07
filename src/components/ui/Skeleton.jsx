@@ -42,42 +42,41 @@ function SkeletonCard({ className }) {
   );
 }
 
+/**
+ * Loading state for the dashboard. Block sizes mirror the real layout (streak
+ * card, stat strip, quick-action grid, activity rows) so nothing shifts
+ * position when the data arrives.
+ */
 function DashboardSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 px-5 pb-28 pt-6 lg:max-w-5xl lg:pb-8">
+    <div className="mx-auto w-full max-w-xl flex-1 pt-5 tf-gutter tf-nav-clearance sm:pt-6 lg:max-w-5xl">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <Skeleton className="h-3 w-28 rounded-full" />
+          <Skeleton className="h-3.5 w-28 rounded-full" />
           <Skeleton className="h-7 w-36 rounded-full" />
         </div>
         <Skeleton className="size-9 rounded-full" />
       </div>
 
-      <div className="mt-5 grid grid-cols-3 gap-3">
+      <Skeleton className="mt-5 h-[9.5rem] rounded-2xl" />
+
+      <div className="mt-3 grid grid-cols-3 gap-2.5">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-[72px] rounded-2xl" />
+          <Skeleton key={i} className="h-[68px] rounded-2xl" />
         ))}
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-28 rounded-2xl" />
+          <Skeleton key={i} className="h-[7.5rem] rounded-2xl" />
         ))}
       </div>
 
-      <div className="mt-8 space-y-3">
-        <Skeleton className="h-4 w-32 rounded-full" />
-        <Skeleton className="h-11 w-full rounded-full" />
-        <div className="flex gap-2">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-8 w-16 rounded-full" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} className="h-40 rounded-2xl" />
-          ))}
-        </div>
+      <div className="mt-8 space-y-2">
+        <Skeleton className="mb-3 h-4 w-40 rounded-full" />
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} className="h-[68px] rounded-2xl" />
+        ))}
       </div>
     </div>
   );

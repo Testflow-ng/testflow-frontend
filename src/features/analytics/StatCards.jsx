@@ -1,3 +1,5 @@
+import { cardClasses } from '../../components/ui/surfaces.js';
+
 function StatCards({ stats }) {
   const items = [
     { label: 'Exams taken', value: stats.totalExams },
@@ -6,18 +8,19 @@ function StatCards({ stats }) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2.5">
       {items.map((item) => (
         <div
           key={item.label}
-          className="flex flex-col items-center rounded-2xl border border-border bg-surface py-4"
+          className={cardClasses({
+            padding: 'none',
+            className: 'flex flex-col items-center justify-center px-2 py-4 text-center',
+          })}
         >
-          <p className="font-heading text-xl font-extrabold tabular-nums text-foreground-strong">
+          <p className="font-heading text-xl font-extrabold leading-none tabular-nums text-foreground-strong">
             {item.value}
           </p>
-          <p className="mt-0.5 text-[10px] font-medium text-muted">
-            {item.label}
-          </p>
+          <p className="mt-1.5 text-[11px] font-medium leading-tight text-muted">{item.label}</p>
         </div>
       ))}
     </div>

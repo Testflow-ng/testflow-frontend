@@ -18,6 +18,7 @@ import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 import { useCountdown } from './useCountdown.js';
+import SubmitSuspense from './SubmitSuspense.jsx';
 import { formatTime } from './formatTime.js';
 
 const letter = (index) => String.fromCharCode(65 + index);
@@ -99,6 +100,8 @@ function ExamRuntime({ session }) {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitPhase, setSubmitPhase] = useState('marking');
+  const [exitOpen, setExitOpen] = useState(false);
   const [notice, setNotice] = useState(null);
   const submittingRef = useRef(false);
   const scrollRef = useRef(null);
@@ -117,15 +120,37 @@ function ExamRuntime({ session }) {
     [id],
   );
 
+  /*
+    Submit, then hold the suspense overlay for a floor of ~1.7s.
+
+    Marking is a single fast request, so without a floor the overlay would
+    flash and vanish — worse than no overlay at all. The floor runs *in
+    parallel* with the request via Promise.all, so a slow network is never
+    penalised twice: the wait is max(request, floor), never the sum.
+
+    The phase steps on a timer so the screen reads as progress rather than a
+    stall, and the submit itself still completes even if the user's connection
+    makes the request outlast the animation.
+  */
   const submit = useCallback(async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
     setSubmitting(true);
+    setSubmitPhase('marking');
+
+    const stepA = setTimeout(() => setSubmitPhase('tallying'), 700);
+    const stepB = setTimeout(() => setSubmitPhase('ready'), 1300);
+    const floor = new Promise((resolve) => setTimeout(resolve, 1700));
+
     try {
-      await examApi.submit(id);
+      await Promise.all([examApi.submit(id), floor]);
     } catch (err) {
       console.error('Submission Error:', err);
+    } finally {
+      clearTimeout(stepA);
+      clearTimeout(stepB);
     }
+
     navigate(`/exam/${id}/result`, { replace: true });
   }, [id, navigate]);
 
@@ -288,7 +313,22 @@ function ExamRuntime({ session }) {
       {/* Fixed top: the timer and progress must never scroll out of reach. */}
       <header className="shrink-0 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <div className="min-w-0">
+          {/*
+            Leave. The exam was a trap without this: the only exits were
+            submitting (which scores every unanswered question wrong) or the
+            browser's back gesture, which is not discoverable and on iOS is an
+            edge swipe a student may never try.
+          */}
+          <button
+            type="button"
+            onClick={() => setExitOpen(true)}
+            aria-label="Leave this paper"
+            className="tf-pressable -ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-strong active:text-foreground-strong"
+          >
+            <ChevronLeft size={20} aria-hidden="true" />
+          </button>
+
+          <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
               {session.subjectCode}
             </p>
@@ -336,6 +376,50 @@ function ExamRuntime({ session }) {
           {notice.message}
         </div>
       )}
+
+      {submitting && <SubmitSuspense phase={submitPhase} />}
+
+      {/*
+        Leave confirmation.
+
+        Leaving does NOT submit. Answers are already persisted per-question, the
+        session stays open, and it reappears under "Unfinished" on the dashboard.
+
+        The one thing this must not do is imply the exam is paused. The deadline
+        lives on the server as `expiresAt` and keeps running whether the app is
+        open or not, so the sheet says so plainly. A student who came back to a
+        submitted paper because we let them assume the clock stopped would have
+        every right to be furious.
+      */}
+      <Modal
+        open={exitOpen}
+        onOpenChange={setExitOpen}
+        title="Leave this paper?"
+        description="Your answers so far are saved. You can pick it up from the dashboard."
+        footer={
+          <>
+            <Button variant="ghost" size="lg" onClick={() => setExitOpen(false)}>
+              Keep going
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-danger"
+              onClick={() => navigate('/dashboard')}
+            >
+              Leave
+            </Button>
+          </>
+        }
+      >
+        <div className="flex items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3.5">
+          <Clock size={16} className="mt-0.5 shrink-0 text-score-mid" aria-hidden="true" />
+          <p className="text-[13px] leading-relaxed text-foreground/80">
+            The timer keeps running while you are away. {formatTime(remaining)} left, and the
+            paper submits itself when it reaches zero.
+          </p>
+        </div>
+      </Modal>
 
       {/* Only this middle band scrolls. */}
       <div className="flex min-h-0 flex-1">

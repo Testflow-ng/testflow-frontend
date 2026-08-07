@@ -2,6 +2,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Download, RotateCcw, Share2, X } from 'lucide-react';
 import { Alert, Button, Modal } from '../../components/ui/index.js';
+import { cardClasses, listRowClasses } from '../../components/ui/surfaces.js';
+import Mascot from '../../components/brand/Mascot.jsx';
+import Confetti from '../../components/brand/Confetti.jsx';
+import { moodForScore } from '../../components/brand/mascotMood.js';
+import { useStats } from '../analytics/useStats.js';
+import { useNewAchievements } from '../analytics/useNewAchievements.js';
+import AchievementUnlock from '../analytics/AchievementUnlock.jsx';
 import PageLoader from '../../components/PageLoader.jsx';
 import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
@@ -10,10 +17,29 @@ import { useCallback, useRef, useState } from 'react';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
+// `color` uses the AA-safe score text roles; the tints stay on the base brand
+// colours, which are correct as fills. See utils/score.js.
 const scoreTone = (score) => {
-  if (score >= 70) return { color: 'text-success', bg: 'bg-success/10', border: 'border-success/20', label: 'Great job' };
-  if (score >= 50) return { color: 'text-warning', bg: 'bg-warning/10', border: 'border-warning/20', label: 'Keep practicing' };
-  return { color: 'text-danger', bg: 'bg-danger/10', border: 'border-danger/20', label: 'Needs work' };
+  if (score >= 70)
+    return {
+      color: 'text-score-good',
+      bg: 'bg-success/10',
+      border: 'border-success/20',
+      label: 'Great job',
+    };
+  if (score >= 50)
+    return {
+      color: 'text-score-mid',
+      bg: 'bg-warning/10',
+      border: 'border-warning/20',
+      label: 'Keep practicing',
+    };
+  return {
+    color: 'text-score-low',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    label: 'Needs work',
+  };
 };
 
 const MEME_LINES = {
@@ -166,6 +192,14 @@ function ExamResultPage() {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const [shareOpen, setShareOpen] = useState(false);
+  /*
+    Badges are derived from stats, so this reads the stats that were just
+    refreshed by the submit. Any badge the attempt unlocked is celebrated here,
+    at the moment it was earned, rather than surfacing on a later screen with
+    no visible cause.
+  */
+  const { data: stats } = useStats();
+  const { fresh: newBadges, acknowledge } = useNewAchievements(stats);
   const {
     data: result,
     isLoading,
@@ -211,76 +245,110 @@ function ExamResultPage() {
   }
 
   const tone = scoreTone(result.score);
+  const reaction = moodForScore(result.score);
   const wrongCount = result.totalQuestions - result.correctCount;
   const skippedCount = result.questions.filter(q => q.selectedOption === null && !q.isCorrect).length;
 
   return (
-    <div className="mx-auto w-full max-w-xl flex-1 px-5 pb-28 pt-6 lg:pb-8">
+    <div className="mx-auto w-full max-w-xl flex-1 pt-5 tf-gutter tf-nav-clearance sm:pt-6">
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Score hero */}
-      <div className={cn('rounded-2xl border p-6 text-center', tone.bg, tone.border)}>
-        <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted">
+      {/*
+        Score hero.
+
+        Flo reacts to the actual result: celebrating over 85, thumbs up on a
+        pass, waving encouragement on a borderline, and slumping on a fail. The
+        confetti only fires on a pass, because confetti over a 31% would be the
+        app failing to read the room.
+
+        `relative` + `overflow-hidden` keeps the confetti inside the card rather
+        than over the whole page, so it never lands on the review list below.
+      */}
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-2xl border px-5 pb-7 pt-6 text-center',
+          tone.bg,
+          tone.border,
+        )}
+      >
+        <Confetti active={reaction.confetti} />
+
+        <Mascot
+          mood={reaction.mood}
+          animation={reaction.animation}
+          size={104}
+          className={cn('relative mx-auto', tone.color)}
+        />
+
+        <p className="relative mt-2 font-mono text-xs font-bold uppercase tracking-widest text-muted">
           {result.subjectCode}
         </p>
         <p
           className={cn(
-            'mt-3 font-heading text-6xl font-extrabold tabular-nums tracking-tight',
+            'mt-3 font-heading text-6xl font-extrabold leading-none tabular-nums tracking-tight',
             tone.color,
           )}
         >
           {result.score}%
         </p>
-        <p className="mt-1 text-sm font-medium text-muted">
+        <p className="mt-2.5 text-sm font-medium text-muted">
           {result.correctCount} of {result.totalQuestions} correct
         </p>
-        <p className={cn('mt-2 text-xs font-bold', tone.color)}>{tone.label}</p>
+        {/* Flo's line, not a bare verdict. "Needs work" states the obvious;
+            "Try it again while it is fresh" names the next move. */}
+        <p className={cn('relative mt-2.5 text-[14px] font-semibold', tone.color)}>
+          {reaction.line}
+        </p>
       </div>
 
       {/* Stats strip */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <div className="flex flex-col items-center rounded-2xl border border-border bg-surface py-3">
-          <span className="text-xl font-extrabold tabular-nums text-success">{result.correctCount}</span>
-          <span className="mt-0.5 text-[10px] font-medium text-muted">Correct</span>
-        </div>
-        <div className="flex flex-col items-center rounded-2xl border border-border bg-surface py-3">
-          <span className="text-xl font-extrabold tabular-nums text-danger">{wrongCount - skippedCount}</span>
-          <span className="mt-0.5 text-[10px] font-medium text-muted">Wrong</span>
-        </div>
-        <div className="flex flex-col items-center rounded-2xl border border-border bg-surface py-3">
-          <span className="text-xl font-extrabold tabular-nums text-muted">{skippedCount}</span>
-          <span className="mt-0.5 text-[10px] font-medium text-muted">Skipped</span>
-        </div>
+      <div className="mt-3 grid grid-cols-3 gap-2.5">
+        <ResultStat value={result.correctCount} label="Correct" tone="text-score-good" />
+        <ResultStat value={wrongCount - skippedCount} label="Wrong" tone="text-score-low" />
+        <ResultStat value={skippedCount} label="Skipped" tone="text-muted" />
       </div>
 
-      {/* Actions */}
-      <div className="mt-4 flex gap-2">
+      {/*
+        Actions stack full-width on phones. Two 50%-width buttons on a 375px
+        screen leave ~160px each, which truncates "Practice again" and puts
+        both targets in the awkward middle of the screen rather than in easy
+        thumb reach.
+      */}
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <Button
-          variant="outline"
-          size="md"
-          onClick={() => navigate('/dashboard')}
-          className="flex-1"
-        >
-          Dashboard
-        </Button>
-        <Button
-          size="md"
+          size="lg"
           onClick={() => navigate('/courses')}
-          leadingIcon={<RotateCcw size={16} />}
-          className="flex-1"
+          leadingIcon={<RotateCcw size={16} aria-hidden="true" />}
+          className="sm:order-2 sm:flex-1"
         >
           Practice again
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => navigate('/dashboard')}
+          className="sm:order-1 sm:flex-1"
+        >
+          Dashboard
         </Button>
       </div>
 
       {/* Share button */}
       <button
+        type="button"
         onClick={() => setShareOpen(true)}
-        className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-border py-3 text-sm font-semibold text-foreground-strong transition-colors hover:bg-surface-strong"
+        className="tf-pressable mt-2 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-border text-sm font-semibold text-foreground-strong active:bg-surface-strong"
       >
-        <Share2 size={16} />
+        <Share2 size={16} aria-hidden="true" />
         Share result
       </button>
+
+      {/* Badge celebration, after the score has had its moment. */}
+      <AchievementUnlock
+        achievements={newBadges}
+        open={newBadges.length > 0}
+        onClose={acknowledge}
+      />
 
       {/* Share modal */}
       <Modal
@@ -289,39 +357,45 @@ function ExamResultPage() {
         title="Share your result"
         size="sm"
       >
-        <div className="flex flex-col gap-3 pt-2">
+        <div className="flex flex-col gap-2 py-1">
           <button
+            type="button"
             onClick={() => downloadCard(false)}
-            className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-colors hover:bg-surface-strong"
+            className={listRowClasses({ className: 'p-4' })}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Download size={18} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground-strong">Download result card</p>
-              <p className="text-xs text-muted">Clean scorecard image</p>
-            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+              <Download size={18} className="text-primary" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[15px] font-semibold text-foreground-strong">
+                Download result card
+              </span>
+              <span className="mt-0.5 block text-[13px] text-muted">Clean scorecard image</span>
+            </span>
           </button>
           <button
+            type="button"
             onClick={() => downloadCard(true)}
-            className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-left transition-colors hover:bg-surface-strong"
+            className={listRowClasses({ className: 'p-4' })}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10">
-              <span className="text-lg">😂</span>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-foreground-strong">Meme download</p>
-              <p className="text-xs text-muted">With Naija commentary</p>
-            </div>
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-lg">
+              😂
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[15px] font-semibold text-foreground-strong">
+                Meme download
+              </span>
+              <span className="mt-0.5 block text-[13px] text-muted">With Naija commentary</span>
+            </span>
           </button>
         </div>
       </Modal>
 
       {/* Review */}
-      <h2 className="mt-8 text-sm font-bold text-foreground-strong">
+      <h2 className="mt-8 text-[15px] font-bold tracking-tight text-foreground-strong">
         Review answers
       </h2>
-      <ol className="mt-3 flex flex-col gap-3">
+      <ol className="mt-3 flex flex-col gap-2">
         {result.questions.map((question) => (
           <ReviewItem key={question.index} question={question} />
         ))}
@@ -330,26 +404,34 @@ function ExamResultPage() {
   );
 }
 
+function ResultStat({ value, label, tone }) {
+  return (
+    <div className={cardClasses({ padding: 'none', className: 'flex flex-col items-center py-3' })}>
+      <span className={cn('text-xl font-extrabold leading-none tabular-nums', tone)}>{value}</span>
+      <span className="mt-1.5 text-[11px] font-medium leading-none text-muted">{label}</span>
+    </div>
+  );
+}
+
 function ReviewItem({ question }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <li className="rounded-2xl border border-border bg-surface overflow-hidden">
+    <li className={cardClasses({ padding: 'none', className: 'overflow-hidden' })}>
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-start justify-between gap-3 p-4 text-left"
+        aria-expanded={expanded}
+        className="tf-pressable flex w-full items-start justify-between gap-3 p-4 text-left active:bg-surface-strong"
       >
-        <MathText className="text-sm font-medium text-foreground-strong flex-1">
+        <MathText className="flex-1 text-[15px] font-medium leading-snug text-foreground-strong">
           {`${question.index + 1}. ${question.stem}`}
         </MathText>
         <div className="flex shrink-0 items-center gap-2">
           <span
             className={cn(
-              'rounded-full px-2 py-0.5 text-[10px] font-bold',
-              question.isCorrect
-                ? 'bg-success/10 text-success'
-                : 'bg-danger/10 text-danger',
+              'rounded-full px-2 py-0.5 text-[11px] font-bold',
+              question.isCorrect ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
             )}
           >
             {question.isCorrect
@@ -359,9 +441,10 @@ function ReviewItem({ question }) {
                 : 'Wrong'}
           </span>
           <ChevronDown
-            size={14}
+            size={16}
+            aria-hidden="true"
             className={cn(
-              'text-muted transition-transform',
+              'text-muted transition-transform duration-[var(--duration-sm)] ease-[var(--transition-ease)]',
               expanded && 'rotate-180',
             )}
           />
@@ -378,7 +461,7 @@ function ReviewItem({ question }) {
                 <div
                   key={index}
                   className={cn(
-                    'flex items-center gap-2.5 rounded-xl border p-3 text-sm',
+                    'flex items-center gap-2.5 rounded-xl border p-3 text-[14px] leading-snug',
                     isCorrect
                       ? 'border-success/30 bg-success/5 text-success'
                       : isChosen
@@ -386,7 +469,7 @@ function ReviewItem({ question }) {
                         : 'border-border text-foreground',
                   )}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-current text-[10px] font-bold">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-current text-[11px] font-bold">
                     {letter(index)}
                   </span>
                   <MathText className="flex-1">{option}</MathText>
@@ -402,7 +485,7 @@ function ReviewItem({ question }) {
           </div>
 
           {question.explanation && (
-            <div className="mt-3 rounded-xl bg-surface-strong p-3 text-xs leading-relaxed text-muted">
+            <div className="mt-3 rounded-xl bg-surface-strong p-3 text-[13px] leading-relaxed text-muted">
               <span className="font-bold text-foreground-strong">
                 Explanation.{' '}
               </span>

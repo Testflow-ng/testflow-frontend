@@ -25,77 +25,90 @@ function CourseSelectionModal({ open, onOpenChange }) {
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Organize Your Courses"
+      title="Organize your courses"
       description="Select the courses you are offering this semester to pin them to your dashboard."
       footer={
-        <Button onClick={() => onOpenChange(false)} className="w-full">
-          Done Selecting ({pinnedCount})
+        <Button size="lg" onClick={() => onOpenChange(false)}>
+          Done selecting ({pinnedCount})
         </Button>
       }
     >
-      <div className="space-y-6 pt-2">
-        {/* Search and Filters */}
-        <div className="flex flex-col gap-3">
+      <div className="space-y-4 py-1">
+        {/*
+          Search + filters stick to the top of the sheet's scroll region, so the
+          list can be scrolled without losing the controls that filter it.
+        */}
+        <div className="sticky top-0 z-10 -mx-1 flex flex-col gap-2.5 bg-surface px-1 pb-2 pt-1">
           <Input
-            placeholder="Search course code or title..."
+            placeholder="Search course code or title"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             leadingAdornment={<Search size={16} className="text-muted" />}
           />
-          <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-            {['all', '100', '200', '300', '400', '500'].map(lvl => (
+          <div className="flex gap-2 overflow-x-auto pb-0.5">
+            {['all', '100', '200', '300', '400', '500'].map((lvl) => (
               <button
                 key={lvl}
+                type="button"
                 onClick={() => setLevelFilter(lvl)}
+                aria-pressed={levelFilter === lvl}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border whitespace-nowrap transition-all",
-                  levelFilter === lvl ? "bg-primary border-primary text-white" : "bg-surface-strong border-border text-muted"
+                  'tf-pressable inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-[12px] font-semibold',
+                  levelFilter === lvl
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border bg-surface-strong text-muted',
                 )}
               >
-                {lvl === 'all' ? 'All Levels' : `${lvl}L`}
+                {lvl === 'all' ? 'All levels' : `${lvl}L`}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Course List */}
-        <div className="max-h-[350px] overflow-y-auto space-y-2 custom-scrollbar">
+        {/* Course list. The sheet owns scrolling; no nested scroll container. */}
+        <div className="flex flex-col gap-2">
           {isLoading ? (
-            <div className="py-10 flex justify-center"><Spinner /></div>
+            <div className="flex justify-center py-10">
+              <Spinner />
+            </div>
           ) : filtered.length === 0 ? (
-            <div className="py-10 text-center text-muted italic text-sm">No courses match your search.</div>
+            <p className="py-10 text-center text-sm text-muted">No courses match your search.</p>
           ) : (
             filtered.map(subject => {
               const isPinned = user?.pinnedSubjects?.includes(subject.id);
               return (
                 <button
                   key={subject.id}
+                  type="button"
                   onClick={() => togglePin(subject.id)}
+                  aria-pressed={Boolean(isPinned)}
                   className={cn(
-                    "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
-                    isPinned
-                      ? "border-primary bg-primary/5 shadow-sm"
-                      : "border-border bg-surface hover:bg-surface-strong"
+                    'tf-pressable flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border p-3 text-left',
+                    isPinned ? 'border-primary bg-primary/5' : 'border-border bg-surface',
                   )}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs",
-                      isPinned ? "bg-primary text-white" : "bg-surface-strong text-muted"
-                    )}>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span
+                      className={cn(
+                        'flex size-10 shrink-0 items-center justify-center rounded-xl text-[12px] font-bold',
+                        isPinned ? 'bg-primary text-primary-foreground' : 'bg-surface-strong text-muted',
+                      )}
+                    >
                       {subject.code.substring(0, 3)}
-                    </div>
-                    <div>
-                      <p className="text-xs font-black text-foreground-strong">{subject.code}</p>
-                      <p className="text-[10px] text-muted font-medium line-clamp-1">{subject.title}</p>
-                    </div>
-                  </div>
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[14px] font-bold text-foreground-strong">
+                        {subject.code}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[12px] font-medium text-muted">
+                        {subject.title}
+                      </span>
+                    </span>
+                  </span>
                   {isPinned ? (
-                    <div className="bg-primary rounded-full p-1 text-white shadow-lg shadow-primary/20 scale-110">
-                      <CheckCircle2 size={16} />
-                    </div>
+                    <CheckCircle2 size={22} className="shrink-0 text-primary" aria-hidden="true" />
                   ) : (
-                    <Star size={18} className="text-border group-hover:text-muted transition-colors" />
+                    <Star size={20} className="shrink-0 text-border" aria-hidden="true" />
                   )}
                 </button>
               );

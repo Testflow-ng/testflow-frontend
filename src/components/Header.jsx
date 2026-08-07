@@ -60,7 +60,12 @@ function Header() {
   const links = isAuthenticated ? authLinks : publicLinks;
 
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-2 sm:px-5">
+    /*
+      `viewport-fit=cover` lets the page run under the status bar, so the
+      header has to add the top inset itself — without it the pill sits behind
+      the clock and notch on an installed iPhone PWA.
+    */
+    <header className="sticky top-0 z-50 w-full px-4 pt-[calc(0.5rem+var(--safe-top))] sm:px-5">
       <AnimatePresence>
         {menuOpen && (
           <motion.div
@@ -115,7 +120,7 @@ function Header() {
               rel="noreferrer"
               aria-label="Follow EDDYRUS MEDIA on WhatsApp"
               title="Follow EDDYRUS MEDIA on WhatsApp"
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform active:scale-95"
+              className="tf-pressable relative flex size-9 items-center justify-center rounded-full text-white after:absolute after:inset-[-3px] after:content-['']"
               style={{ backgroundColor: WHATSAPP_GREEN }}
             >
               <WhatsAppIcon size={20} />
@@ -213,7 +218,7 @@ function Header() {
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-label={menuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={menuOpen}
-                className="group flex h-9 w-9 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong transition-colors hover:bg-surface-strong active:scale-95 lg:hidden"
+                className="tf-pressable relative flex size-9 items-center justify-center rounded-full border border-border/70 bg-surface text-foreground-strong after:absolute after:inset-[-3px] after:content-[''] active:bg-surface-strong lg:hidden"
               >
                 <EqualsMenuIcon size={22} open={menuOpen} />
               </button>
@@ -244,10 +249,10 @@ function Header() {
                         to={to}
                         onClick={() => setMenuOpen(false)}
                         className={cn(
-                          'block rounded-2xl px-3 py-3.5 text-lg font-semibold tracking-tight transition-colors',
+                          'tf-pressable flex min-h-12 items-center rounded-2xl px-3 text-lg font-semibold tracking-tight active:bg-surface-strong',
                           location.pathname === to
                             ? 'text-foreground-strong'
-                            : 'text-muted hover:text-foreground-strong',
+                            : 'text-muted',
                         )}
                       >
                         {label}

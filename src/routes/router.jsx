@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
+import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import PublicOnly from '../features/auth/PublicOnly.jsx';
 import LoginPage from '../features/auth/pages/LoginPage.jsx';
@@ -32,6 +33,9 @@ import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
 
 export const router = createBrowserRouter([
   {
+    // Replaces React Router's default error element, which renders a raw
+    // stack trace on a blank white page.
+    errorElement: <ErrorState />,
     element: <RequireAuth />,
     children: [
       { path: 'setup', element: <SetupPage /> },
