@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ChevronLeft,
@@ -11,6 +11,8 @@ import {
   X,
   AlertTriangle,
   Keyboard,
+  ShieldAlert,
+  Calculator as CalcIcon,
 } from 'lucide-react';
 import { Alert, Button, Modal } from '../../components/ui/index.js';
 import PageLoader from '../../components/PageLoader.jsx';
@@ -19,6 +21,7 @@ import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 import { useCountdown } from './useCountdown.js';
 import { formatTime } from './formatTime.js';
+import Calculator from '../post-utme/components/Calculator.jsx';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
@@ -85,6 +88,9 @@ function Legend() {
 
 function ExamRuntime({ session }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isPostUtme = searchParams.get('type') === 'post-utme';
+
   const id = session.id;
   const questions = useMemo(() => session.questions || [], [session.questions]);
   const total = questions.length;
@@ -98,8 +104,49 @@ function ExamRuntime({ session }) {
   const [current, setCurrent] = useState(0);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [strikes, setStrikes] = useState(session.strikes || 0);
+
+  const saveUrl = isPostUtme ? `/api/post-utme/${id}/answer` : null;
+
+  const persist = useCallback(
+    (index, patch) => {
+      setAnswers((prev) => {
+        const next = [...prev];
+        if (next[index]) next[index] = { ...next[index], ...patch };
+        return next;
+      });
+
+      if (isPostUtme) {
+        fetch(saveUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionIndex: index, ...patch })
+        }).catch(() => {});
+      } else {
+        examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
+      }
+    },
+    [id, isPostUtme, saveUrl],
+  );
+
+  const submit = useCallback(async () => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      if (isPostUtme) {
+        await fetch(`/api/post-utme/${id}/submit`, { method: 'POST' });
+      } else {
+        await examApi.submit(id);
+      }
+    } catch (err) {
+      console.error('Submission Error:', err);
+    }
+    navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
+  }, [id, navigate, isPostUtme]);
   const submittingRef = useRef(false);
   const scrollRef = useRef(null);
   const pendingStrikeRef = useRef(null);
@@ -139,6 +186,17 @@ function ExamRuntime({ session }) {
 
   const question = questions[current];
   const answer = answers[current];
+
+  // Post-UTME Subject Navigation
+  const subjects = useMemo(() => {
+    if (!isPostUtme) return [];
+    const map = new Map();
+    questions.forEach((q, i) => {
+      if (!map.has(q.subject)) map.set(q.subject, { id: q.subject, questions: [] });
+      map.get(q.subject).questions.push(i);
+    });
+    return Array.from(map.values());
+  }, [isPostUtme, questions]);
 
   // Escalate quietly: a nudge at five minutes, real urgency inside one.
   const urgency = remaining <= 60 ? 'critical' : remaining <= 300 ? 'warning' : 'normal';
@@ -186,10 +244,14 @@ function ExamRuntime({ session }) {
       }
       if (submittingRef.current) return;
       try {
-        const result = await examApi.recordStrike(id);
+        const result = isPostUtme
+          ? await (await fetch(`/api/post-utme/${id}/strike`, { method: 'POST' })).json()
+          : await examApi.recordStrike(id);
+
         if (result.status === 'submitted') {
           pendingStrikeRef.current = { submitted: true };
         } else if (result.strikes) {
+          setStrikes(result.strikes);
           pendingStrikeRef.current = {
             message: `Stay on this tab. Strike ${result.strikes} of 3.`,
           };
@@ -298,6 +360,25 @@ function ExamRuntime({ session }) {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            {isPostUtme && (
+              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-danger/10 border border-danger/20 text-danger text-[10px] font-black uppercase tracking-widest">
+                 <ShieldAlert size={12} />
+                 Strict Mode: {strikes}/3
+              </div>
+            )}
+            {isPostUtme && (
+              <button
+                type="button"
+                onClick={() => setCalcOpen(!calcOpen)}
+                className={cn(
+                  "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-bold transition-all",
+                  calcOpen ? "bg-primary text-primary-foreground border-primary" : "border-border bg-surface text-foreground-strong hover:bg-surface-strong"
+                )}
+              >
+                <CalcIcon size={15} />
+                <span className="hidden sm:inline">Calculator</span>
+              </button>
+            )}
             {timer}
             <button
               type="button"
@@ -309,6 +390,40 @@ function ExamRuntime({ session }) {
             </button>
           </div>
         </div>
+
+        {isPostUtme && (
+          <div className="border-t border-border bg-surface-strong/30 overflow-x-auto custom-scrollbar no-scrollbar">
+            <div className="mx-auto flex max-w-5xl items-center px-4 sm:px-6">
+               {subjects.map((sub, idx) => {
+                 const isCurrent = sub.questions.includes(current);
+                 const answeredInSub = sub.questions.filter(qIdx => answers[qIdx]?.selectedOption !== null).length;
+                 const subjectCode = session.subjectCodes?.[idx] || `Sub ${idx+1}`;
+
+                 return (
+                   <button
+                    key={sub.id}
+                    onClick={() => goTo(sub.questions[0])}
+                    className={cn(
+                      "flex h-10 shrink-0 items-center gap-2 border-b-2 px-4 text-[10px] font-black uppercase tracking-widest transition-all",
+                      isCurrent
+                        ? "border-primary text-primary bg-primary/5"
+                        : "border-transparent text-muted hover:text-foreground"
+                    )}
+                   >
+                     {subjectCode}
+                     <span className={cn(
+                       "rounded-full px-1.5 py-0.5 text-[8px]",
+                       isCurrent ? "bg-primary text-primary-foreground" : "bg-border text-muted"
+                     )}>
+                       {sub.questions.length}
+                     </span>
+                   </button>
+                 );
+               })}
+            </div>
+          </div>
+        )}
+
         <div
           className="h-1 w-full bg-surface-strong"
           role="progressbar"
@@ -574,6 +689,8 @@ function ExamRuntime({ session }) {
           </p>
         </div>
       </Modal>
+
+      {calcOpen && <Calculator onClose={() => setCalcOpen(false)} />}
     </div>
   );
 }
