@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   BookOpen,
@@ -11,9 +11,12 @@ import {
   ShieldCheck,
   TrendingUp,
   Users,
+  Zap,
+  Check,
+  Search,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
-import { Spinner, Alert, Button } from '../../../components/ui/index.js';
+import { Spinner, Alert, Button, Card } from '../../../components/ui/index.js';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
 import UsernameSetupModal from '../../auth/components/UsernameSetupModal.jsx';
@@ -27,11 +30,41 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 function AdminDashboardPage() {
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
   const [setupDismissed, setSetupDismissed] = useState(false);
+  const [utmeCode, setUtmeCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState(null);
+
   const showSetup = Boolean(currentUser && !currentUser.username) && !setupDismissed;
 
   const handleExport = () => {
     window.open(`${API_URL}/api/admin/export-results`, '_blank');
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (!utmeCode || verifying) return;
+    setVerifying(true);
+    setVerifyStatus(null);
+    try {
+      const res = await fetch('/api/admin/verify-utme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verificationCode: utmeCode })
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Verification failed');
+      }
+      setVerifyStatus({ type: 'success', message: 'User verified successfully!' });
+      setUtmeCode('');
+      queryClient.invalidateQueries(['adminStats']);
+    } catch (err) {
+      setVerifyStatus({ type: 'error', message: err.message });
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const { data, isLoading, isError } = useQuery({
@@ -64,6 +97,22 @@ function AdminDashboardPage() {
       icon: Users,
       color: 'text-secondary',
       bg: 'bg-secondary/10',
+    },
+    {
+      title: 'Rankings',
+      description: 'View Post-UTME performance leaderboards.',
+      href: '/admin/rankings',
+      icon: TrendingUp,
+      color: 'text-info',
+      bg: 'bg-info/20',
+    },
+    {
+      title: 'Verifications',
+      description: 'Review and approve payment receipts.',
+      href: '/admin/verifications',
+      icon: Zap,
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
     },
   ];
 
@@ -98,11 +147,11 @@ function AdminDashboardPage() {
 
   const kpis = [
     { label: 'Students', value: stats.users.students, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: 'Paid UTME', value: stats.users.postUtmePaid, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { label: 'Active now', value: stats.usage.activeNow, icon: Radio, color: 'text-success', bg: 'bg-success/10', hint: 'live' },
     { label: 'Total exams', value: stats.usage.totalSessions, icon: TrendingUp, color: 'text-warning', bg: 'bg-warning/10' },
-    { label: 'Platform average', value: `${stats.usage.averageScore}%`, icon: CheckCircle2, color: 'text-info', bg: 'bg-info/10' },
+    { label: 'Platform avg', value: `${stats.usage.averageScore}%`, icon: CheckCircle2, color: 'text-info', bg: 'bg-info/10' },
     { label: 'Questions', value: stats.content.questions, icon: FileQuestion, color: 'text-secondary', bg: 'bg-secondary/10' },
-    { label: 'Subjects', value: stats.content.subjects, icon: BookOpen, color: 'text-primary', bg: 'bg-primary/10' },
   ];
 
   return (
@@ -136,6 +185,68 @@ function AdminDashboardPage() {
         {kpis.map((kpi) => (
           <AdminStatCard key={kpi.label} {...kpi} />
         ))}
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Verification Tool */}
+        <Card className="p-6 border-amber-500/20 bg-amber-500/5 lg:col-span-1">
+          <div className="flex items-center gap-2 mb-4">
+             <Zap size={18} className="text-amber-500 fill-current" />
+             <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Verify UTME Code</h3>
+          </div>
+          <form onSubmit={handleVerify} className="space-y-3">
+             <div className="relative">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="text"
+                  value={utmeCode}
+                  onChange={(e) => setUtmeCode(e.target.value.toUpperCase())}
+                  placeholder="UTME-XXXXXX"
+                  className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-4 text-sm font-bold text-foreground-strong outline-none focus:border-amber-500 transition-colors"
+                />
+             </div>
+             <Button
+                type="submit"
+                fullWidth
+                loading={verifying}
+                disabled={!utmeCode}
+                className="h-11 rounded-xl bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20"
+                leadingIcon={<Check size={18} />}
+             >
+                Verify Student
+             </Button>
+          </form>
+          {verifyStatus && (
+            <div className={cn(
+              "mt-4 rounded-xl p-3 text-xs font-bold text-center",
+              verifyStatus.type === 'success' ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+            )}>
+              {verifyStatus.message}
+            </div>
+          )}
+        </Card>
+
+        {/* Growth Stats */}
+        <Card className="p-6 lg:col-span-2">
+           <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Daily Student Growth</h3>
+              <TrendingUp size={18} className="text-primary" />
+           </div>
+           <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Today</p>
+                 <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.today || 0}</h4>
+              </div>
+              <div className="text-center border-x border-border">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Week</p>
+                 <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.week || 0}</h4>
+              </div>
+              <div className="text-center">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Month</p>
+                 <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.month || 0}</h4>
+              </div>
+           </div>
+        </Card>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
