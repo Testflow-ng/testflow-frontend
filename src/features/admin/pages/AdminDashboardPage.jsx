@@ -114,6 +114,14 @@ function AdminDashboardPage() {
       color: 'text-amber-500',
       bg: 'bg-amber-500/10',
     },
+    {
+      title: 'Platform settings',
+      description: 'Configure bank details and global toggles.',
+      href: '/admin/settings',
+      icon: Settings,
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+    },
   ];
 
   if (currentUser?.role === 'super_admin') {

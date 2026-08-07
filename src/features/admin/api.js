@@ -36,4 +36,8 @@ export const adminApi = {
 
   // Post-UTME Rankings
   getPostUtmeRankings: () => apiClient.get('/api/admin/post-utme/rankings').then((res) => res.data.rankings),
+
+  // Global Settings
+  getSettings: () => apiClient.get('/api/admin/settings').then((res) => res.data.settings),
+  updateSettings: (payload) => apiClient.patch('/api/admin/settings', payload).then((res) => res.data.settings),
 };
