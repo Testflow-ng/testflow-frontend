@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Header from '../components/Header.jsx';
+import BottomNav from '../components/BottomNav.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 import NightOwlPopup from '../components/NightOwlPopup.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
@@ -36,6 +37,7 @@ function RootLayout() {
         </motion.div>
       </main>
 
+      {isAuthenticated && !isLoading && !isExamPage && <BottomNav />}
       {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />}
     </div>
   );
