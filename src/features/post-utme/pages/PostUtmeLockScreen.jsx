@@ -142,7 +142,7 @@ function PostUtmeLockScreen({ config }) {
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-widest text-muted">Step 2: Upload Receipt</p>
                         <p className="text-sm font-black text-foreground-strong">
-                            Take a screenshot of your successful transfer and upload it here.
+                            Screenshot the image of your receipt and upload it here.
                         </p>
                     </div>
                 </div>
