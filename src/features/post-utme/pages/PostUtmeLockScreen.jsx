@@ -63,7 +63,7 @@ function PostUtmeLockScreen({ config }) {
   };
 
   const request = statusData?.request;
-  const isPending = request?.status === 'pending';
+  const isPending = user?.postUtmeStatus === 'pending' || request?.status === 'pending';
 
   const whatsappLink = `https://wa.me/2341234567890?text=Hello%20Testflow%20Admin,%20I%20have%20made%20payment%20for%20Post-UTME%20access.%20My%20verification%20code%20is:%20${user.verificationCode}`;
 

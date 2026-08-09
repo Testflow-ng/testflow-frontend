@@ -46,7 +46,8 @@ function PostUtmeHub() {
     );
   }
 
-  if (!user?.isPostUtmePaid) {
+  // Use the formal state machine status
+  if (user?.postUtmeStatus !== 'verified') {
     return <PostUtmeLockScreen config={config} />;
   }
 
