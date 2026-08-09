@@ -40,4 +40,11 @@ export const adminApi = {
   // Global Settings
   getSettings: () => apiClient.get('/api/admin/settings').then((res) => res.data.settings),
   updateSettings: (payload) => apiClient.patch('/api/admin/settings', payload).then((res) => res.data.settings),
+
+  // Activity Feed
+  getActivityFeed: () => apiClient.get('/api/admin/activity').then((res) => res.data.logs),
+
+  // Bulk Questions Actions
+  bulkDeleteQuestions: (ids) => apiClient.post('/api/admin/questions/bulk-delete', { ids }).then((res) => res.data),
+  bulkToggleQuestions: (ids, isActive) => apiClient.post('/api/admin/questions/bulk-toggle', { ids, isActive }).then((res) => res.data),
 };

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { adminApi } from '../api.js';
 import { subjectsApi } from '../../subjects/api.js';
 import {
@@ -11,9 +11,11 @@ import {
   Badge
 } from '../../../components/ui/index.js';
 import MathText from '../../../components/MathText.jsx';
-import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Filter } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Filter, CheckSquare, Square, X, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BulkImportModal from '../components/BulkImportModal.jsx';
+import { cn } from '../../../utils/cn.js';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function QuestionBankPage() {
   const [page, setPage] = useState(1);
@@ -21,6 +23,9 @@ function QuestionBankPage() {
   const [subject, setSubject] = useState('');
   const [level, setLevel] = useState('all');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  const queryClient = useQueryClient();
 
   const { data: subjects } = useQuery({
     queryKey: ['subjects', { all: true }],
@@ -39,8 +44,50 @@ function QuestionBankPage() {
     placeholderData: keepPreviousData,
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids) => adminApi.bulkDeleteQuestions(ids),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries(['questions']);
+      setSelectedIds([]);
+      alert(res.message);
+    }
+  });
+
+  const bulkToggleMutation = useMutation({
+    mutationFn: ({ ids, isActive }) => adminApi.bulkToggleQuestions(ids, isActive),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries(['questions']);
+      setSelectedIds([]);
+      alert(res.message);
+    }
+  });
+
   const questions = data?.items || [];
   const totalPages = data?.pages || 1;
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === questions.length && questions.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(questions.map(q => q.id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} questions?`)) {
+      bulkDeleteMutation.mutate(selectedIds);
+    }
+  };
+
+  const handleBulkToggle = (isActive) => {
+    bulkToggleMutation.mutate({ ids: selectedIds, isActive });
+  };
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-6">
@@ -129,9 +176,47 @@ function QuestionBankPage() {
         </Card>
       ) : (
         <div className="space-y-4">
+          <div className="flex items-center justify-between px-2 mb-2">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted hover:text-foreground-strong transition-colors"
+            >
+              {selectedIds.length === questions.length && questions.length > 0 ? (
+                <CheckSquare size={16} className="text-primary" />
+              ) : (
+                <Square size={16} />
+              )}
+              {selectedIds.length > 0 ? `Selected ${selectedIds.length}` : 'Select All on Page'}
+            </button>
+            {selectedIds.length > 0 && (
+              <button
+                onClick={() => setSelectedIds([])}
+                className="text-[10px] font-black uppercase tracking-widest text-danger hover:underline"
+              >
+                Clear Selection
+              </button>
+            )}
+          </div>
+
           {questions.map((q) => (
-            <Card key={q.id} className="p-5">
-              <div className="flex justify-between items-start gap-4">
+            <Card
+              key={q.id}
+              className={cn(
+                "p-5 transition-all",
+                selectedIds.includes(q.id) ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "hover:border-primary/20"
+              )}
+            >
+              <div className="flex items-start gap-4">
+                <button
+                  onClick={() => toggleSelect(q.id)}
+                  className={cn(
+                    "mt-1 shrink-0 transition-colors",
+                    selectedIds.includes(q.id) ? "text-primary" : "text-muted hover:text-foreground"
+                  )}
+                >
+                  {selectedIds.includes(q.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                </button>
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">
@@ -143,6 +228,9 @@ function QuestionBankPage() {
                     <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-strong text-muted">
                       {q.difficulty}
                     </span>
+                    {!q.isActive && (
+                      <Badge variant="danger" className="text-[8px] px-1.5 py-0">INACTIVE</Badge>
+                    )}
                     {q.topic && (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500">
                         {q.topic}
@@ -162,7 +250,7 @@ function QuestionBankPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Link to={`/admin/questions/${q.id}/edit`}>
                     <button
-                      className="p-2.5 rounded-xl bg-primary text-white hover:bg-primary-dark transition-all shadow-md shadow-primary/10 border border-primary/20"
+                      className="p-2.5 rounded-xl bg-surface-strong text-foreground hover:bg-primary hover:text-white transition-all border border-border"
                       title="Edit Question"
                     >
                       <Edit2 size={16} />
@@ -172,11 +260,11 @@ function QuestionBankPage() {
                     onClick={() => {
                       if (window.confirm('Are you sure you want to delete this question?')) {
                         adminApi.deleteQuestion(q.id).then(() => {
-                           window.location.reload();
+                           queryClient.invalidateQueries(['questions']);
                         });
                       }
                     }}
-                    className="p-2.5 rounded-xl bg-danger text-white hover:bg-danger/90 transition-all shadow-md shadow-danger/10 border border-danger/20"
+                    className="p-2.5 rounded-xl bg-surface-strong text-foreground hover:bg-danger hover:text-white transition-all border border-border"
                     title="Delete Question"
                   >
                     <Trash2 size={16} />
@@ -218,6 +306,66 @@ function QuestionBankPage() {
         open={isImportModalOpen}
         onOpenChange={setIsImportModalOpen}
       />
+
+      {/* Floating Bulk Action Bar */}
+      <AnimatePresence>
+        {selectedIds.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4"
+          >
+            <div className="bg-foreground-strong text-background rounded-2xl p-4 shadow-2xl shadow-black/40 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                  <CheckSquare size={20} />
+                </div>
+                <div className="min-w-[100px]">
+                  <p className="text-sm font-black">{selectedIds.length} Selected</p>
+                  <p className="text-[10px] font-bold text-background/60 uppercase tracking-widest">Bulk Actions</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  className="bg-background/10 text-background hover:bg-background/20 border-none"
+                  onClick={() => handleBulkToggle(true)}
+                  loading={bulkToggleMutation.isPending}
+                >
+                  Enable
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-background/10 text-background hover:bg-background/20 border-none"
+                  onClick={() => handleBulkToggle(false)}
+                  loading={bulkToggleMutation.isPending}
+                >
+                  Disable
+                </Button>
+                <div className="w-px h-8 bg-background/10 mx-1" />
+                <Button
+                  size="sm"
+                  variant="danger"
+                  className="shadow-lg shadow-danger/20"
+                  onClick={handleBulkDelete}
+                  loading={bulkDeleteMutation.isPending}
+                  leadingIcon={<Trash2 size={14} />}
+                >
+                  Delete
+                </Button>
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="ml-2 p-1 hover:bg-background/10 rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

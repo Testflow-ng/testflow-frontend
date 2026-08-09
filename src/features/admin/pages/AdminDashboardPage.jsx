@@ -25,6 +25,7 @@ import ActiveUsersChart from '../components/ActiveUsersChart.jsx';
 import LevelBarChart from '../components/LevelBarChart.jsx';
 import SessionsDonut from '../components/SessionsDonut.jsx';
 import RecentStudents from '../components/RecentStudents.jsx';
+import AdminActivityFeed from '../components/AdminActivityFeed.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -311,11 +312,22 @@ function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-1">
-          <h2 className="mb-4 font-heading text-lg font-bold text-foreground-strong">
-            Recent
-          </h2>
-          <RecentStudents students={recentUsers} />
+        <div className="lg:col-span-1 space-y-8">
+          <div>
+            <h2 className="mb-4 font-heading text-lg font-bold text-foreground-strong flex items-center gap-2">
+              <Users size={20} className="text-primary" />
+              Recent Students
+            </h2>
+            <RecentStudents students={recentUsers} />
+          </div>
+
+          <div>
+            <h2 className="mb-4 font-heading text-lg font-bold text-foreground-strong flex items-center gap-2">
+              <ShieldCheck size={20} className="text-secondary" />
+              Activity Feed
+            </h2>
+            <AdminActivityFeed />
+          </div>
         </div>
       </div>
     </div>
