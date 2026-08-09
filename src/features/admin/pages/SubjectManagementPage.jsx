@@ -52,6 +52,7 @@ function SubjectManagementPage() {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(subjectSchema),
@@ -223,7 +224,11 @@ function SubjectManagementPage() {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Subject Code" error={errors.code?.message}>
+            <Field
+                label="Subject Code"
+                error={errors.code?.message}
+                hint={watch('level') === 'post-utme' ? "Optional for Post-UTME (will be auto-generated)" : "e.g. MTH101"}
+            >
                 <Input placeholder="e.g. MTH101" {...register('code')} />
             </Field>
 

@@ -13,18 +13,23 @@ export const questionSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
-export const subjectSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .min(2, 'Code must be at least 2 characters')
-    .max(10, 'Code is too long')
-    .toUpperCase(),
-  title: z.string().trim().min(2, 'Title is required').max(160),
-  description: z.string().trim().max(500).optional(),
-  level: z.enum(['post-utme', '100', '200', '300', '400', '500'], {
-    errorMap: () => ({ message: 'Please select a valid level' }),
-  }),
-  department: z.string().trim().max(100).optional(),
-  isActive: z.boolean().default(true),
-});
+export const subjectSchema = z
+  .object({
+    code: z.string().trim().max(10, 'Code is too long').toUpperCase().optional(),
+    title: z.string().trim().min(2, 'Title is required').max(160),
+    description: z.string().trim().max(500).optional(),
+    level: z.enum(['post-utme', '100', '200', '300', '400', '500'], {
+      errorMap: () => ({ message: 'Please select a valid level' }),
+    }),
+    department: z.string().trim().max(100).optional(),
+    isActive: z.boolean().default(true),
+  })
+  .superRefine((data, ctx) => {
+    if (data.level !== 'post-utme' && (!data.code || data.code.trim().length < 2)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Code is required for university levels',
+        path: ['code'],
+      });
+    }
+  });

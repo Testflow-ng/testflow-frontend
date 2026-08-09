@@ -7,8 +7,7 @@ import {
   History,
   ChevronRight,
   Sparkles,
-  AlertCircle,
-  GraduationCap
+  AlertCircle
 } from 'lucide-react';
 import { Card, Button, Badge } from '../../../components/ui/index.js';
 import { useAuth } from '../../auth/useAuth.js';
@@ -16,7 +15,6 @@ import { cn } from '../../../utils/cn.js';
 import { Link, useNavigate } from 'react-router-dom';
 import PostUtmeSubjectSelector from './PostUtmeSubjectSelector.jsx';
 import AggregateModal from './AggregateModal.jsx';
-import MigrationModal from './MigrationModal.jsx';
 import PostUtmeRadarChart from './PostUtmeRadarChart.jsx';
 
 function StatTile({ label, value, subValue, icon: Icon, color = 'primary' }) {
@@ -50,7 +48,6 @@ function PostUtmeDashboard({ stats = [] }) {
   const navigate = useNavigate();
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [aggregateOpen, setAggregateOpen] = useState(false);
-  const [migrationOpen, setMigrationOpen] = useState(false);
 
   // Calculate average score
   const avgScore = stats.length > 0
@@ -208,23 +205,6 @@ function PostUtmeDashboard({ stats = [] }) {
         </main>
 
         <aside className="space-y-6">
-          <Card raised className="p-6 bg-foreground text-background border-none overflow-hidden relative">
-             <div className="absolute -right-10 -bottom-10 size-40 bg-primary/20 rounded-full blur-3xl" />
-             <GraduationCap size={32} className="text-primary mb-4" />
-             <h3 className="text-lg font-black tracking-tight mb-2">Ready to switch to Uni?</h3>
-             <p className="text-xs text-background/60 leading-relaxed mb-6">
-               Once you gain admission, you can migrate your account to University mode to start practicing 100L courses.
-             </p>
-             <Button
-                onClick={() => setMigrationOpen(true)}
-                variant="primary"
-                fullWidth
-                className="rounded-xl h-11 border-none shadow-none"
-             >
-                Migrate Account
-             </Button>
-          </Card>
-
           <div className="space-y-3">
              <h4 className="text-[10px] font-black uppercase tracking-widest text-muted px-1">Resources</h4>
              <Link to="/history" className="flex items-center justify-between p-4 rounded-2xl bg-surface border border-border hover:border-primary/30 transition-all group">
@@ -242,11 +222,6 @@ function PostUtmeDashboard({ stats = [] }) {
       <AggregateModal
         open={aggregateOpen}
         onOpenChange={setAggregateOpen}
-      />
-
-      <MigrationModal
-        open={migrationOpen}
-        onOpenChange={setMigrationOpen}
       />
     </div>
   );
