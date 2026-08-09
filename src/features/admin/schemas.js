@@ -22,5 +22,9 @@ export const subjectSchema = z.object({
     .toUpperCase(),
   title: z.string().trim().min(2, 'Title is required').max(160),
   description: z.string().trim().max(500).optional(),
+  level: z.enum(['post-utme', '100', '200', '300', '400', '500'], {
+    errorMap: () => ({ message: 'Please select a valid level' }),
+  }),
+  department: z.string().trim().max(100).optional(),
   isActive: z.boolean().default(true),
 });

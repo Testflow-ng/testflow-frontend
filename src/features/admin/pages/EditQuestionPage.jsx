@@ -125,7 +125,7 @@ function EditQuestionPage() {
                 <option value="">Select a subject</option>
                 {subjects?.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.code} - {s.title}
+                    {s.code} ({s.level?.toUpperCase()}) - {s.title}
                   </option>
                 ))}
               </select>

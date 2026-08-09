@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { adminApi } from '../api.js';
 import { subjectsApi } from '../../subjects/api.js';
@@ -7,10 +7,11 @@ import {
   Input,
   Card,
   Spinner,
-  Field
+  Field,
+  Badge
 } from '../../../components/ui/index.js';
 import MathText from '../../../components/MathText.jsx';
-import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BulkImportModal from '../components/BulkImportModal.jsx';
 
@@ -18,6 +19,7 @@ function QuestionBankPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [subject, setSubject] = useState('');
+  const [level, setLevel] = useState('all');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { data: subjects } = useQuery({
@@ -25,9 +27,15 @@ function QuestionBankPage() {
     queryFn: () => subjectsApi.list({ all: true }),
   });
 
+  const filteredSubjectsForSelect = useMemo(() => {
+    if (!subjects) return [];
+    if (level === 'all') return subjects;
+    return subjects.filter(s => s.level === level);
+  }, [subjects, level]);
+
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['questions', { page, search, subject }],
-    queryFn: () => adminApi.listQuestions({ page, search, subject, limit: 10 }),
+    queryKey: ['questions', { page, search, subject, level }],
+    queryFn: () => adminApi.listQuestions({ page, search, subject, level: level !== 'all' ? level : undefined, limit: 10 }),
     placeholderData: keepPreviousData,
   });
 
@@ -54,10 +62,10 @@ function QuestionBankPage() {
       </div>
 
       <Card className="p-4 mb-6">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Search Questions">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Search Questions" className="sm:col-span-1">
             <Input
-              placeholder="Search by text..."
+              placeholder="Search text..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -66,7 +74,28 @@ function QuestionBankPage() {
               leadingAdornment={<Search className="w-4 h-4 text-muted" />}
             />
           </Field>
-          <Field label="Filter by Subject">
+
+          <Field label="Filter Level">
+            <select
+              className="w-full h-11 rounded-md border border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              value={level}
+              onChange={(e) => {
+                setLevel(e.target.value);
+                setSubject(''); // Reset subject when level changes
+                setPage(1);
+              }}
+            >
+                <option value="all">All Levels</option>
+                <option value="post-utme">Post-UTME</option>
+                <option value="100">100 Level</option>
+                <option value="200">200 Level</option>
+                <option value="300">300 Level</option>
+                <option value="400">400 Level</option>
+                <option value="500">500 Level</option>
+            </select>
+          </Field>
+
+          <Field label="Filter Subject">
             <select
               className="w-full h-11 rounded-md border border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               value={subject}
@@ -75,8 +104,8 @@ function QuestionBankPage() {
                 setPage(1);
               }}
             >
-              <option value="">All Subjects</option>
-              {subjects?.map((s) => (
+              <option value="">{level === 'all' ? 'All Subjects' : `All ${level.toUpperCase()} Subjects`}</option>
+              {filteredSubjectsForSelect?.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.code} - {s.title}
                 </option>
@@ -108,6 +137,9 @@ function QuestionBankPage() {
                     <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary">
                       {q.subject?.code}
                     </span>
+                    <Badge variant={q.subject?.level === 'post-utme' ? 'warning' : 'info'} className="text-[8px] px-1.5 py-0">
+                        {q.subject?.level?.toUpperCase()}
+                    </Badge>
                     <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-strong text-muted">
                       {q.difficulty}
                     </span>

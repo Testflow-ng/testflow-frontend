@@ -10,29 +10,43 @@ import {
   IconButton,
   Field,
   Modal,
-  Alert
+  Alert,
+  Badge
 } from '../../../components/ui/index.js';
-import { Plus, Edit2, Trash2, ChevronLeft, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, ChevronLeft, Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { subjectSchema } from '../schemas.js';
+import { cn } from '../../../utils/cn.js';
+
+const LEVELS = [
+  { value: 'post-utme', label: 'Post-UTME' },
+  { value: '100', label: '100 Level' },
+  { value: '200', label: '200 Level' },
+  { value: '300', label: '300 Level' },
+  { value: '400', label: '400 Level' },
+  { value: '500', label: '500 Level' },
+];
 
 function SubjectManagementPage() {
   const queryClient = useQueryClient();
   const [editingSubject, setEditingSubject] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [levelFilter, setLevelFilter] = useState('all');
 
   const { data: subjects, isLoading } = useQuery({
     queryKey: ['subjects', { all: true }],
     queryFn: () => subjectsApi.list({ all: true }),
   });
 
-  const filteredSubjects = subjects?.filter(s =>
-    (s.code?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (s.title?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredSubjects = subjects?.filter(s => {
+    const matchesSearch = (s.code?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (s.title?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesLevel = levelFilter === 'all' || s.level === levelFilter;
+    return matchesSearch && matchesLevel;
+  });
 
   const {
     register,
@@ -41,6 +55,10 @@ function SubjectManagementPage() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(subjectSchema),
+    defaultValues: {
+      isActive: true,
+      level: '100'
+    }
   });
 
   const mutation = useMutation({
@@ -69,6 +87,8 @@ function SubjectManagementPage() {
       code: subject.code,
       title: subject.title,
       description: subject.description || '',
+      level: subject.level || '100',
+      department: subject.department || '',
       isActive: subject.isActive,
     });
     setIsModalOpen(true);
@@ -80,6 +100,8 @@ function SubjectManagementPage() {
       code: '',
       title: '',
       description: '',
+      level: '100',
+      department: '',
       isActive: true,
     });
     setIsModalOpen(true);
@@ -103,14 +125,31 @@ function SubjectManagementPage() {
       </div>
 
       <Card className="p-4 mb-6">
-        <Field label="Search Subjects">
-          <Input
-            placeholder="Search by code or title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            leadingAdornment={<Search size={16} />}
-          />
-        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Search Subjects">
+            <Input
+              placeholder="Search by code or title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              leadingAdornment={<Search size={16} />}
+            />
+          </Field>
+          <Field label="Filter by Level">
+            <div className="relative">
+                <select
+                className="w-full h-11 rounded-md border border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 appearance-none"
+                value={levelFilter}
+                onChange={(e) => setLevelFilter(e.target.value)}
+                >
+                    <option value="all">All Levels</option>
+                    {LEVELS.map(l => (
+                        <option key={l.value} value={l.value}>{l.label}</option>
+                    ))}
+                </select>
+                <Filter size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            </div>
+          </Field>
+        </div>
       </Card>
 
       {isLoading ? (
@@ -126,13 +165,25 @@ function SubjectManagementPage() {
           {filteredSubjects?.map((s) => (
             <Card key={s.id} className="p-5 flex justify-between items-center group hover:border-primary/30 transition-all">
               <div className="min-w-0 pr-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted">{s.code}</p>
+                <div className="flex items-center gap-2 mb-1.5">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted">{s.code}</p>
+                    <Badge variant={s.level === 'post-utme' ? 'warning' : 'info'} className="text-[8px] px-1.5 py-0">
+                        {s.level?.toUpperCase()}
+                    </Badge>
+                </div>
                 <h3 className="truncate font-bold text-foreground-strong tracking-tight">{s.title}</h3>
-                {!s.isActive && (
-                  <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-danger/10 text-danger mt-1.5 inline-block">
-                    Hidden from students
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                    {s.department && (
+                        <span className="text-[9px] font-bold text-muted-foreground bg-surface-strong px-2 py-0.5 rounded border border-border">
+                            {s.department}
+                        </span>
+                    )}
+                    {!s.isActive && (
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-danger/10 text-danger">
+                        Hidden
+                    </span>
+                    )}
+                </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -171,12 +222,29 @@ function SubjectManagementPage() {
             </Alert>
           )}
 
-          <Field label="Subject Code" error={errors.code?.message}>
-            <Input placeholder="e.g. MTH101" {...register('code')} />
-          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Subject Code" error={errors.code?.message}>
+                <Input placeholder="e.g. MTH101" {...register('code')} />
+            </Field>
+
+            <Field label="Academic Level" error={errors.level?.message}>
+                <select
+                    className="w-full h-11 rounded-md border border-border bg-surface px-3 text-sm text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    {...register('level')}
+                >
+                    {LEVELS.map(l => (
+                        <option key={l.value} value={l.value}>{l.label}</option>
+                    ))}
+                </select>
+            </Field>
+          </div>
 
           <Field label="Subject Title" error={errors.title?.message}>
             <Input placeholder="e.g. Introduction to Mathematics" {...register('title')} />
+          </Field>
+
+          <Field label="Department (Optional)" error={errors.department?.message}>
+            <Input placeholder="e.g. Computer Science" {...register('department')} />
           </Field>
 
           <Field label="Description (Optional)" error={errors.description?.message}>
