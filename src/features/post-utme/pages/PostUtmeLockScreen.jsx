@@ -119,6 +119,10 @@ function PostUtmeLockScreen({ config }) {
         <Card className="p-6 flex flex-col justify-between overflow-hidden relative">
           {isPending ? (
             <div className="flex flex-col items-center text-center py-4">
+               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-success">
+                  <CheckCircle2 size={12} />
+                  Success
+               </div>
                <div className="mb-6 relative">
                   <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
                   <div className="relative size-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -126,12 +130,12 @@ function PostUtmeLockScreen({ config }) {
                   </div>
                </div>
                <h3 className="text-lg font-black text-foreground-strong">Verification Pending</h3>
-               <p className="mt-2 text-sm text-muted leading-relaxed">
-                  We've received your receipt. Our admins are currently cross-referencing it with our bank statements.
+               <p className="mt-2 text-sm text-muted leading-relaxed max-w-[280px]">
+                  Receipt uploaded successfully! Your verification is now pending as the Team will be verifying your receipt.
                </p>
                <div className="mt-8 w-full rounded-2xl bg-surface-strong p-4 border border-border">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-tighter mb-1">Queue Status</p>
-                  <p className="text-xs font-bold text-foreground-strong">Verification typically takes from a few minutes to a few hours.</p>
+                  <p className="text-[10px] font-bold text-muted uppercase tracking-tighter mb-1 text-left">Queue Status</p>
+                  <p className="text-xs font-bold text-foreground-strong text-left">Verification typically takes from a few minutes to 24 hours.</p>
                </div>
                <Button
                 as="a"
