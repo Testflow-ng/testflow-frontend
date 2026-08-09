@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, FileImage, X } from 'lucide-react';
+import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, FileImage, X, Check } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Alert, Spinner } from '../../../components/ui/index.js';
@@ -10,6 +10,7 @@ function PostUtmeLockScreen({ config }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [copied, setCopied] = useState(false);
+  const [copiedAcc, setCopiedAcc] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef(null);
@@ -62,6 +63,13 @@ function PostUtmeLockScreen({ config }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const copyAccount = () => {
+    const acc = config?.paymentInfo?.accountNumber || '8147321034';
+    navigator.clipboard.writeText(acc);
+    setCopiedAcc(true);
+    setTimeout(() => setCopiedAcc(false), 2000);
+  };
+
   const request = statusData?.request;
   const isPending = user?.postUtmeStatus === 'pending' || request?.status === 'pending';
 
@@ -110,12 +118,20 @@ function PostUtmeLockScreen({ config }) {
                     <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <Check size={20} />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-black uppercase tracking-widest text-muted">Step 1: Make Payment</p>
-                        <p className="text-sm font-black text-foreground-strong">
-                            {config?.paymentInfo?.bankName || 'Opay'} · {config?.paymentInfo?.accountNumber || '8147321034'}
-                        </p>
-                        <p className="text-xs font-bold text-muted">{config?.paymentInfo?.accountName || 'Oluwadare Daniel'}</p>
+                        <div className="flex items-center justify-between gap-2 mt-1">
+                            <p className="text-sm font-black text-foreground-strong truncate">
+                                {config?.paymentInfo?.bankName || 'Opay'} · {config?.paymentInfo?.accountNumber || '8147321034'}
+                            </p>
+                            <button
+                                onClick={copyAccount}
+                                className="flex items-center gap-1 text-[10px] font-black text-primary uppercase shrink-0"
+                            >
+                                <Copy size={10} /> {copiedAcc ? 'Copied' : 'Copy'}
+                            </button>
+                        </div>
+                        <p className="text-xs font-bold text-muted truncate">{config?.paymentInfo?.accountName || 'Oluwadare Daniel'}</p>
                     </div>
                 </div>
 
