@@ -237,21 +237,42 @@ function AdminDashboardPage() {
         {/* Growth Stats */}
         <Card className="p-6 lg:col-span-2">
            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Daily Student Growth</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Student Growth Intelligence</h3>
               <TrendingUp size={18} className="text-primary" />
            </div>
            <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                  <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Today</p>
                  <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.today || 0}</h4>
+                 <div className={cn(
+                    "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black",
+                    stats.users.growth?.todayPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+                 )}>
+                    {stats.users.growth?.todayPercent >= 0 ? '+' : ''}{stats.users.growth?.todayPercent}%
+                    <span className="text-[8px] font-bold opacity-60">vs yesterday</span>
+                 </div>
               </div>
               <div className="text-center border-x border-border">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Week</p>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">This Week</p>
                  <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.week || 0}</h4>
+                 <div className={cn(
+                    "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black",
+                    stats.users.growth?.weekPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+                 )}>
+                    {stats.users.growth?.weekPercent >= 0 ? '+' : ''}{stats.users.growth?.weekPercent}%
+                    <span className="text-[8px] font-bold opacity-60">vs last week</span>
+                 </div>
               </div>
               <div className="text-center">
-                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Month</p>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">This Month</p>
                  <h4 className="text-3xl font-black text-foreground-strong">+{stats.users.growth?.month || 0}</h4>
+                 <div className={cn(
+                    "mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black",
+                    stats.users.growth?.monthPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+                 )}>
+                    {stats.users.growth?.monthPercent >= 0 ? '+' : ''}{stats.users.growth?.monthPercent}%
+                    <span className="text-[8px] font-bold opacity-60">vs last month</span>
+                 </div>
               </div>
            </div>
         </Card>
