@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { GraduationCap, Sparkles, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button, Modal, Card, Alert } from '../../../components/ui/index.js';
-import { useAuth } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
 
 const DEPARTMENTS = [

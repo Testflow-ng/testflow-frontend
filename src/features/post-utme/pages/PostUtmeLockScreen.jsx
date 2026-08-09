@@ -3,7 +3,7 @@ import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, File
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Alert, Spinner } from '../../../components/ui/index.js';
-import { useAuth } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../auth/useAuth.js';
 import { cn } from '../../../utils/cn.js';
 
 function PostUtmeLockScreen({ config }) {

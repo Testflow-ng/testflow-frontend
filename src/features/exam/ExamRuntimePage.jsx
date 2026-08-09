@@ -114,42 +114,6 @@ function ExamRuntime({ session }) {
 
   const saveUrl = isPostUtme ? `/api/post-utme/${id}/answer` : null;
 
-  const persist = useCallback(
-    (index, patch) => {
-      setAnswers((prev) => {
-        const next = [...prev];
-        if (next[index]) next[index] = { ...next[index], ...patch };
-        return next;
-      });
-
-      if (isPostUtme) {
-        fetch(saveUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questionIndex: index, ...patch })
-        }).catch(() => {});
-      } else {
-        examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
-      }
-    },
-    [id, isPostUtme, saveUrl],
-  );
-
-  const submit = useCallback(async () => {
-    if (submittingRef.current) return;
-    submittingRef.current = true;
-    setSubmitting(true);
-    try {
-      if (isPostUtme) {
-        await fetch(`/api/post-utme/${id}/submit`, { method: 'POST' });
-      } else {
-        await examApi.submit(id);
-      }
-    } catch (err) {
-      console.error('Submission Error:', err);
-    }
-    navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
-  }, [id, navigate, isPostUtme]);
   const submittingRef = useRef(false);
   const scrollRef = useRef(null);
   const pendingStrikeRef = useRef(null);
@@ -162,23 +126,20 @@ function ExamRuntime({ session }) {
         if (next[index]) next[index] = { ...next[index], ...patch };
         return next;
       });
-      examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
+
+      if (isPostUtme) {
+        fetch(saveUrl, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionIndex: index, ...patch }),
+        }).catch(() => {});
+      } else {
+        examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
+      }
     },
-    [id],
+    [id, isPostUtme, saveUrl],
   );
 
-  /*
-    Submit, then hold the suspense overlay for a floor of ~1.7s.
-
-    Marking is a single fast request, so without a floor the overlay would
-    flash and vanish — worse than no overlay at all. The floor runs *in
-    parallel* with the request via Promise.all, so a slow network is never
-    penalised twice: the wait is max(request, floor), never the sum.
-
-    The phase steps on a timer so the screen reads as progress rather than a
-    stall, and the submit itself still completes even if the user's connection
-    makes the request outlast the animation.
-  */
   const submit = useCallback(async () => {
     if (submittingRef.current) return;
     submittingRef.current = true;
@@ -190,7 +151,11 @@ function ExamRuntime({ session }) {
     const floor = new Promise((resolve) => setTimeout(resolve, 1700));
 
     try {
-      await Promise.all([examApi.submit(id), floor]);
+      if (isPostUtme) {
+        await Promise.all([fetch(`/api/post-utme/${id}/submit`, { method: 'POST' }), floor]);
+      } else {
+        await Promise.all([examApi.submit(id), floor]);
+      }
     } catch (err) {
       console.error('Submission Error:', err);
     } finally {
@@ -198,8 +163,8 @@ function ExamRuntime({ session }) {
       clearTimeout(stepB);
     }
 
-    navigate(`/exam/${id}/result`, { replace: true });
-  }, [id, navigate]);
+    navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
+  }, [id, navigate, isPostUtme]);
 
   const remaining = useCountdown(session.expiresAt, submit);
 

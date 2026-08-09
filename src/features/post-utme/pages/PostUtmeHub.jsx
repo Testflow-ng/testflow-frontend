@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../auth/useAuth.js';
 import PageLoader from '../../../components/PageLoader.jsx';
 import PostUtmeLockScreen from './PostUtmeLockScreen.jsx';
 import PostUtmeWelcomeFlow from '../components/PostUtmeWelcomeFlow.jsx';

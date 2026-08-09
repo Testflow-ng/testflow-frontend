@@ -11,7 +11,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { Card, Button, Badge } from '../../../components/ui/index.js';
-import { useAuth } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../auth/useAuth.js';
 import { cn } from '../../../utils/cn.js';
 import { Link, useNavigate } from 'react-router-dom';
 import PostUtmeSubjectSelector from './PostUtmeSubjectSelector.jsx';

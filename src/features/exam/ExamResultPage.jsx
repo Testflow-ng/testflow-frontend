@@ -15,7 +15,7 @@ import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 import { useCallback, useRef, useState, useMemo } from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
+import { useAuth } from '../auth/useAuth.js';
 
 const letter = (index) => String.fromCharCode(65 + index);
 

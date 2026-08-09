@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Calculator, Check, Save } from 'lucide-react';
 import { Button, Modal, Card, Alert } from '../../../components/ui/index.js';
-import { useAuth } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../auth/useAuth.js';
 
 const GRADES = [
   { label: 'A1', points: 10 },
