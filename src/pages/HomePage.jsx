@@ -353,7 +353,7 @@ function HomePage() {
                 transition={{ duration: 0.5, delay: 0.35 }}
                 className="mt-6 max-w-md text-base leading-relaxed text-muted sm:text-lg"
               >
-                The CBT practice platform built for OAU. Timed mock exams, instant corrections,
+                The CBT practice platform built for excellence. Timed mock exams, instant corrections,
                 progress tracking.
               </motion.p>
 

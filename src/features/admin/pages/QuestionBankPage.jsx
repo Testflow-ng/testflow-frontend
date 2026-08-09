@@ -11,9 +11,10 @@ import {
   Badge
 } from '../../../components/ui/index.js';
 import MathText from '../../../components/MathText.jsx';
-import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Filter, CheckSquare, Square, X, Check } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, ChevronLeft, ChevronRight, Upload, Filter, CheckSquare, Square, X, Check, Share2, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BulkImportModal from '../components/BulkImportModal.jsx';
+import QuestionAnalyticsModal from '../components/QuestionAnalyticsModal.jsx';
 import { cn } from '../../../utils/cn.js';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,6 +25,7 @@ function QuestionBankPage() {
   const [level, setLevel] = useState('all');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
+  const [analyticsQuestionId, setAnalyticsQuestionId] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -236,6 +238,9 @@ function QuestionBankPage() {
                         {q.topic}
                       </span>
                     )}
+                    {q.isShareable && (
+                      <Badge variant="success" className="text-[8px] px-1.5 py-0">PUBLIC</Badge>
+                    )}
                   </div>
                   <MathText className="text-foreground-strong font-medium line-clamp-2 mb-2">
                     {q.stem}
@@ -248,6 +253,28 @@ function QuestionBankPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  {q.isShareable && (
+                    <>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/api/public/questions/${q.id}/share`;
+                          navigator.clipboard.writeText(url);
+                          alert('Public share link copied to clipboard!');
+                        }}
+                        className="p-2.5 rounded-xl bg-surface-strong text-primary hover:bg-primary hover:text-white transition-all border border-border"
+                        title="Copy Share Link"
+                      >
+                        <Share2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => setAnalyticsQuestionId(q.id)}
+                        className="p-2.5 rounded-xl bg-surface-strong text-info hover:bg-info hover:text-white transition-all border border-border"
+                        title="View Public Analytics"
+                      >
+                        <BarChart3 size={16} />
+                      </button>
+                    </>
+                  )}
                   <Link to={`/admin/questions/${q.id}/edit`}>
                     <button
                       className="p-2.5 rounded-xl bg-surface-strong text-foreground hover:bg-primary hover:text-white transition-all border border-border"
@@ -305,6 +332,11 @@ function QuestionBankPage() {
       <BulkImportModal
         open={isImportModalOpen}
         onOpenChange={setIsImportModalOpen}
+      />
+
+      <QuestionAnalyticsModal
+        questionId={analyticsQuestionId}
+        onOpenChange={(open) => !open && setAnalyticsQuestionId(null)}
       />
 
       {/* Floating Bulk Action Bar */}

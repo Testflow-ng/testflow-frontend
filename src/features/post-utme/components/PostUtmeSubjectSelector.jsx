@@ -4,6 +4,9 @@ import { Check, Info, Search, Target, Zap } from 'lucide-react';
 import { Button, Modal, Card, SkeletonCard, Alert } from '../../../components/ui/index.js';
 import { cn } from '../../../utils/cn.js';
 
+import { adminApi } from '../../admin/api.js';
+import apiClient from '../../../api/client.js';
+
 function PostUtmeSubjectSelector({ open, onOpenChange, onStart }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [search, setSearch] = useState('');
@@ -11,10 +14,8 @@ function PostUtmeSubjectSelector({ open, onOpenChange, onStart }) {
   const { data: subjects, isLoading, isError } = useQuery({
     queryKey: ['subjects', 'post-utme'],
     queryFn: async () => {
-      const res = await fetch('/api/subjects?level=post-utme');
-      if (!res.ok) throw new Error('Failed to load subjects');
-      const data = await res.json();
-      return data.subjects;
+      const res = await apiClient.get('/api/subjects', { params: { level: 'post-utme' } });
+      return res.data.subjects;
     },
   });
 

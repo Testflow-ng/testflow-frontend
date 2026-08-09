@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Card, Button, Badge, Modal, Spinner, Alert, Input, Field } from '../../../components/ui/index.js';
 import PageLoader from '../../../components/PageLoader.jsx';
 import { cn } from '../../../utils/cn.js';
+import apiClient from '../../../api/client.js';
 
 function VerificationQueuePage() {
   const queryClient = useQueryClient();
@@ -14,21 +15,17 @@ function VerificationQueuePage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['verificationQueue', activeTab],
     queryFn: async () => {
-      const res = await fetch(`/api/verifications/queue?status=${activeTab === 'pending' ? 'pending' : 'all'}`);
-      if (!res.ok) throw new Error('Failed to load queue');
-      return res.json();
+      const res = await apiClient.get('/api/verifications/queue', {
+        params: { status: activeTab === 'pending' ? 'pending' : 'all' }
+      });
+      return res.data;
     }
   });
 
   const processMutation = useMutation({
     mutationFn: async ({ id, status }) => {
-      const res = await fetch(`/api/verifications/${id}/process`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      if (!res.ok) throw new Error('Failed to process request');
-      return res.json();
+      const res = await apiClient.patch(`/api/verifications/${id}/process`, { status });
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['verificationQueue']);

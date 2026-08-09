@@ -43,11 +43,20 @@ function StatTile({ label, value, subValue, icon: Icon, color = 'primary' }) {
   );
 }
 
-function PostUtmeDashboard({ stats = [] }) {
+function PostUtmeDashboard({ stats = [], isLoading = false }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [aggregateOpen, setAggregateOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-6xl px-5 py-20 flex flex-col items-center justify-center">
+         <Spinner size="lg" />
+         <p className="mt-4 text-xs font-bold text-muted uppercase tracking-widest animate-pulse">Calculating your trajectory...</p>
+      </div>
+    );
+  }
 
   // Calculate average score
   const avgScore = stats.length > 0

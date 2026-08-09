@@ -113,7 +113,7 @@ function AdminSettingsPage() {
                     <Input {...register('paymentAccountNumber')} placeholder="0123456789" />
                  </Field>
                  <Field label="Account Name">
-                    <Input {...register('paymentAccountName')} placeholder="NACOS OAU" />
+                    <Input {...register('paymentAccountName')} placeholder="e.g. Oluwadare Daniel" />
                  </Field>
               </div>
            </Card>

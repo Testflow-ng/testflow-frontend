@@ -74,6 +74,8 @@ function EditQuestionPage() {
         explanation: question.explanation || '',
         difficulty: question.difficulty,
         isActive: question.isActive,
+        isShareable: question.isShareable || false,
+        shareTitle: question.shareTitle || '',
       });
     }
   }, [question, reset]);
@@ -226,6 +228,32 @@ function EditQuestionPage() {
               {...register('explanation')}
             />
           </Field>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold text-foreground-strong mb-4">Sharing & Engagement</h2>
+          <div className="space-y-5">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-surface-strong border border-border">
+                <div>
+                   <p className="text-xs font-bold text-foreground-strong">Make Shareable</p>
+                   <p className="text-[10px] text-muted">Generate a public link to share on WhatsApp.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        {...register('isShareable')}
+                        className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+            </div>
+
+            {watch('isShareable') && (
+                <Field label="Social Preview Title (Optional)" error={errors.shareTitle?.message}>
+                    <Input placeholder="e.g. Can you solve this Math challenge?" {...register('shareTitle')} />
+                </Field>
+            )}
+          </div>
         </Card>
 
         <div className="flex items-center gap-4">

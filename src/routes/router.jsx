@@ -35,6 +35,7 @@ import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage
 import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
 import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
+import PublicQuestionPage from '../features/public-questions/pages/PublicQuestionPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'question/:id', element: <PublicQuestionPage /> },
       {
         element: <PublicOnly />,
         children: [

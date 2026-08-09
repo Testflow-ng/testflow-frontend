@@ -1,10 +1,12 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, FileImage, X, Check } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Alert, Spinner } from '../../../components/ui/index.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { cn } from '../../../utils/cn.js';
+import apiClient from '../../../api/client.js';
+import CryptoJS from 'crypto-js';
 
 function PostUtmeLockScreen({ config }) {
   const { user } = useAuth();
@@ -18,22 +20,67 @@ function PostUtmeLockScreen({ config }) {
   const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: ['verificationStatus'],
     queryFn: async () => {
-      const res = await fetch('/api/verifications/my-status');
-      return res.json();
+      const res = await apiClient.get('/api/verifications/my-status');
+      return res.data;
     }
   });
 
+  const getIKAuth = async () => {
+    const res = await apiClient.get('/api/verifications/auth');
+    return res.data;
+  };
+
+  const getFileHash = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const words = CryptoJS.lib.WordArray.create(e.target.result);
+        const hash = CryptoJS.MD5(words).toString();
+        resolve(hash);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
   const uploadMutation = useMutation({
-    mutationFn: async (formData) => {
-      const res = await fetch('/api/verifications/submit', {
+    mutationFn: async () => {
+      if (!file) return;
+
+      // 1. Get Auth Parameters
+      const auth = await getIKAuth();
+
+      // 2. Calculate Hash
+      const hash = await getFileHash(file);
+
+      // 3. Upload to ImageKit
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', `receipt-${user.id}-${Date.now()}`);
+      formData.append('folder', '/receipts');
+      formData.append('publicKey', import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY || '');
+      formData.append('signature', auth.signature);
+      formData.append('expire', auth.expire);
+      formData.append('token', auth.token);
+
+      const ikResponse = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
         method: 'POST',
         body: formData,
       });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Upload failed');
+
+      if (!ikResponse.ok) {
+        const errorData = await ikResponse.json();
+        throw new Error(errorData.message || 'ImageKit upload failed');
       }
-      return res.json();
+
+      const ikData = await ikResponse.json();
+
+      // 4. Submit to our Backend
+      const res = await apiClient.post('/api/verifications/submit', {
+        receiptImage: ikData.url,
+        receiptHash: hash
+      });
+
+      return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['verificationStatus']);
@@ -51,10 +98,7 @@ function PostUtmeLockScreen({ config }) {
   };
 
   const handleUpload = () => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('receipt', file);
-    uploadMutation.mutate(formData);
+    uploadMutation.mutate();
   };
 
   const copyCode = () => {

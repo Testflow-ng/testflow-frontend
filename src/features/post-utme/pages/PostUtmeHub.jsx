@@ -6,32 +6,29 @@ import PostUtmeLockScreen from './PostUtmeLockScreen.jsx';
 import PostUtmeWelcomeFlow from '../components/PostUtmeWelcomeFlow.jsx';
 import PostUtmeDashboard from '../components/PostUtmeDashboard.jsx';
 import { Alert } from '../../../components/ui/index.js';
+import apiClient from '../../../api/client.js';
 
 function PostUtmeHub() {
   const { user } = useAuth();
   const [showWelcome, setShowWelcome] = useState(() => {
-    return user?.isPostUtmePaid && !localStorage.getItem('tf_utme_welcomed');
+    return user?.postUtmeStatus === 'verified' && !localStorage.getItem('tf_utme_welcomed');
   });
 
   const { data: config, isLoading: isConfigLoading, isError } = useQuery({
     queryKey: ['publicConfig'],
     queryFn: async () => {
-      const res = await fetch('/api/public/config');
-      if (!res.ok) throw new Error('Failed to load config');
-      const data = await res.json();
-      return data;
+      const res = await apiClient.get('/api/public/config');
+      return res.data;
     },
   });
 
   const { data: stats, isLoading: isStatsLoading } = useQuery({
     queryKey: ['postUtmeStats'],
     queryFn: async () => {
-      const res = await fetch('/api/post-utme/stats');
-      if (!res.ok) throw new Error('Failed to load stats');
-      const data = await res.json();
-      return data.stats;
+      const res = await apiClient.get('/api/post-utme/stats');
+      return res.data.stats;
     },
-    enabled: !!user?.isPostUtmePaid,
+    enabled: user?.postUtmeStatus === 'verified',
   });
 
   if (isConfigLoading || (user?.isPostUtmePaid && isStatsLoading)) return <PageLoader label="Opening the Vault" />;
@@ -55,7 +52,7 @@ function PostUtmeHub() {
     return <PostUtmeWelcomeFlow onComplete={() => setShowWelcome(false)} />;
   }
 
-  return <PostUtmeDashboard stats={stats} />;
+  return <PostUtmeDashboard stats={stats} isLoading={isStatsLoading} />;
 }
 
 export default PostUtmeHub;

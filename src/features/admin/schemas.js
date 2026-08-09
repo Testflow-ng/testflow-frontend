@@ -11,6 +11,8 @@ export const questionSchema = z.object({
   explanation: z.string().trim().max(2000).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
   isActive: z.boolean().default(true),
+  isShareable: z.boolean().default(false),
+  shareTitle: z.string().trim().max(200).optional(),
 });
 
 export const subjectSchema = z

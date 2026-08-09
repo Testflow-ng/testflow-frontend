@@ -47,4 +47,5 @@ export const adminApi = {
   // Bulk Questions Actions
   bulkDeleteQuestions: (ids) => apiClient.post('/api/admin/questions/bulk-delete', { ids }).then((res) => res.data),
   bulkToggleQuestions: (ids, isActive) => apiClient.post('/api/admin/questions/bulk-toggle', { ids, isActive }).then((res) => res.data),
+  getQuestionAnalytics: (id) => apiClient.get(`/api/admin/questions/${id}/analytics`).then((res) => res.data),
 };

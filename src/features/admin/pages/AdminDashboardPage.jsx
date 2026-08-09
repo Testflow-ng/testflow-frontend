@@ -16,6 +16,7 @@ import {
   Search,
   Settings,
   ArrowRight,
+  Lightbulb,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
 import { Spinner, Alert, Button, Card } from '../../../components/ui/index.js';
@@ -28,6 +29,7 @@ import LevelBarChart from '../components/LevelBarChart.jsx';
 import SessionsDonut from '../components/SessionsDonut.jsx';
 import RecentStudents from '../components/RecentStudents.jsx';
 import AdminActivityFeed from '../components/AdminActivityFeed.jsx';
+import apiClient from '../../../api/client.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
@@ -51,15 +53,7 @@ function AdminDashboardPage() {
     setVerifying(true);
     setVerifyStatus(null);
     try {
-      const res = await fetch('/api/admin/verify-utme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ verificationCode: utmeCode })
-      });
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Verification failed');
-      }
+      const res = await apiClient.post('/api/admin/verify-utme', { verificationCode: utmeCode });
       setVerifyStatus({ type: 'success', message: 'User verified successfully!' });
       setUtmeCode('');
       queryClient.invalidateQueries(['adminStats']);
@@ -124,6 +118,14 @@ function AdminDashboardPage() {
       icon: Settings,
       color: 'text-primary',
       bg: 'bg-primary/10',
+    },
+    {
+      title: 'Brainstorming',
+      description: 'AI-assisted space for planning new content.',
+      href: '/admin/brainstorm',
+      icon: Lightbulb,
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
     },
   ];
 
