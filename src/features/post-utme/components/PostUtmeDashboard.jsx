@@ -54,7 +54,7 @@ function PostUtmeDashboard({ stats = [] }) {
     ? (stats.reduce((acc, s) => acc + s.totalScore, 0) / stats.length).toFixed(1)
     : '0.0';
 
-  // OAU Aggregate Calculation (simplified example)
+  // Aggregate Calculation (simplified example)
   const jambContribution = (user.utmeData?.jambScore || 0) / 8;
   const oLevelContribution = user.utmeData?.oLevelPoints || 0;
   const postUtmeContribution = stats.length > 0 ? parseFloat(avgScore) : 0;

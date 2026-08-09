@@ -224,7 +224,7 @@ function ExamResultPage() {
           ...data.session,
           score: Math.round((data.session.totalScore / 40) * 100),
           correctCount: data.session.totalScore,
-          subjectCode: 'OAU POST-UTME'
+          subjectCode: 'POST-UTME'
         };
       }
       return examApi.result(id);
@@ -349,7 +349,7 @@ function ExamResultPage() {
              <span className="text-xs font-bold text-background/40">/ 100.00</span>
           </div>
           <p className="mt-3 text-[10px] leading-relaxed text-background/60">
-            Calculated using OAU's 50:40:10 formula (JAMB: {((user.utmeData?.jambScore || 0)/8).toFixed(2)} + Post-UTME: {result.totalScore.toFixed(2)} + O-Level: {(user.utmeData?.oLevelPoints || 0).toFixed(2)}).
+            Calculated using the 50:40:10 formula (JAMB: {((user.utmeData?.jambScore || 0)/8).toFixed(2)} + Post-UTME: {result.totalScore.toFixed(2)} + O-Level: {(user.utmeData?.oLevelPoints || 0).toFixed(2)}).
           </p>
         </motion.div>
       )}

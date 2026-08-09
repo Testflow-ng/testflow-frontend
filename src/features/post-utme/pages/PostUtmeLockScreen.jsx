@@ -83,7 +83,7 @@ function PostUtmeLockScreen({ config }) {
           Unlock Post-UTME Excellence
         </h1>
         <p className="mt-4 text-base leading-relaxed text-muted max-w-md">
-          Join thousands of scholars preparing for OAU Post-UTME. Get access to mocks, analytics, and calculators.
+          Join thousands of scholars preparing for Post-UTME. Get access to mocks, analytics, and calculators.
         </p>
       </motion.div>
 
@@ -279,7 +279,7 @@ function PostUtmeLockScreen({ config }) {
       </div>
 
       <p className="mt-12 text-center text-[10px] font-bold text-muted uppercase tracking-[0.2em]">
-        Verified by NACOS OAU Team
+        Verified by Team
       </p>
     </div>
   );
