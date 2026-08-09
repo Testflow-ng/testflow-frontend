@@ -19,6 +19,7 @@ import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
 import LiveCBTPage from '../features/live/LiveCBTPage.jsx';
 import AIStudyPage from '../features/ai/AIStudyPage.jsx';
+import PostUtmeHub from '../features/post-utme/pages/PostUtmeHub.jsx';
 import CoursesPage from '../features/subjects/CoursesPage.jsx';
 import SetupPage from '../features/auth/pages/SetupPage.jsx';
 import SettingsPage from '../features/settings/SettingsPage.jsx';
@@ -30,6 +31,9 @@ import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
 import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
 import StudentManagementPage from '../features/admin/pages/StudentManagementPage.jsx';
 import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
+import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage.jsx';
+import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
+import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -68,6 +72,7 @@ export const router = createBrowserRouter([
           { path: 'settings/notifications', element: <NotificationPreferencesPage /> },
           { path: 'live', element: <LiveCBTPage /> },
           { path: 'ai-study', element: <AIStudyPage /> },
+          { path: 'post-utme', element: <PostUtmeHub /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
           {
@@ -79,6 +84,9 @@ export const router = createBrowserRouter([
               { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
               { path: 'admin/subjects', element: <SubjectManagementPage /> },
               { path: 'admin/students', element: <StudentManagementPage /> },
+              { path: 'admin/rankings', element: <PostUtmeRankingsPage /> },
+              { path: 'admin/verifications', element: <VerificationQueuePage /> },
+              { path: 'admin/settings', element: <AdminSettingsPage /> },
               { path: 'admin/roster', element: <AdminRosterPage /> },
             ],
           },

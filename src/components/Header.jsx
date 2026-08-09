@@ -14,6 +14,7 @@ import {
   TrendingUp,
   User,
   Users,
+  Zap,
 } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import Logo from './Logo.jsx';
@@ -42,6 +43,7 @@ function Header() {
 
   const authLinks = [
     { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+    { to: '/post-utme', label: 'Post-UTME', Icon: Zap },
     { to: '/live', label: 'Live CBT', Icon: Users },
     { to: '/courses', label: 'Courses', Icon: TrendingUp },
     { to: '/history', label: 'History', Icon: History },

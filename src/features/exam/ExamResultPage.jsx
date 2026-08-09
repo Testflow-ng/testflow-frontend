@@ -1,7 +1,8 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronDown, Download, RotateCcw, Share2, X } from 'lucide-react';
-import { Alert, Button, Modal } from '../../components/ui/index.js';
+import { motion } from 'framer-motion';
+import { Check, ChevronDown, Download, RotateCcw, Share2, X, TrendingUp, Sparkles, Award } from 'lucide-react';
+import { Alert, Button, Modal, Card } from '../../components/ui/index.js';
 import { cardClasses, listRowClasses } from '../../components/ui/surfaces.js';
 import Mascot from '../../components/brand/Mascot.jsx';
 import Confetti from '../../components/brand/Confetti.jsx';
@@ -13,7 +14,8 @@ import PageLoader from '../../components/PageLoader.jsx';
 import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
@@ -189,9 +191,14 @@ function drawResultCard(canvas, result, memeMode) {
 
 function ExamResultPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isPostUtme = searchParams.get('type') === 'post-utme';
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const [shareOpen, setShareOpen] = useState(false);
+
   /*
     Badges are derived from stats, so this reads the stats that were just
     refreshed by the submit. Any badge the attempt unlocked is celebrated here,
@@ -200,6 +207,7 @@ function ExamResultPage() {
   */
   const { data: stats } = useStats();
   const { fresh: newBadges, acknowledge } = useNewAchievements(stats);
+
   const {
     data: result,
     isLoading,
@@ -207,10 +215,31 @@ function ExamResultPage() {
     error,
   } = useQuery({
     queryKey: ['examResult', id],
-    queryFn: () => examApi.result(id),
+    queryFn: async () => {
+      if (isPostUtme) {
+        const res = await fetch(`/api/post-utme/${id}/submit`, { method: 'POST' });
+        if (!res.ok) throw new Error('Failed to load Post-UTME result');
+        const data = await res.json();
+        return {
+          ...data.session,
+          score: Math.round((data.session.totalScore / 40) * 100),
+          correctCount: data.session.totalScore,
+          subjectCode: 'OAU POST-UTME'
+        };
+      }
+      return examApi.result(id);
+    },
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const aggregate = useMemo(() => {
+    if (!isPostUtme || !result || !user) return null;
+    const jamb = (user.utmeData?.jambScore || 0) / 8;
+    const oLevel = user.utmeData?.oLevelPoints || 0;
+    const postUtme = result.totalScore || 0;
+    return (jamb + oLevel + postUtme).toFixed(2);
+  }, [isPostUtme, result, user]);
 
   const downloadCard = useCallback((memeMode) => {
     if (!result || !canvasRef.current) return;
@@ -300,6 +329,30 @@ function ExamResultPage() {
           {reaction.line}
         </p>
       </div>
+
+      {isPostUtme && aggregate && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-4 rounded-3xl bg-foreground p-6 text-background overflow-hidden relative"
+        >
+          <div className="absolute -right-6 -top-6 size-24 bg-primary/20 rounded-full blur-2xl" />
+          <div className="flex items-center justify-between mb-4">
+             <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-background/60">Admission Aggregate</span>
+             </div>
+             <Award size={18} className="text-primary" />
+          </div>
+          <div className="flex items-baseline gap-2">
+             <h3 className="text-4xl font-black tracking-tight">{aggregate}%</h3>
+             <span className="text-xs font-bold text-background/40">/ 100.00</span>
+          </div>
+          <p className="mt-3 text-[10px] leading-relaxed text-background/60">
+            Calculated using OAU's 50:40:10 formula (JAMB: {((user.utmeData?.jambScore || 0)/8).toFixed(2)} + Post-UTME: {result.totalScore.toFixed(2)} + O-Level: {(user.utmeData?.oLevelPoints || 0).toFixed(2)}).
+          </p>
+        </motion.div>
+      )}
 
       {/* Stats strip */}
       <div className="mt-3 grid grid-cols-3 gap-2.5">

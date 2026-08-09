@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, GraduationCap, Home, User, Users } from 'lucide-react';
+import { BookOpen, GraduationCap, Home, User, Users, Zap } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 
 const items = [
   { to: '/dashboard', label: 'Home', Icon: Home },
-  { to: '/history', label: 'History', Icon: BookOpen },
+  { to: '/post-utme', label: 'UTME', Icon: Zap },
   { to: '/live', label: 'Live', Icon: Users },
   { to: '/courses', label: 'Courses', Icon: GraduationCap },
   { to: '/profile', label: 'Profile', Icon: User },

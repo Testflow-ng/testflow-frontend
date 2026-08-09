@@ -33,4 +33,11 @@ export const adminApi = {
   updateSubject: (id, data) =>
     apiClient.patch(`/api/subjects/${id}`, data).then((res) => res.data.subject),
   deleteSubject: (id) => apiClient.delete(`/api/subjects/${id}`).then((res) => res.data),
+
+  // Post-UTME Rankings
+  getPostUtmeRankings: () => apiClient.get('/api/admin/post-utme/rankings').then((res) => res.data.rankings),
+
+  // Global Settings
+  getSettings: () => apiClient.get('/api/admin/settings').then((res) => res.data.settings),
+  updateSettings: (payload) => apiClient.patch('/api/admin/settings', payload).then((res) => res.data.settings),
 };
