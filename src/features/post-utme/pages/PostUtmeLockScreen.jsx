@@ -57,7 +57,7 @@ function PostUtmeLockScreen({ config }) {
       formData.append('file', file);
       formData.append('fileName', `receipt-${user.id}-${Date.now()}`);
       formData.append('folder', '/receipts');
-      formData.append('publicKey', import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY || '');
+      formData.append('publicKey', auth.publicKey);
       formData.append('signature', auth.signature);
       formData.append('expire', auth.expire);
       formData.append('token', auth.token);
