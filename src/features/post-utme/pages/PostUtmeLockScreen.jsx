@@ -108,10 +108,10 @@ function PostUtmeLockScreen({ config }) {
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-white">
                     <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <span className="font-black text-sm">1</span>
+                        <Check size={20} />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Transfer to</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Step 1: Make Payment</p>
                         <p className="text-sm font-black text-foreground-strong">
                             {config?.paymentInfo?.bankName || 'Opay'} · {config?.paymentInfo?.accountNumber || '8147321034'}
                         </p>
@@ -121,16 +121,13 @@ function PostUtmeLockScreen({ config }) {
 
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-white">
                     <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <span className="font-black text-sm">2</span>
+                        <Check size={20} />
                     </div>
-                    <div className="flex-1">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Include Code in Narration</p>
-                        <div className="flex items-center justify-between mt-1">
-                            <p className="text-sm font-black text-primary tracking-widest">{user.verificationCode}</p>
-                            <button onClick={copyCode} className="text-[10px] font-bold text-muted hover:text-primary uppercase flex items-center gap-1">
-                                <Copy size={10} /> {copied ? 'Copied' : 'Copy'}
-                            </button>
-                        </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Step 2: Upload Receipt</p>
+                        <p className="text-sm font-black text-foreground-strong">
+                            Take a screenshot of your successful transfer and upload it here.
+                        </p>
                     </div>
                 </div>
               </div>
@@ -212,7 +209,7 @@ function PostUtmeLockScreen({ config }) {
                     </div>
                     <p className="text-sm font-black text-foreground-strong">Tap to upload receipt</p>
                     <p className="mt-2 text-[10px] text-muted text-center max-w-[180px] leading-relaxed uppercase tracking-tighter">
-                        Ensure the student code or your name is visible on the image.
+                        Please ensure the transfer details are clearly visible on the image.
                     </p>
                     <input
                       type="file"
