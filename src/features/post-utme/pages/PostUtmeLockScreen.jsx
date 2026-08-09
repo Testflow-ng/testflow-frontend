@@ -160,13 +160,13 @@ function PostUtmeLockScreen({ config }) {
               {!preview ? (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 cursor-pointer flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-strong transition-all hover:border-primary/50 hover:bg-primary/5 p-6 group"
+                  className="flex-1 cursor-pointer flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-strong transition-all hover:border-primary/50 hover:bg-primary/5 p-6 group min-h-[200px]"
                 >
                   <div className="size-12 rounded-xl bg-surface border border-border flex items-center justify-center text-muted group-hover:text-primary transition-colors mb-3">
                      <Upload size={24} />
                   </div>
-                  <p className="text-xs font-bold text-foreground-strong">Upload Receipt Image</p>
-                  <p className="mt-1 text-[10px] text-muted">PNG or JPG, Max 5MB</p>
+                  <p className="text-xs font-bold text-foreground-strong">Click to upload receipt</p>
+                  <p className="mt-1 text-[10px] text-muted text-center max-w-[150px]">Please ensure your name or student code is in the bank narration.</p>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -176,16 +176,16 @@ function PostUtmeLockScreen({ config }) {
                   />
                 </div>
               ) : (
-                <div className="flex-1 relative rounded-2xl overflow-hidden border border-border bg-surface-strong">
+                <div className="flex-1 relative rounded-2xl overflow-hidden border border-border bg-surface-strong min-h-[200px]">
                    <img src={preview} alt="Receipt Preview" className="h-full w-full object-cover opacity-50" />
-                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-background/40 backdrop-blur-[2px]">
                       <div className="size-10 rounded-full bg-white shadow-lg flex items-center justify-center text-primary mb-2">
                          <FileImage size={20} />
                       </div>
                       <p className="text-xs font-black text-foreground-strong truncate max-w-full px-2">{file.name}</p>
                       <button
                         onClick={() => { setFile(null); setPreview(null); }}
-                        className="mt-4 flex items-center gap-1.5 text-[10px] font-bold text-danger bg-danger/10 px-3 py-1.5 rounded-full"
+                        className="mt-4 flex items-center gap-1.5 text-[10px] font-bold text-danger bg-danger/10 px-3 py-1.5 rounded-full hover:bg-danger/20 transition-all"
                       >
                          <X size={12} /> Remove
                       </button>
@@ -195,13 +195,13 @@ function PostUtmeLockScreen({ config }) {
 
               <Button
                 onClick={handleUpload}
-                disabled={!file}
+                disabled={!file || uploadMutation.isPending}
                 loading={uploadMutation.isPending}
                 variant="primary"
                 className="mt-6 w-full h-12 rounded-2xl shadow-xl shadow-primary/20"
                 leadingIcon={<CheckCircle2 size={20} />}
               >
-                Submit for Verification
+                {uploadMutation.isPending ? 'Uploading...' : 'Submit for Verification'}
               </Button>
             </div>
           )}

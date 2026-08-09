@@ -18,7 +18,6 @@ function RootLayout() {
   const location = useLocation();
 
   const isExamPage = EXAM_PATTERN.test(location.pathname);
-  const showBottomNav = isAuthenticated && !isLoading && !isExamPage;
 
   return (
     <div className="relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
@@ -38,8 +37,7 @@ function RootLayout() {
         </motion.div>
       </main>
 
-      {showBottomNav && <BottomNav />}
-      {showBottomNav && <NightOwlPopup />}
+      {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />}
     </div>
   );
 }
