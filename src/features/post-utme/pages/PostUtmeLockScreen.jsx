@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, FileImage, X, Check } from 'lucide-react';
+import { Lock, MessageCircle, Copy, CheckCircle2, ShieldCheck, Zap, Upload, FileImage, X, Check, Clock } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Alert, Spinner } from '../../../components/ui/index.js';
