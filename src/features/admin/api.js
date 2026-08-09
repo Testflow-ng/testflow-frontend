@@ -42,7 +42,7 @@ export const adminApi = {
   updateSettings: (payload) => apiClient.patch('/api/admin/settings', payload).then((res) => res.data.settings),
 
   // Activity Feed
-  getActivityFeed: () => apiClient.get('/api/admin/activity').then((res) => res.data.logs),
+  getActivityFeed: (params) => apiClient.get('/api/admin/activity', { params }).then((res) => res.data),
 
   // Bulk Questions Actions
   bulkDeleteQuestions: (ids) => apiClient.post('/api/admin/questions/bulk-delete', { ids }).then((res) => res.data),

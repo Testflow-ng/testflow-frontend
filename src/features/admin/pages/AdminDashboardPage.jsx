@@ -15,6 +15,7 @@ import {
   Check,
   Search,
   Settings,
+  ArrowRight,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
 import { Spinner, Alert, Button, Card } from '../../../components/ui/index.js';
@@ -326,11 +327,23 @@ function AdminDashboardPage() {
           </div>
 
           <div>
-            <h2 className="mb-4 font-heading text-lg font-bold text-foreground-strong flex items-center gap-2">
-              <ShieldCheck size={20} className="text-secondary" />
-              Activity Feed
-            </h2>
-            <AdminActivityFeed />
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-heading text-lg font-bold text-foreground-strong flex items-center gap-2">
+                <ShieldCheck size={20} className="text-secondary" />
+                Activity Feed
+              </h2>
+              <Link to="/admin/activity" className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
+                View All
+              </Link>
+            </div>
+            <Link to="/admin/activity">
+              <Card className="p-4 hover:border-primary/30 transition-all cursor-pointer group">
+                <AdminActivityFeed limit={5} />
+                <div className="mt-4 pt-4 border-t border-border flex items-center justify-center gap-2 text-[10px] font-bold text-muted group-hover:text-primary transition-colors">
+                   See full system log <ArrowRight size={12} />
+                </div>
+              </Card>
+            </Link>
           </div>
         </div>
       </div>

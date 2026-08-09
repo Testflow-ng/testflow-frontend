@@ -34,6 +34,7 @@ import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
 import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage.jsx';
 import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
+import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
 
 export const router = createBrowserRouter([
   {
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
               { path: 'admin/students', element: <StudentManagementPage /> },
               { path: 'admin/rankings', element: <PostUtmeRankingsPage /> },
               { path: 'admin/verifications', element: <VerificationQueuePage /> },
+              { path: 'admin/activity', element: <AdminActivityPage /> },
               { path: 'admin/settings', element: <AdminSettingsPage /> },
               { path: 'admin/roster', element: <AdminRosterPage /> },
             ],

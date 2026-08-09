@@ -88,14 +88,6 @@ function SetupPage() {
             Continue
           </Button>
         </form>
-
-        <button
-          type="button"
-          onClick={skip}
-          className="mt-4 w-full text-center text-sm font-medium text-muted transition-colors hover:text-foreground"
-        >
-          Skip for now
-        </button>
       </div>
     </div>
   );

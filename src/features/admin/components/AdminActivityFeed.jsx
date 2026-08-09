@@ -84,10 +84,10 @@ function renderDescription(log) {
   }
 }
 
-function AdminActivityFeed() {
+function AdminActivityFeed({ limit }) {
   const { data: result, isLoading, isError } = useQuery({
-    queryKey: ['adminActivity'],
-    queryFn: adminApi.getActivityFeed,
+    queryKey: ['adminActivity', limit],
+    queryFn: () => adminApi.getActivityFeed({ limit }),
     refetchInterval: 60000,
   });
 
