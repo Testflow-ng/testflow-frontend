@@ -200,10 +200,13 @@ function AdminDashboardPage() {
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Verification Tool */}
         <Card className="p-6 border-amber-500/20 bg-amber-500/5 lg:col-span-1">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-2">
              <Zap size={18} className="text-amber-500 fill-current" />
              <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Verify UTME Code</h3>
           </div>
+          <p className="text-[10px] text-muted leading-tight mb-4 italic">
+            Manual override: Use this to instantly unlock a student if they paid but cannot upload a receipt.
+          </p>
           <form onSubmit={handleVerify} className="space-y-3">
              <div className="relative">
                 <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />

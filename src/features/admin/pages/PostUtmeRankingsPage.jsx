@@ -104,20 +104,20 @@ function PostUtmeRankingsPage() {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <span className="text-sm font-bold text-foreground-strong">
-                      {student.oLevelScore}
+                      {student.oLevelPoints || 0}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center gap-1.5">
                       <TrendingUp size={14} className="text-success" />
                       <span className="text-sm font-bold text-foreground-strong">
-                        {student.mockAverage}%
+                        {Math.round(student.avgMockScore || 0)}%
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-sm font-black text-primary">
-                      {student.aggregateScore.toFixed(2)}
+                      {(student.aggregate || 0).toFixed(2)}
                     </span>
                   </td>
                 </tr>
