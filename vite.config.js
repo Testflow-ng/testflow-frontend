@@ -39,6 +39,7 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4MB to accommodate growing app shell
       },
       devOptions: { enabled: false },
     }),
