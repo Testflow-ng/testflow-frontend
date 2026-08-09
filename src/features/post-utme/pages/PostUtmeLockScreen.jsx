@@ -67,10 +67,10 @@ function PostUtmeLockScreen({ config }) {
 
   const whatsappLink = `https://wa.me/2341234567890?text=Hello%20Testflow%20Admin,%20I%20have%20made%20payment%20for%20Post-UTME%20access.%20My%20verification%20code%20is:%20${user.verificationCode}`;
 
-  if (isStatusLoading) return <div className="flex justify-center py-20"><Spinner /></div>;
+  if (isStatusLoading) return <div className="flex h-svh items-center justify-center"><Spinner size="lg" /></div>;
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col px-5 py-10 lg:py-20">
+    <div className="mx-auto flex w-full max-w-4xl flex-col px-5 py-10 lg:py-20">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -83,159 +83,207 @@ function PostUtmeLockScreen({ config }) {
           Unlock Post-UTME Excellence
         </h1>
         <p className="mt-4 text-base leading-relaxed text-muted max-w-md">
-          Get access to full-length OAU mock tests, the aggregate calculator, and subject-specific analytics.
+          Join thousands of scholars preparing for OAU Post-UTME. Get access to mocks, analytics, and calculators.
         </p>
       </motion.div>
 
-      <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Payment Card */}
-        <Card raised className="p-6 border-primary/20 bg-gradient-to-br from-surface to-primary/5">
-          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary mb-4">
-            <Zap size={14} className="fill-current" />
-            One-time Access
-          </div>
-          <h2 className="text-4xl font-black text-foreground-strong mb-2">
-            ₦{config?.postUtmePrice || '2,000'}
-          </h2>
-          <p className="text-xs text-muted mb-6">Lifetime access for this session</p>
+      <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[1.2fr_1fr]">
+        {/* Left Column: Instructions & Payment */}
+        <div className="space-y-6">
+           <Card raised className="p-8 border-primary/20 bg-gradient-to-br from-surface to-primary/5 relative overflow-hidden">
+              <div className="absolute -right-8 -top-8 size-40 bg-primary/10 rounded-full blur-3xl" />
 
-          <div className="space-y-4 rounded-2xl bg-surface/50 p-4 border border-border/50">
-            <div>
-              <p className="text-[10px] font-bold text-muted uppercase tracking-tighter">Bank Name</p>
-              <p className="text-sm font-bold text-foreground-strong">{config?.paymentInfo?.bankName || 'Test Bank'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-muted uppercase tracking-tighter">Account Number</p>
-              <p className="text-sm font-bold text-foreground-strong tracking-wider">{config?.paymentInfo?.accountNumber || '1234567890'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-muted uppercase tracking-tighter">Account Name</p>
-              <p className="text-sm font-bold text-foreground-strong">{config?.paymentInfo?.accountName || 'Testflow Admin'}</p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Verification Card */}
-        <Card className="p-6 flex flex-col justify-between overflow-hidden relative">
-          {isPending ? (
-            <div className="flex flex-col items-center text-center py-4">
-               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-success">
-                  <CheckCircle2 size={12} />
-                  Success
-               </div>
-               <div className="mb-6 relative">
-                  <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
-                  <div className="relative size-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                     <Clock size={32} />
-                  </div>
-               </div>
-               <h3 className="text-lg font-black text-foreground-strong">Verification Pending</h3>
-               <p className="mt-2 text-sm text-muted leading-relaxed max-w-[280px]">
-                  Receipt uploaded successfully! Your verification is now pending as the Team will be verifying your receipt.
-               </p>
-               <div className="mt-8 w-full rounded-2xl bg-surface-strong p-4 border border-border">
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-tighter mb-1 text-left">Queue Status</p>
-                  <p className="text-xs font-bold text-foreground-strong text-left">Verification typically takes from a few minutes to 24 hours.</p>
-               </div>
-               <Button
-                as="a"
-                href={whatsappLink}
-                target="_blank"
-                variant="ghost"
-                className="mt-6 w-full text-xs font-bold"
-               >
-                Need help? WhatsApp Us
-               </Button>
-            </div>
-          ) : (
-            <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
-                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted">
-                    <ShieldCheck size={14} />
-                    Submit Proof
-                 </div>
-                 {user.verificationCode && (
-                    <button onClick={copyCode} className="text-[10px] font-black text-primary uppercase">
-                      Code: {user.verificationCode} {copied ? '✓' : ''}
-                    </button>
-                 )}
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary mb-6">
+                <Zap size={14} className="fill-current" />
+                One-time Access
               </div>
 
-              {!preview ? (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 cursor-pointer flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-surface-strong transition-all hover:border-primary/50 hover:bg-primary/5 p-6 group min-h-[200px]"
-                >
-                  <div className="size-12 rounded-xl bg-surface border border-border flex items-center justify-center text-muted group-hover:text-primary transition-colors mb-3">
-                     <Upload size={24} />
-                  </div>
-                  <p className="text-xs font-bold text-foreground-strong">Click to upload receipt</p>
-                  <p className="mt-1 text-[10px] text-muted text-center max-w-[150px]">Please ensure your name or student code is in the bank narration.</p>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*"
-                    className="hidden"
-                  />
+              <div className="flex items-baseline gap-2 mb-8">
+                <h2 className="text-5xl font-black text-foreground-strong tracking-tighter">
+                  ₦{config?.postUtmePrice || '2,000'}
+                </h2>
+                <span className="text-sm font-bold text-muted">/ session</span>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-white">
+                    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span className="font-black text-sm">1</span>
+                    </div>
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Transfer to</p>
+                        <p className="text-sm font-black text-foreground-strong">
+                            {config?.paymentInfo?.bankName || 'Opay'} · {config?.paymentInfo?.accountNumber || '8147321034'}
+                        </p>
+                        <p className="text-xs font-bold text-muted">{config?.paymentInfo?.accountName || 'Oluwadare Daniel'}</p>
+                    </div>
                 </div>
-              ) : (
-                <div className="flex-1 relative rounded-2xl overflow-hidden border border-border bg-surface-strong min-h-[200px]">
-                   <img src={preview} alt="Receipt Preview" className="h-full w-full object-cover opacity-50" />
-                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-background/40 backdrop-blur-[2px]">
-                      <div className="size-10 rounded-full bg-white shadow-lg flex items-center justify-center text-primary mb-2">
-                         <FileImage size={20} />
-                      </div>
-                      <p className="text-xs font-black text-foreground-strong truncate max-w-full px-2">{file.name}</p>
-                      <button
-                        onClick={() => { setFile(null); setPreview(null); }}
-                        className="mt-4 flex items-center gap-1.5 text-[10px] font-bold text-danger bg-danger/10 px-3 py-1.5 rounded-full hover:bg-danger/20 transition-all"
-                      >
-                         <X size={12} /> Remove
-                      </button>
+
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/50 border border-white">
+                    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <span className="font-black text-sm">2</span>
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted">Include Code in Narration</p>
+                        <div className="flex items-center justify-between mt-1">
+                            <p className="text-sm font-black text-primary tracking-widest">{user.verificationCode}</p>
+                            <button onClick={copyCode} className="text-[10px] font-bold text-muted hover:text-primary uppercase flex items-center gap-1">
+                                <Copy size={10} /> {copied ? 'Copied' : 'Copy'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+              </div>
+           </Card>
+
+           <div className="grid grid-cols-2 gap-4">
+              <div className="p-5 rounded-3xl bg-surface-strong border border-border">
+                 <ShieldCheck size={20} className="text-primary mb-3" />
+                 <h4 className="text-xs font-black text-foreground-strong uppercase tracking-tight">Verified Secure</h4>
+                 <p className="text-[10px] text-muted mt-1 leading-relaxed">Direct human verification by the admin team.</p>
+              </div>
+              <div className="p-5 rounded-3xl bg-surface-strong border border-border">
+                 <CheckCircle2 size={20} className="text-success mb-3" />
+                 <h4 className="text-xs font-black text-foreground-strong uppercase tracking-tight">Instant Unlock</h4>
+                 <p className="text-[10px] text-muted mt-1 leading-relaxed">Access granted immediately after receipt approval.</p>
+              </div>
+           </div>
+        </div>
+
+        {/* Right Column: Upload/Pending Area */}
+        <div className="h-full">
+          <Card className="p-8 h-full flex flex-col justify-center border-border/50 relative bg-surface overflow-hidden">
+            {isPending ? (
+              <div className="flex flex-col items-center text-center py-4">
+                 <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-success animate-bounce">
+                    <CheckCircle2 size={12} />
+                    Uploaded
+                 </div>
+                 <div className="mb-8 relative">
+                    <div className="absolute inset-0 rounded-full bg-amber-500/20 animate-ping" />
+                    <div className="relative size-20 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                       <Clock size={40} strokeWidth={1.5} />
+                    </div>
+                 </div>
+                 <h3 className="text-xl font-black text-foreground-strong">Verification in Progress</h3>
+                 <p className="mt-4 text-sm text-muted leading-relaxed max-w-[260px]">
+                    The Team is currently verifying your receipt. You will be redirected once your payment is confirmed.
+                 </p>
+
+                 <div className="mt-10 w-full space-y-4">
+                    <div className="p-4 rounded-2xl bg-surface-strong border border-border flex items-center justify-between text-left">
+                        <div>
+                            <p className="text-[9px] font-black text-muted uppercase tracking-widest">Expected Time</p>
+                            <p className="text-xs font-bold text-foreground-strong">15 mins — 24 hours</p>
+                        </div>
+                        <div className="size-2 rounded-full bg-amber-500 animate-pulse" />
+                    </div>
+                    <Button
+                        as="a"
+                        href={whatsappLink}
+                        target="_blank"
+                        variant="ghost"
+                        size="sm"
+                        className="w-full text-[10px] font-black uppercase tracking-widest"
+                    >
+                        Expedite via WhatsApp
+                    </Button>
+                 </div>
+              </div>
+            ) : (
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-6">
+                   <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Submit Payment Proof</h3>
+                   <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                      <ShieldCheck size={16} />
                    </div>
                 </div>
-              )}
 
-              <Button
-                onClick={handleUpload}
-                disabled={!file || uploadMutation.isPending}
-                loading={uploadMutation.isPending}
-                variant="primary"
-                className="mt-6 w-full h-12 rounded-2xl shadow-xl shadow-primary/20"
-                leadingIcon={<CheckCircle2 size={20} />}
-              >
-                {uploadMutation.isPending ? 'Uploading...' : 'Submit for Verification'}
-              </Button>
-            </div>
-          )}
-        </Card>
-      </div>
+                {!preview ? (
+                  <div
+                    onClick={() => !uploadMutation.isPending && fileInputRef.current?.click()}
+                    className={cn(
+                        "flex-1 cursor-pointer flex flex-col items-center justify-center rounded-[2.5rem] border-2 border-dashed border-border bg-surface-strong transition-all p-10 group min-h-[300px]",
+                        uploadMutation.isPending ? "opacity-50 cursor-not-allowed" : "hover:border-primary/50 hover:bg-primary/5"
+                    )}
+                  >
+                    <div className="size-16 rounded-[1.5rem] bg-surface border border-border flex items-center justify-center text-muted group-hover:text-primary transition-all group-hover:rotate-12 mb-4 shadow-sm">
+                       <Upload size={32} />
+                    </div>
+                    <p className="text-sm font-black text-foreground-strong">Tap to upload receipt</p>
+                    <p className="mt-2 text-[10px] text-muted text-center max-w-[180px] leading-relaxed uppercase tracking-tighter">
+                        Ensure the student code or your name is visible on the image.
+                    </p>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadMutation.isPending}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1 relative rounded-[2.5rem] overflow-hidden border border-border bg-black min-h-[300px] shadow-inner">
+                     <img src={preview} alt="Receipt Preview" className="h-full w-full object-cover opacity-60" />
+                     <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-t from-black/80 to-transparent backdrop-blur-[1px]">
+                        <div className="size-12 rounded-full bg-white shadow-xl flex items-center justify-center text-primary mb-3">
+                           <FileImage size={24} />
+                        </div>
+                        <p className="text-xs font-black text-white truncate max-w-full px-2 mb-6">{file.name}</p>
+                        <button
+                          onClick={() => { setFile(null); setPreview(null); }}
+                          disabled={uploadMutation.isPending}
+                          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-all bg-white/10 px-4 py-2 rounded-full border border-white/10"
+                        >
+                           <X size={14} /> Replace Image
+                        </button>
+                     </div>
+                  </div>
+                )}
 
-      <div className="mt-12 flex flex-col gap-4">
-        <h3 className="text-xs font-black uppercase tracking-widest text-muted text-center">What you get</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            '40-Question Mock Tests',
-            'Admission Probability',
-            'Integrated Calculator',
-            'Subject Analytics',
-            'Departmental Cut-offs',
-            'Strict Mode CBT'
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-surface border border-border">
-              <div className="size-2 rounded-full bg-primary" />
-              <span className="text-xs font-bold text-foreground-strong">{item}</span>
-            </div>
-          ))}
+                <Button
+                  onClick={handleUpload}
+                  disabled={!file || uploadMutation.isPending}
+                  loading={uploadMutation.isPending}
+                  variant="primary"
+                  className="mt-8 w-full h-14 rounded-2xl shadow-2xl shadow-primary/30 text-base font-black"
+                  leadingIcon={<CheckCircle2 size={24} />}
+                >
+                  {uploadMutation.isPending ? 'Uploading Receipt...' : 'Confirm Payment'}
+                </Button>
+
+                {uploadMutation.isError && (
+                    <Alert variant="danger" className="mt-4 rounded-xl text-[10px] py-2">
+                        {uploadMutation.error.message}
+                    </Alert>
+                )}
+              </div>
+            )}
+          </Card>
         </div>
       </div>
 
-      <Alert variant="info" className="mt-12 rounded-2xl">
-        <p className="text-xs font-medium leading-relaxed text-blue-800 dark:text-blue-200">
-          Verification typically takes from a few minutes to a few hours. You will receive a notification and a welcome tour once your account is activated.
-        </p>
-      </Alert>
+      {/* Feature Pills */}
+      <div className="mt-16 flex flex-wrap justify-center gap-3">
+        {[
+          '40-Question Mock Tests',
+          'Admission Aggregate',
+          'Subject Performance Radar',
+          'Departmental Rankings',
+          'Exam History',
+          'Strict CBT Mode'
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border shadow-sm">
+            <div className="size-1.5 rounded-full bg-primary" />
+            <span className="text-[10px] font-bold text-foreground-strong uppercase tracking-tight">{item}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-12 text-center text-[10px] font-bold text-muted uppercase tracking-[0.2em]">
+        Verified by NACOS OAU Team
+      </p>
     </div>
   );
 }

@@ -198,50 +198,9 @@ function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Verification Tool */}
-        <Card className="p-6 border-amber-500/20 bg-amber-500/5 lg:col-span-1">
-          <div className="flex items-center gap-2 mb-2">
-             <Zap size={18} className="text-amber-500 fill-current" />
-             <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Verify UTME Code</h3>
-          </div>
-          <p className="text-[10px] text-muted leading-tight mb-4 italic">
-            Manual override: Use this to instantly unlock a student if they paid but cannot upload a receipt.
-          </p>
-          <form onSubmit={handleVerify} className="space-y-3">
-             <div className="relative">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
-                <input
-                  type="text"
-                  value={utmeCode}
-                  onChange={(e) => setUtmeCode(e.target.value.toUpperCase())}
-                  placeholder="UTME-XXXXXX"
-                  className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-4 text-sm font-bold text-foreground-strong outline-none focus:border-amber-500 transition-colors"
-                />
-             </div>
-             <Button
-                type="submit"
-                fullWidth
-                loading={verifying}
-                disabled={!utmeCode}
-                className="h-11 rounded-xl bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20"
-                leadingIcon={<Check size={18} />}
-             >
-                Verify Student
-             </Button>
-          </form>
-          {verifyStatus && (
-            <div className={cn(
-              "mt-4 rounded-xl p-3 text-xs font-bold text-center",
-              verifyStatus.type === 'success' ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
-            )}>
-              {verifyStatus.message}
-            </div>
-          )}
-        </Card>
-
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Growth Stats */}
-        <Card className="p-6 lg:col-span-2">
+        <Card className="p-6 h-full">
            <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Student Growth Intelligence</h3>
               <TrendingUp size={18} className="text-primary" />
@@ -255,7 +214,7 @@ function AdminDashboardPage() {
                     stats.users.growth?.todayPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                  )}>
                     {stats.users.growth?.todayPercent >= 0 ? '+' : ''}{stats.users.growth?.todayPercent}%
-                    <span className="text-[8px] font-bold opacity-60">vs yesterday</span>
+                    <span className="text-[8px] font-bold opacity-60 ml-1">vs yesterday</span>
                  </div>
               </div>
               <div className="text-center border-x border-border">
@@ -266,7 +225,7 @@ function AdminDashboardPage() {
                     stats.users.growth?.weekPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                  )}>
                     {stats.users.growth?.weekPercent >= 0 ? '+' : ''}{stats.users.growth?.weekPercent}%
-                    <span className="text-[8px] font-bold opacity-60">vs last week</span>
+                    <span className="text-[8px] font-bold opacity-60 ml-1">vs last week</span>
                  </div>
               </div>
               <div className="text-center">
@@ -277,8 +236,26 @@ function AdminDashboardPage() {
                     stats.users.growth?.monthPercent >= 0 ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
                  )}>
                     {stats.users.growth?.monthPercent >= 0 ? '+' : ''}{stats.users.growth?.monthPercent}%
-                    <span className="text-[8px] font-bold opacity-60">vs last month</span>
+                    <span className="text-[8px] font-bold opacity-60 ml-1">vs last month</span>
                  </div>
+              </div>
+           </div>
+        </Card>
+
+        {/* KPI Summary / Content Stats */}
+        <Card className="p-6 h-full bg-surface-strong/30 border-dashed">
+           <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground-strong">Content Statistics</h3>
+              <FileQuestion size={18} className="text-secondary" />
+           </div>
+           <div className="grid grid-cols-2 gap-6">
+              <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Total Subjects</p>
+                 <h4 className="text-2xl font-black text-foreground-strong">{stats.content.subjects}</h4>
+              </div>
+              <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Total Questions</p>
+                 <h4 className="text-2xl font-black text-foreground-strong">{stats.content.questions}</h4>
               </div>
            </div>
         </Card>
