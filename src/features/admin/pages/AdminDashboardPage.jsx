@@ -14,6 +14,7 @@ import {
   Zap,
   Check,
   Search,
+  Settings,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
 import { Spinner, Alert, Button, Card } from '../../../components/ui/index.js';
