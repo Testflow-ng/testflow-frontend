@@ -130,72 +130,83 @@ function Header() {
 
             {!isLoading &&
               (isAuthenticated ? (
-                <div className="relative hidden lg:block">
-                  <button
-                    onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="flex items-center gap-2 rounded-full border border-border bg-surface p-1 pr-3 transition-colors hover:border-border-strong"
-                  >
-                    <Avatar name={user.fullName} size="sm" />
-                    <span className="max-w-[100px] truncate text-xs font-bold text-foreground-strong">
-                      {user.fullName.split(' ')[0]}
-                    </span>
-                    <ChevronDown
-                      size={14}
-                      className={cn(
-                        'text-muted transition-transform',
-                        userMenuOpen && 'rotate-180',
-                      )}
-                    />
-                  </button>
-
-                  {userMenuOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setUserMenuOpen(false)}
+                <div className="flex items-center gap-2">
+                  <div className="relative hidden lg:block">
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center gap-2 rounded-full border border-border bg-surface p-1 pr-3 transition-colors hover:border-border-strong"
+                    >
+                      <Avatar name={user.fullName} size="sm" />
+                      <span className="max-w-[100px] truncate text-xs font-bold text-foreground-strong">
+                        {user.fullName.split(' ')[0]}
+                      </span>
+                      <ChevronDown
+                        size={14}
+                        className={cn(
+                          'text-muted transition-transform',
+                          userMenuOpen && 'rotate-180',
+                        )}
                       />
-                      <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-2xl border border-border bg-surface p-2 shadow-xl">
-                        <div className="mb-1 border-b border-border px-3 py-2">
-                          <p className="truncate text-sm font-bold text-foreground-strong">
-                            {user.fullName}
-                          </p>
-                          <p className="truncate text-xs text-muted">
-                            {user.email}
-                          </p>
+                    </button>
+
+                    {userMenuOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => setUserMenuOpen(false)}
+                        />
+                        <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-2xl border border-border bg-surface p-2 shadow-xl">
+                          <div className="mb-1 border-b border-border px-3 py-2">
+                            <p className="truncate text-sm font-bold text-foreground-strong">
+                              {user.fullName}
+                            </p>
+                            <p className="truncate text-xs text-muted">
+                              {user.email}
+                            </p>
+                          </div>
+                          <Link
+                            to="/profile"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <User size={16} /> Profile
+                          </Link>
+                          <Link
+                            to="/achievements"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <Award size={16} /> Achievements
+                          </Link>
+                          <Link
+                            to="/settings"
+                            className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <Settings size={16} /> Settings
+                          </Link>
+                          <button
+                            onClick={() => {
+                              logout();
+                              setUserMenuOpen(false);
+                            }}
+                            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/5"
+                          >
+                            <LogOut size={16} /> Sign out
+                          </button>
                         </div>
-                        <Link
-                          to="/profile"
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <User size={16} /> Profile
-                        </Link>
-                        <Link
-                          to="/achievements"
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <Award size={16} /> Achievements
-                        </Link>
-                        <Link
-                          to="/settings"
-                          className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-strong hover:text-foreground-strong"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <Settings size={16} /> Settings
-                        </Link>
-                        <button
-                          onClick={() => {
-                            logout();
-                            setUserMenuOpen(false);
-                          }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-danger transition-colors hover:bg-danger/5"
-                        >
-                          <LogOut size={16} /> Sign out
-                        </button>
-                      </div>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Quick Logout for Desktop */}
+                  <button
+                    onClick={logout}
+                    title="Sign out"
+                    className="tf-pressable hidden lg:flex size-9 items-center justify-center rounded-full border border-border bg-surface text-danger active:bg-danger/5"
+                  >
+                    <LogOut size={18} />
+                  </button>
                 </div>
               ) : (
                 <div className="hidden items-center gap-2 lg:flex">
@@ -214,7 +225,7 @@ function Header() {
                 </div>
               ))}
 
-            {!isLoading && !isAuthenticated && (
+            {!isLoading && (
               <button
                 type="button"
                 onClick={() => setMenuOpen((prev) => !prev)}
