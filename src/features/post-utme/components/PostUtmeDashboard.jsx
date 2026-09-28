@@ -9,13 +9,14 @@ import {
   Sparkles,
   AlertCircle
 } from 'lucide-react';
-import { Card, Button, Badge, Skeleton } from '../../../components/ui/index.js';
+import { Card, Button, Badge, Skeleton, Spinner } from '../../../components/ui/index.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { cn } from '../../../utils/cn.js';
 import { Link, useNavigate } from 'react-router-dom';
 import PostUtmeSubjectSelector from './PostUtmeSubjectSelector.jsx';
 import AggregateModal from './AggregateModal.jsx';
 import PostUtmeRadarChart from './PostUtmeRadarChart.jsx';
+import apiClient from '../../../api/client.js';
 
 function StatTile({ label, value, subValue, icon: Icon, color = 'primary' }) {
   return (
@@ -71,13 +72,7 @@ function PostUtmeDashboard({ stats = [], isLoading = false }) {
 
   const startTest = async (subjects) => {
     try {
-      const res = await fetch('/api/post-utme/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subjects })
-      });
-      if (!res.ok) throw new Error('Failed to start test');
-      const data = await res.json();
+      const { data } = await apiClient.post('/api/post-utme/start', { subjects });
       navigate(`/exam/${data.session.id}?type=post-utme`);
     } catch (err) {
       alert(err.message);

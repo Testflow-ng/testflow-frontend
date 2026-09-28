@@ -5,6 +5,7 @@ import BottomNav from '../components/BottomNav.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 import NightOwlPopup from '../components/NightOwlPopup.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
+import Seo from '../components/Seo.jsx';
 
 const EXAM_PATTERN = /^\/exam\/[^/]+$/;
 
@@ -21,6 +22,7 @@ function RootLayout() {
 
   return (
     <div className="relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+      <Seo />
       {!isExamPage && <Header />}
       <OfflineBanner />
 

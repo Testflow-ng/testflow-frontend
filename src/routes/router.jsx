@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
+import PrivacyPage from '../pages/PrivacyPage.jsx';
+import TermsPage from '../pages/TermsPage.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import PublicOnly from '../features/auth/PublicOnly.jsx';
@@ -51,6 +53,8 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'privacy', element: <PrivacyPage /> },
+      { path: 'terms', element: <TermsPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
       {
         element: <PublicOnly />,

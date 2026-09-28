@@ -3,6 +3,8 @@ import apiClient from '../../api/client.js';
 export const adminApi = {
   // Stats
   getStats: () => apiClient.get('/api/admin/stats').then((res) => res.data),
+  exportResults: () =>
+    apiClient.get('/api/admin/export-results', { responseType: 'blob' }).then((res) => res.data),
 
   // Students
   listStudents: (params) => apiClient.get('/api/admin/students', { params }).then((res) => res.data),

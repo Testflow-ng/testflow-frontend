@@ -4,6 +4,7 @@ import { GraduationCap, Sparkles, CheckCircle2, ChevronRight } from 'lucide-reac
 import { Button, Modal, Card, Alert } from '../../../components/ui/index.js';
 import { useAuth } from '../../auth/useAuth.js';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/client.js';
 
 const DEPARTMENTS = [
   'Architecture', 'Building', 'Estate Management', 'Fine Arts', 'Quantity Surveying', 'Urban and Regional Planning',
@@ -28,13 +29,8 @@ function MigrationModal({ open, onOpenChange }) {
 
   const mutation = useMutation({
     mutationFn: async (data) => {
-      const res = await fetch('/api/auth/migrate', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error('Migration failed');
-      return res.json();
+      const res = await apiClient.patch('/api/auth/migrate', data);
+      return res.data;
     },
     onSuccess: () => {
       refreshUser();

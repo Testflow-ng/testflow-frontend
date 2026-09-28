@@ -26,10 +26,10 @@ The development server is normally available at `http://localhost:5173`.
 
 ## Configuration
 
-Set `VITE_API_URL` in `.env.development` to the TestFlow API address:
+Set `VITE_API_URL` in `.env.development` to the API origin. Production deployments must set the same environment variable in their hosting provider; no Vercel rewrite is required.
 
 ```env
-VITE_API_URL=http://localhost:5000
+VITE_API_URL=http://localhost:5001
 ```
 
 ## Useful commands

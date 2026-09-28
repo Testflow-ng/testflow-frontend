@@ -23,6 +23,7 @@ import { useCountdown } from './useCountdown.js';
 import SubmitSuspense from './SubmitSuspense.jsx';
 import { formatTime } from './formatTime.js';
 import Calculator from '../post-utme/components/Calculator.jsx';
+import apiClient from '../../api/client.js';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
@@ -128,11 +129,7 @@ function ExamRuntime({ session }) {
       });
 
       if (isPostUtme) {
-        fetch(saveUrl, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ questionIndex: index, ...patch }),
-        }).catch(() => {});
+        apiClient.patch(saveUrl, { questionIndex: index, ...patch }).catch(() => {});
       } else {
         examApi.saveAnswer(id, { questionIndex: index, ...patch }).catch(() => {});
       }
@@ -152,7 +149,7 @@ function ExamRuntime({ session }) {
 
     try {
       if (isPostUtme) {
-        await Promise.all([fetch(`/api/post-utme/${id}/submit`, { method: 'POST' }), floor]);
+        await Promise.all([apiClient.post(`/api/post-utme/${id}/submit`), floor]);
       } else {
         await Promise.all([examApi.submit(id), floor]);
       }
@@ -235,7 +232,7 @@ function ExamRuntime({ session }) {
       if (submittingRef.current) return;
       try {
         const result = isPostUtme
-          ? await (await fetch(`/api/post-utme/${id}/strike`, { method: 'POST' })).json()
+          ? (await apiClient.post(`/api/post-utme/${id}/strike`)).data
           : await examApi.recordStrike(id);
 
         if (result.status === 'submitted') {

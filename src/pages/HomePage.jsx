@@ -326,7 +326,7 @@ function HomePage() {
         >
           <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-20">
             <div className="flex-1">
-              {/* <motion.span
+              <motion.span
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
@@ -334,7 +334,7 @@ function HomePage() {
               >
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                 Live for OAU students
-              </motion.span> */}
+              </motion.span>
 
               <motion.h1
                 initial={{ opacity: 0, y: 24 }}
@@ -353,8 +353,8 @@ function HomePage() {
                 transition={{ duration: 0.5, delay: 0.35 }}
                 className="mt-6 max-w-md text-base leading-relaxed text-muted sm:text-lg"
               >
-                The CBT practice platform built for excellence. Timed mock exams, instant corrections,
-                progress tracking.
+                The OAU CBT practice platform. Practise your courses with timed tests, instant corrections,
+                and progress tracking.
               </motion.p>
 
               <motion.div

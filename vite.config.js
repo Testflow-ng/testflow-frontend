@@ -9,11 +9,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'favicons/favicon.png', 'icons/apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'favicons/favicon.png', 'icons/apple-touch-icon.png', 'robots.txt', 'sitemap.xml'],
       manifest: {
-        name: 'TestFlow',
+        name: 'TestFlow | OAU CBT Practice',
         short_name: 'TestFlow',
-        description: 'Computer-Based Testing platform by Eddyrus Media',
+        description: 'OAU CBT practice, timed tests, mock exams, and course revision for Obafemi Awolowo University students.',
         start_url: '/',
         scope: '/',
         display: 'standalone',
@@ -22,14 +22,8 @@ export default defineConfig({
         background_color: '#ffffff',
         categories: ['education'],
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          {
-            src: '/icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
         ],
       },
       workbox: {

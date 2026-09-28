@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, Calculator, Check, Save } from 'lucide-react';
 import { Button, Modal, Card, Alert } from '../../../components/ui/index.js';
 import { useAuth } from '../../auth/useAuth.js';
+import apiClient from '../../../api/client.js';
 
 const GRADES = [
   { label: 'A1', points: 10 },
@@ -26,13 +27,8 @@ function AggregateModal({ open, onOpenChange }) {
 
   const mutation = useMutation({
     mutationFn: async (data) => {
-      const res = await fetch('/api/auth/utme-data', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error('Failed to update data');
-      return res.json();
+      const res = await apiClient.patch('/api/auth/utme-data', data);
+      return res.data;
     },
     onSuccess: () => {
       refreshUser();

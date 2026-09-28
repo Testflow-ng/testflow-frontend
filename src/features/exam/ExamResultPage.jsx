@@ -16,6 +16,7 @@ import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
 import { useCallback, useRef, useState, useMemo } from 'react';
 import { useAuth } from '../auth/useAuth.js';
+import apiClient from '../../api/client.js';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
@@ -217,9 +218,7 @@ function ExamResultPage() {
     queryKey: ['examResult', id],
     queryFn: async () => {
       if (isPostUtme) {
-        const res = await fetch(`/api/post-utme/${id}/submit`, { method: 'POST' });
-        if (!res.ok) throw new Error('Failed to load Post-UTME result');
-        const data = await res.json();
+        const { data } = await apiClient.post(`/api/post-utme/${id}/submit`);
         return {
           ...data.session,
           score: Math.round((data.session.totalScore / 40) * 100),

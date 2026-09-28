@@ -7,7 +7,7 @@ const COLUMNS = [
     links: [
       { label: 'Subjects', to: '/#subjects' },
       { label: 'How it works', to: '/#how-it-works' },
-      { label: 'Get started', to: '/register' },
+      { label: 'Get started', to: '/' },
     ],
   },
   {
@@ -21,14 +21,8 @@ const COLUMNS = [
   {
     heading: 'Legal',
     links: [
-      {
-        label: 'Privacy policy',
-        href: 'https://ferousco-dev.github.io/testflow-policy/privacy.html',
-      },
-      {
-        label: 'Terms of service',
-        href: 'https://ferousco-dev.github.io/testflow-policy/terms.html',
-      },
+      { label: 'Privacy policy', to: '/privacy' },
+      { label: 'Terms and conditions', to: '/terms' },
       { label: 'Contact', href: 'mailto:feranmioresajo@gmail.com' },
     ],
   },

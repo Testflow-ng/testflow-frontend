@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-// In production, we use Vercel rewrites to proxy /api to the backend.
-// This makes cookies "First-Party" and fixes Safari/Firefox blocking.
-const baseURL = import.meta.env.MODE === 'production'
-  ? ''
-  : (import.meta.env.VITE_API_URL ?? 'http://localhost:5001');
+// The API origin is deliberately configured at build time rather than tied to
+// a hosting provider. Use HTTPS for production and configure CORS/cookies on
+// the backend for this frontend's origin.
+const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/$/, '');
 
 /**
  * Shared Axios instance for the TestFlow API.

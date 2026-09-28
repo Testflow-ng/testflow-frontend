@@ -43,8 +43,18 @@ function Calculator({ onClose }) {
 
   const calculate = () => {
     try {
-      // Basic safety: only allow numbers and operators
-      const result = eval(equation + display);
+      const operator = equation.at(-1);
+      const first = Number(equation.slice(0, -1));
+      const second = Number(display);
+      if (!Number.isFinite(first) || !Number.isFinite(second)) throw new Error('Invalid expression');
+      if (operator === '/' && second === 0) throw new Error('Division by zero');
+      const result = {
+        '+': first + second,
+        '-': first - second,
+        '*': first * second,
+        '/': first / second,
+      }[operator];
+      if (!Number.isFinite(result)) throw new Error('Invalid result');
       setDisplay(String(Number(result.toFixed(8))));
       setEquation('');
     } catch {

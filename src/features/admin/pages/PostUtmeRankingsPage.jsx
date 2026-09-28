@@ -14,9 +14,14 @@ function PostUtmeRankingsPage() {
     queryFn: adminApi.getPostUtmeRankings,
   });
 
-  const handleExport = () => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-    window.open(`${API_URL}/api/admin/export-results`, '_blank');
+  const handleExport = async () => {
+    const csv = await adminApi.exportResults();
+    const url = URL.createObjectURL(csv);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'testflow-results.csv';
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading) {

@@ -31,8 +31,6 @@ import RecentStudents from '../components/RecentStudents.jsx';
 import AdminActivityFeed from '../components/AdminActivityFeed.jsx';
 import apiClient from '../../../api/client.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-
 function AdminDashboardPage() {
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
@@ -43,8 +41,18 @@ function AdminDashboardPage() {
 
   const showSetup = Boolean(currentUser && !currentUser.username) && !setupDismissed;
 
-  const handleExport = () => {
-    window.open(`${API_URL}/api/admin/export-results`, '_blank');
+  const handleExport = async () => {
+    try {
+      const csv = await adminApi.exportResults();
+      const url = URL.createObjectURL(csv);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'testflow-results.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setVerifyStatus({ type: 'error', message: 'Unable to export results. Please try again.' });
+    }
   };
 
   const handleVerify = async (e) => {

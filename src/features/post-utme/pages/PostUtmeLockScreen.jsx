@@ -15,6 +15,7 @@ function PostUtmeLockScreen({ config }) {
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [fileError, setFileError] = useState(null);
   const fileInputRef = useRef(null);
 
   const { data: statusData, isLoading: isStatusLoading } = useQuery({
@@ -90,14 +91,27 @@ function PostUtmeLockScreen({ config }) {
   });
 
   const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    if (selected) {
-      setFile(selected);
-      setPreview(URL.createObjectURL(selected));
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(selected.type)) {
+      setFileError('Upload a JPG, PNG, or WebP receipt image.');
+      return;
     }
+    if (selected.size > 5 * 1024 * 1024) {
+      setFileError('Receipt images must be 5 MB or smaller.');
+      return;
+    }
+
+    if (preview) URL.revokeObjectURL(preview);
+    setFileError(null);
+    setFile(selected);
+    setPreview(URL.createObjectURL(selected));
   };
 
   const handleUpload = () => {
+    if (!file || fileError) return;
     uploadMutation.mutate();
   };
 
@@ -275,7 +289,7 @@ function PostUtmeLockScreen({ config }) {
                       type="file"
                       ref={fileInputRef}
                       onChange={handleFileChange}
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       className="hidden"
                       disabled={uploadMutation.isPending}
                     />
@@ -299,9 +313,15 @@ function PostUtmeLockScreen({ config }) {
                   </div>
                 )}
 
+                {fileError && (
+                  <Alert variant="danger" className="mt-4 rounded-xl text-[10px] py-2">
+                    {fileError}
+                  </Alert>
+                )}
+
                 <Button
                   onClick={handleUpload}
-                  disabled={!file || uploadMutation.isPending}
+                  disabled={!file || Boolean(fileError) || uploadMutation.isPending}
                   loading={uploadMutation.isPending}
                   variant="primary"
                   className="mt-8 w-full h-14 rounded-2xl shadow-2xl shadow-primary/30 text-base font-black"
