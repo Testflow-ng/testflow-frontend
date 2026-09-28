@@ -295,7 +295,7 @@ function AdminBrainstormPage() {
                   <div className="p-4">
                      <p className="text-xs font-bold text-foreground-strong line-clamp-1">{watch('shareTitle') || 'TestFlow Question Challenge'}</p>
                      <p className="text-[10px] text-muted line-clamp-2 mt-1">{watch('stem') || 'Can you solve this challenge?'}</p>
-                     <p className="text-[8px] font-bold text-primary mt-2 uppercase tracking-tighter">testflow.edu.ng</p>
+                     <p className="text-[8px] font-bold text-primary mt-2 uppercase tracking-tighter">testflow.com.ng</p>
                   </div>
                </div>
             </Card>

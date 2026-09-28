@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SITE_URL = 'https://testflow.edu.ng';
+const SITE_URL = 'https://testflow.com.ng';
 
 const PAGES = {
   '/': {

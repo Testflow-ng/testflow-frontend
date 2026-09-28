@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://testflow.edu.ng/sitemap.xml
+Sitemap: https://testflow.com.ng/sitemap.xml
