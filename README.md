@@ -1,16 +1,48 @@
-# React + Vite
+# TestFlow Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The web application for TestFlow, a mobile-first computer-based testing platform. It provides student and administrator experiences, including authentication, examinations, results, question management, and analytics.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 and Vite
+- Tailwind CSS
+- React Router and TanStack Query
+- Axios, React Hook Form, and Zod
+- Progressive Web App support
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Requirements: Node.js 20 or later and npm.
 
-## Expanding the Oxlint configuration
+```bash
+git clone https://github.com/Testflow-ng/testflow-frontend.git
+cd testflow-frontend
+npm install
+cp .env.example .env.development
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+The development server is normally available at `http://localhost:5173`.
+
+## Configuration
+
+Set `VITE_API_URL` in `.env.development` to the TestFlow API address:
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+## Useful commands
+
+```bash
+npm run dev      # Start the development server
+npm run build    # Create a production build
+npm run preview  # Preview the production build
+npm run lint     # Run ESLint
+npm run format   # Format source files
+```
+
+## Related repositories
+
+- [Backend API](https://github.com/Testflow-ng/testflow-backend)
+- [Mobile app](https://github.com/Testflow-ng/testflow-mobile)
