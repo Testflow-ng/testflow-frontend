@@ -52,7 +52,7 @@ function PrivacyPage() {
         </Section>
 
         <Section title="Contact">
-          <p>For privacy questions or requests, email <a className="font-semibold text-primary hover:underline" href="mailto:feranmioresajo@gmail.com">feranmioresajo@gmail.com</a>.</p>
+          <p>For privacy questions or requests, email <a className="font-semibold text-primary hover:underline" href="mailto:hello@testflow.com.ng">hello@testflow.com.ng</a>.</p>
         </Section>
 
         <Link to="/register" className={buttonClasses({ size: 'lg', className: 'mt-12' })}>

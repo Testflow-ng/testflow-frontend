@@ -23,7 +23,7 @@ const COLUMNS = [
     links: [
       { label: 'Privacy policy', to: '/privacy' },
       { label: 'Terms and conditions', to: '/terms' },
-      { label: 'Contact', href: 'mailto:feranmioresajo@gmail.com' },
+      { label: 'Contact', href: 'mailto:hello@testflow.com.ng' },
     ],
   },
 ];

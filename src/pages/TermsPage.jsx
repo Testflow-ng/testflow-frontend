@@ -51,7 +51,7 @@ function TermsPage() {
         </Section>
 
         <Section title="Contact and changes to these Terms">
-          <p>Questions about these Terms can be sent to <a className="font-semibold text-primary hover:underline" href="mailto:feranmioresajo@gmail.com">feranmioresajo@gmail.com</a>. We may update these Terms from time to time; continued use after an update means you accept the revised Terms.</p>
+          <p>Questions about these Terms can be sent to <a className="font-semibold text-primary hover:underline" href="mailto:hello@testflow.com.ng">hello@testflow.com.ng</a>. We may update these Terms from time to time; continued use after an update means you accept the revised Terms.</p>
         </Section>
 
         <Link to="/register" className={buttonClasses({ size: 'lg', className: 'mt-12' })}>
