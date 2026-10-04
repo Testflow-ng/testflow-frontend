@@ -26,46 +26,70 @@ function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
   const from = location.state?.from?.pathname ?? '/dashboard';
 
   const onSubmit = async (values) => {
     setFormError(null);
+
     try {
       await login(values);
       navigate(from, { replace: true });
     } catch (error) {
-      const msg = error.code === 'VALIDATION_ERROR'
-        ? 'Please enter a valid email and password.'
-        : (error.message ?? 'Unable to sign in. Please try again.');
-      setFormError(msg);
+      const message =
+        error.code === 'VALIDATION_ERROR'
+          ? 'Please enter a valid email and password.'
+          : (error.message ?? 'Unable to sign in. Please try again.');
+
+      setFormError(message);
     }
   };
 
   return (
     <AuthScreen
       title="Sign in"
-      subtitle="Your papers, scores and streak are where you left them."
+      subtitle="Continue to your papers, scores and streak."
       footer={
         <>
           No account yet?{' '}
-          <Link className="font-semibold text-link underline-offset-4 hover:underline" to="/register">
+          <Link
+            to="/register"
+            className="
+              font-semibold text-link
+              underline-offset-4
+              hover:underline
+            "
+          >
             Create one
           </Link>
         </>
       }
     >
-      <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <form
+        className="flex flex-col"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+      >
         {formError && (
-          <Alert variant="danger" className="mb-4">
+          <Alert
+            variant="danger"
+            className="mb-5"
+          >
             {formError}
           </Alert>
         )}
 
         <div className={sheetClasses()}>
-          <SheetField label="Email" error={errors.email?.message} required>
+          <SheetField
+            label="Email"
+            error={errors.email?.message}
+            required
+          >
             <Input
               type="email"
               inputMode="email"
@@ -77,7 +101,12 @@ function LoginPage() {
               {...register('email')}
             />
           </SheetField>
-          <SheetField label="Password" error={errors.password?.message} required>
+
+          <SheetField
+            label="Password"
+            error={errors.password?.message}
+            required
+          >
             <PasswordInput
               autoComplete="current-password"
               placeholder="Your password"
@@ -88,12 +117,26 @@ function LoginPage() {
 
         <Link
           to="/forgot-password"
-          className="tf-pressable mt-3 self-start rounded-full text-[13px] font-semibold text-link underline-offset-4 hover:underline"
+          className="
+            tf-pressable
+            mt-3 self-start
+            rounded-full
+            text-[13px] font-semibold
+            text-link
+            underline-offset-4
+            hover:underline
+          "
         >
           Forgot password?
         </Link>
 
-        <Button type="submit" size="lg" fullWidth loading={isSubmitting} className="mt-5">
+        <Button
+          type="submit"
+          size="lg"
+          fullWidth
+          loading={isSubmitting}
+          className="mt-6"
+        >
           Sign in
         </Button>
       </form>
