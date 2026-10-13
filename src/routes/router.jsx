@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import RootLayout from '../layouts/RootLayout.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
@@ -6,12 +6,7 @@ import PrivacyPage from '../pages/PrivacyPage.jsx';
 import TermsPage from '../pages/TermsPage.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
-import PublicOnly from '../features/auth/PublicOnly.jsx';
-import LoginPage from '../features/auth/pages/LoginPage.jsx';
-import RegisterPage from '../features/auth/pages/RegisterPage.jsx';
-import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage.jsx';
-import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage.jsx';
-import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
+import ComingSoonPage from '../pages/ComingSoonPage.jsx';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
@@ -56,16 +51,12 @@ export const router = createBrowserRouter([
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
-      {
-        element: <PublicOnly />,
-        children: [
-          { path: 'login', element: <LoginPage /> },
-          { path: 'register', element: <RegisterPage /> },
-          { path: 'forgot-password', element: <ForgotPasswordPage /> },
-          { path: 'reset-password', element: <ResetPasswordPage /> },
-          { path: 'verify-email', element: <VerifyEmailPage /> },
-        ],
-      },
+      { path: 'coming-soon', element: <ComingSoonPage /> },
+      // Authentication is paused: every entry point lands on the waitlist.
+      ...['login', 'register', 'forgot-password', 'reset-password', 'verify-email'].map((path) => ({
+        path,
+        element: <Navigate to="/coming-soon" replace />,
+      })),
       {
         element: <RequireAuth />,
         children: [

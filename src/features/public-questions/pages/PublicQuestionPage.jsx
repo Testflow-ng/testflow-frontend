@@ -190,7 +190,7 @@ function PublicQuestionPage() {
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             as={Link}
-                            to="/register"
+                            to="/coming-soon"
                             className="flex-1 h-12 rounded-xl shadow-lg shadow-primary/20"
                             leadingIcon={<Trophy size={18} />}
                         >

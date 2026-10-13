@@ -211,13 +211,13 @@ function Header() {
               ) : (
                 <div className="hidden items-center gap-2 lg:flex">
                   <Link
-                    to="/login"
+                    to="/coming-soon"
                     className="px-3 text-sm font-semibold text-muted transition-colors hover:text-foreground-strong"
                   >
                     Sign in
                   </Link>
                   <Link
-                    to="/register"
+                    to="/coming-soon"
                     className={buttonClasses({ size: 'sm', className: 'px-5' })}
                   >
                     Get started
@@ -321,7 +321,7 @@ function Header() {
                   ) : (
                     <div className="flex flex-col gap-3">
                       <Link
-                        to="/login"
+                        to="/coming-soon"
                         onClick={() => setMenuOpen(false)}
                         className={buttonClasses({
                           variant: 'outline',
@@ -332,7 +332,7 @@ function Header() {
                         Sign in
                       </Link>
                       <Link
-                        to="/register"
+                        to="/coming-soon"
                         onClick={() => setMenuOpen(false)}
                         className={buttonClasses({
                           size: 'lg',

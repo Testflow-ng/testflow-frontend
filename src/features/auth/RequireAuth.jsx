@@ -11,7 +11,7 @@ function RequireAuth() {
     return <PageLoader />;
   }
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate to="/coming-soon" replace state={{ from: location }} />;
   }
   if (user && !user.username && location.pathname !== '/setup') {
     return <Navigate to="/setup" replace />;

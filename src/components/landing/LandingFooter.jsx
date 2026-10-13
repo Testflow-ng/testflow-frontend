@@ -1,92 +1,46 @@
 import { Link } from 'react-router-dom';
 import Logo from '../Logo.jsx';
-
-const COLUMNS = [
-  {
-    heading: 'Product',
-    links: [
-      { label: 'Subjects', to: '/#subjects' },
-      { label: 'How it works', to: '/#how-it-works' },
-      { label: 'Get started', to: '/' },
-    ],
-  },
-  {
-    heading: 'Account',
-    links: [
-      { label: 'Sign in', to: '/login' },
-      { label: 'Create account', to: '/register' },
-      { label: 'Forgot password', to: '/forgot-password' },
-    ],
-  },
-  {
-    heading: 'Legal',
-    links: [
-      { label: 'Privacy policy', to: '/privacy' },
-      { label: 'Terms and conditions', to: '/terms' },
-      { label: 'Contact', href: 'mailto:hello@testflow.com.ng' },
-    ],
-  },
-];
+import { COMING_SOON_PATH, WAITLIST_EMAIL } from '../../features/waitlist/waitlist.js';
+import '../../pages/landing.css';
 
 function LandingFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-border bg-surface">
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -bottom-4 select-none text-center font-heading text-[22vw] font-extrabold leading-none tracking-tighter text-foreground-strong/[0.04] sm:-bottom-8 sm:text-[20vw]"
-      >
-        TESTFLOW
-      </span>
-      <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
-          <div className="col-span-2 sm:col-span-1">
-            <Logo size={28} />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
-              High-fidelity CBT practice for OAU students, built by Eddyrus
-              Media.
-            </p>
+    <div className="tfl">
+      <footer className="container footer">
+        <div className="footer-grid">
+          <div>
+            <Link to="/" className="logo" aria-label="Testflow home">
+              <Logo size={28} withWordmark={false} />
+              Testflow
+            </Link>
+            <p>Focused practice for brighter next chapters. Made for students in OAU.</p>
           </div>
-
-          {COLUMNS.map((column) => (
-            <div key={column.heading}>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-foreground-strong">
-                {column.heading}
-              </h3>
-              <ul className="mt-4 space-y-3">
-                {column.links.map((link) => (
-                  <li key={link.label}>
-                    {link.href ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-muted transition-colors hover:text-foreground-strong"
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link
-                        to={link.to}
-                        className="text-sm text-muted transition-colors hover:text-foreground-strong"
-                      >
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div>
+            <h4>Explore</h4>
+            <Link to="/#approach">Our approach</Link>
+            <Link to="/#subjects">Courses</Link>
+            <Link to="/#how-it-works">How it works</Link>
+            <Link to="/#faq">FAQs</Link>
+          </div>
+          <div>
+            <h4>Account</h4>
+            <Link to={COMING_SOON_PATH}>Get started</Link>
+            <Link to={COMING_SOON_PATH}>Log in</Link>
+            <Link to={COMING_SOON_PATH}>Join the waitlist</Link>
+          </div>
+          <div>
+            <h4>Support</h4>
+            <a href={`mailto:${WAITLIST_EMAIL}`}>Contact us</a>
+            <Link to="/privacy">Privacy policy</Link>
+            <Link to="/terms">Terms of use</Link>
+          </div>
         </div>
-
-        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 sm:flex-row">
-          <p className="text-xs text-muted">
-            &copy; {new Date().getFullYear()} Eddyrus Media. Built for OAU.
-          </p>
-          <p className="text-xs text-muted">Made in Nigeria</p>
+        <div className="footer-bar">
+          <span>© {new Date().getFullYear()} Testflow. All rights reserved.</span>
+          <span>Small steps. Real confidence.</span>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   );
 }
 

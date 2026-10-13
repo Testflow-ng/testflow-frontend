@@ -11,7 +11,7 @@ function RequireAdmin() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/coming-soon" replace />;
   }
 
   if (!['admin', 'super_admin'].includes(user?.role)) {

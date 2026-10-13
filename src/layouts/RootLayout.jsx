@@ -7,6 +7,7 @@ import NightOwlPopup from '../components/NightOwlPopup.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
 import Seo from '../components/Seo.jsx';
 
+const LANDING_PATHS = ['/', '/coming-soon', '/privacy', '/terms'];
 const EXAM_PATTERN = /^\/exam\/[^/]+$/;
 
 const pageVariants = {
@@ -18,12 +19,13 @@ function RootLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
+  const isLanding = LANDING_PATHS.includes(location.pathname);
   const isExamPage = EXAM_PATTERN.test(location.pathname);
 
   return (
     <div className="relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
       <Seo />
-      {!isExamPage && <Header />}
+      {!isExamPage && !isLanding && <Header />}
       <OfflineBanner />
 
       <main className="flex flex-1 flex-col">
