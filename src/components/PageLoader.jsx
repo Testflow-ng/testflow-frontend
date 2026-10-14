@@ -1,23 +1,18 @@
-import Mascot from './brand/Mascot.jsx';
+import Logo from './Logo.jsx';
 
 /**
- * Full-page loading state.
- *
- * Flo runs in and bobs while the page resolves. Deliberately restrained
- * compared to the splash: this appears on ordinary route loads, several times a
- * session, and an elaborate performance here would make the app feel slower
- * rather than friendlier. The entrance is 620ms and the idle is a 4px float.
- *
- * `label` is still announced to screen readers. The mascot is decoration; the
- * status text is the actual loading indicator.
+ * Full-page loading state: the TestFlow mark and three quiet dots.
+ * `label` is announced to screen readers; the mark is decoration.
  */
 function PageLoader({ label = 'Loading' }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-      <Mascot mood="neutral" size={84} animation="runIn" className="text-primary" />
-      <p role="status" className="text-[13px] font-medium text-muted">
-        {label}
-      </p>
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-20">
+      <Logo size={52} withWordmark={false} />
+      <div role="status" aria-label={label} className="flex items-center gap-2">
+        <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.3s]" />
+        <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.15s]" />
+        <span className="size-2 animate-bounce rounded-full bg-primary/70" />
+      </div>
     </div>
   );
 }
