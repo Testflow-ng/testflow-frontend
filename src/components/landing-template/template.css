@@ -141,3 +141,9 @@
 .tfl .tpl-member{flex:0 0 calc((100% - 56px) / 3);padding:34px 32px;gap:10px}
 @media(max-width:900px){.tfl .tpl-member{flex-basis:calc((100% - 28px) / 2)}}
 @media(max-width:600px){.tfl .tpl-team{gap:18px}.tfl .tpl-member{flex-basis:100%}}
+
+/* Keep visually-hidden text inside the scrolling table so it cannot widen the page on phones */
+.tfl .tpl-table-scroll{position:relative}
+.tfl .tpl-compare .sr-only{position:absolute}
+.tfl .tpl-yes,.tfl .tpl-no{position:relative}
+.tfl{overflow-x:clip}
