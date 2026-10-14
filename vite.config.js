@@ -112,6 +112,8 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        skipWaiting: true, // a new deploy replaces the old worker immediately
+        clientsClaim: true,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4MB to accommodate growing app shell
       },
       devOptions: { enabled: false },

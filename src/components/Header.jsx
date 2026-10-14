@@ -20,6 +20,7 @@ import { cn } from '../utils/cn.js';
 import Logo from './Logo.jsx';
 import EqualsMenuIcon from './EqualsMenuIcon.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import { THEME_SWITCHING_ENABLED } from '../theme.js';
 import WhatsAppIcon from './icons/WhatsAppIcon.jsx';
 import { WHATSAPP_CHANNEL_URL, WHATSAPP_GREEN } from '../constants/social.js';
 import { useAuth } from '../features/auth/useAuth.js';
@@ -275,13 +276,15 @@ function Header() {
                   ))}
                 </nav>
 
-                <div className="mt-2 flex items-center justify-between rounded-2xl bg-surface-strong px-4 py-3">
-                  <span className="flex items-center gap-3 text-sm font-semibold text-foreground-strong">
-                    <Sun size={18} className="text-muted" />
-                    Theme
-                  </span>
-                  <ThemeToggle />
-                </div>
+                {THEME_SWITCHING_ENABLED && (
+                  <div className="mt-2 flex items-center justify-between rounded-2xl bg-surface-strong px-4 py-3">
+                    <span className="flex items-center gap-3 text-sm font-semibold text-foreground-strong">
+                      <Sun size={18} className="text-muted" />
+                      Theme
+                    </span>
+                    <ThemeToggle />
+                  </div>
+                )}
 
                 <a
                   href={WHATSAPP_CHANNEL_URL}

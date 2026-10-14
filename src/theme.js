@@ -1,3 +1,6 @@
+// Light mode only for now. Flip to true when the toggle is added to Settings at launch.
+export const THEME_SWITCHING_ENABLED = false;
+
 const STORAGE_KEY = 'theme';
 const THEMES = {
   LIGHT: 'light',
@@ -46,6 +49,9 @@ const applyTheme = (theme) => {
 };
 
 const getTheme = () => {
+  if (!THEME_SWITCHING_ENABLED) {
+    return THEMES.LIGHT;
+  }
   const saved = getStoredTheme();
   if (saved) {
     return saved;
@@ -60,7 +66,7 @@ const getTheme = () => {
 };
 
 const setTheme = (theme, { persist = true } = {}) => {
-  if (!isValidTheme(theme)) {
+  if (!isValidTheme(theme) || (!THEME_SWITCHING_ENABLED && theme !== THEMES.LIGHT)) {
     return;
   }
 
@@ -86,6 +92,15 @@ const THEME_VERSION_KEY = 'theme_v';
 const CURRENT_THEME_VERSION = '2';
 
 const initializeTheme = () => {
+  if (!THEME_SWITCHING_ENABLED) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    applyTheme(THEMES.LIGHT);
+    return;
+  }
   const version = localStorage.getItem(THEME_VERSION_KEY);
   if (version !== CURRENT_THEME_VERSION) {
     localStorage.removeItem(STORAGE_KEY);

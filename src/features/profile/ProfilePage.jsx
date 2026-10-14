@@ -27,6 +27,7 @@ import { useAuth } from '../auth/useAuth.js';
 import { cn } from '../../utils/cn.js';
 import { useSubjects, useTogglePin } from '../subjects/useSubjects.js';
 import { useTheme } from '../../hooks/useTheme.js';
+import { THEME_SWITCHING_ENABLED } from '../../theme.js';
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
@@ -302,19 +303,21 @@ function ProfilePage() {
               label="Leaderboard"
               value={user.showOnLeaderboard !== false ? 'Visible' : 'Hidden'}
             />
-            <button type="button" onClick={toggleTheme} className={groupRowClasses()}>
-              <span className="flex items-center gap-3">
-                {isDark ? (
-                  <Sun size={16} className="text-muted" aria-hidden="true" />
-                ) : (
-                  <Moon size={16} className="text-muted" aria-hidden="true" />
-                )}
-                <span className="text-[15px] font-medium text-foreground-strong">
-                  {isDark ? 'Light mode' : 'Dark mode'}
+            {THEME_SWITCHING_ENABLED && (
+              <button type="button" onClick={toggleTheme} className={groupRowClasses()}>
+                <span className="flex items-center gap-3">
+                  {isDark ? (
+                    <Sun size={16} className="text-muted" aria-hidden="true" />
+                  ) : (
+                    <Moon size={16} className="text-muted" aria-hidden="true" />
+                  )}
+                  <span className="text-[15px] font-medium text-foreground-strong">
+                    {isDark ? 'Light mode' : 'Dark mode'}
+                  </span>
                 </span>
-              </span>
-              <Switch checked={isDark} />
-            </button>
+                <Switch checked={isDark} />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setPasswordModalOpen(true)}

@@ -3,6 +3,7 @@ import { Bell, ChevronRight, HelpCircle, Lock, LogOut, Moon, Shield, User } from
 import { useAuth } from '../auth/useAuth.js';
 import Avatar from '../../components/ui/Avatar.jsx';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
+import { THEME_SWITCHING_ENABLED } from '../../theme.js';
 import Screen, { ScreenHeader } from '../../components/layout/Screen.jsx';
 import { groupListClasses, groupRowClasses, listRowClasses } from '../../components/ui/surfaces.js';
 import { cn } from '../../utils/cn.js';
@@ -27,13 +28,15 @@ function SettingsPage() {
       </Link>
 
       <SettingsGroup title="Preferences">
-        <div className={groupRowClasses({ interactive: false })}>
-          <div className="flex items-center gap-3">
-            <Moon size={18} className="shrink-0 text-muted" aria-hidden="true" />
-            <span className="text-[15px] font-medium text-foreground-strong">Dark mode</span>
+        {THEME_SWITCHING_ENABLED && (
+          <div className={groupRowClasses({ interactive: false })}>
+            <div className="flex items-center gap-3">
+              <Moon size={18} className="shrink-0 text-muted" aria-hidden="true" />
+              <span className="text-[15px] font-medium text-foreground-strong">Dark mode</span>
+            </div>
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
-        </div>
+        )}
         <SettingsRow
           icon={<Bell size={18} aria-hidden="true" />}
           label="Notifications"
