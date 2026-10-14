@@ -340,3 +340,48 @@ blockquote{font-size:clamp(1.3rem,2.6vw,1.8rem);font-weight:500;color:var(--gree
 .tfl .hero-visual .week{margin:14px 0 22px}
 .tfl .orbit ellipse{stroke:#a7b4a3;stroke-dasharray:none;animation:none}
 .tfl .orbit-b ellipse{stroke:#b9c3b4}
+
+/* Footer: five columns now that Advertise is a group */
+.tfl .footer-grid{grid-template-columns:1.4fr repeat(5,1fr)}
+@media(max-width:900px){.tfl .footer-grid{grid-template-columns:1fr 1fr}}
+.tfl .nav-actions{gap:.9rem}
+.tfl .nav-actions>button:not(.menu-btn){background:#efede5;border-color:var(--line);color:var(--green)}
+
+/* Dark theme (follows the app's data-theme) */
+:root[data-theme='dark'] .tfl{
+  --bg:#0e1813;--bg-alt:#111f18;--text:#b9c9bf;--muted:#8fa498;--line:#25382d;
+  --lavender:#1c1a38;--sage:#17281f;--indigo:#7566ff;--green:#e7f1ea;--lime:#d6e87c;
+}
+:root[data-theme='dark'] .tfl .nav-shell{background:rgba(14,24,19,.88)}
+:root[data-theme='dark'] .tfl .btn-ghost,
+:root[data-theme='dark'] .tfl .menu-btn,
+:root[data-theme='dark'] .tfl .nav-actions>button:not(.menu-btn){background:#17281f;color:var(--green)}
+:root[data-theme='dark'] .tfl .btn-primary{background:#5b49f5;color:#fff}
+:root[data-theme='dark'] .tfl .btn-lime{color:#16301f}
+:root[data-theme='dark'] .tfl .subjects{background:#0a1c13}
+:root[data-theme='dark'] .tfl .subjects h2,
+:root[data-theme='dark'] .tfl .subject h3{color:#fff}
+:root[data-theme='dark'] .tfl .plan-card,
+:root[data-theme='dark'] .tfl .chip,
+:root[data-theme='dark'] .tfl .stat,
+:root[data-theme='dark'] .tfl .qcard,
+:root[data-theme='dark'] .tfl .soon-card,
+:root[data-theme='dark'] .tfl .ad-card{background:#1a2a21}
+:root[data-theme='dark'] .tfl .ring span{background:#1a2a21}
+:root[data-theme='dark'] .tfl .bar{background:#223329}
+:root[data-theme='dark'] .tfl .chip-streak{background:#2b5a43;color:#fff}
+:root[data-theme='dark'] .tfl .ticker b{color:#e7f1ea}
+:root[data-theme='dark'] .tfl .cta{background:#3b2fd0}
+:root[data-theme='dark'] .tfl .wl-input{background:#111f18;color:var(--green)}
+:root[data-theme='dark'] .tfl .blob{filter:brightness(.75)}
+:root[data-theme='dark'] .tfl .plan-icon{background:#2a2757}
+:root[data-theme='dark'] .tfl .cols u{background:#6a5fc4}
+:root[data-theme='dark'] .tfl .cols u.lime{background:var(--lime)}
+:root[data-theme='dark'] .tfl .cols u.blue{background:#7566ff}
+
+/* Mobile menu CTA: the generic menu-link rule was wiping the button background */
+.tfl .mobile-menu a.btn-primary{background:var(--indigo);color:#fff;border-radius:999px;justify-content:center;min-height:48px;padding:0 1.3rem;margin-top:.6rem}
+:root[data-theme='dark'] .tfl .mobile-menu a.btn-primary{background:#5b49f5}
+.tfl .nav-shell:has(.mobile-menu){background:var(--bg)}
+
+.tfl .wl-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}

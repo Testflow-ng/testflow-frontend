@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { REGISTER_PATH } from '../../auth/paths.js';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
@@ -190,7 +191,7 @@ function PublicQuestionPage() {
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Button
                             as={Link}
-                            to="/coming-soon"
+                            to={REGISTER_PATH}
                             className="flex-1 h-12 rounded-xl shadow-lg shadow-primary/20"
                             leadingIcon={<Trophy size={18} />}
                         >

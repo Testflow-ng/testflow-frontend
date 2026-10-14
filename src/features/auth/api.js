@@ -4,6 +4,10 @@ export const authApi = {
   me: () => apiClient.get('/api/auth/me').then((res) => res.data.user),
   login: (payload) => apiClient.post('/api/auth/login', payload).then((res) => res.data.user),
   register: (payload) => apiClient.post('/api/auth/register', payload).then((res) => res.data.user),
+  forgotPassword: ({ email }) => apiClient.post('/api/auth/forgot-password', { email }).then((res) => res.data),
+  resetPassword: ({ token, password }) =>
+    apiClient.post('/api/auth/reset-password', { token, password }).then((res) => res.data),
+  verifyEmail: (token) => apiClient.post('/api/auth/verify-email', { token }).then((res) => res.data),
   logout: () => apiClient.post('/api/auth/logout'),
   setUsername: (username) =>
     apiClient.patch('/api/auth/username', { username }).then((res) => res.data.user),

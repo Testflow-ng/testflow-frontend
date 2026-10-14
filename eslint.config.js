@@ -24,4 +24,5 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  { files: ['api/**/*.js', 'vite.config.js'], languageOptions: { globals: globals.node } },
 ];

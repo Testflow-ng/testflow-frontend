@@ -1,17 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import {
-  Alert,
-  Button,
-  Input,
-  SheetField,
-  sheetClasses,
-} from '../../../components/ui/index.js';
 import { zodResolver } from '../../../utils/zodResolver.js';
 import { forgotPasswordSchema } from '../schemas.js';
 import { authApi } from '../api.js';
-import AuthScreen from '../AuthScreen.jsx';
+import AuthShell from '../ui/AuthShell.jsx';
+import AuthField from '../ui/AuthField.jsx';
 
 function ForgotPasswordPage() {
   const [formError, setFormError] = useState(null);
@@ -21,104 +15,59 @@ function ForgotPasswordPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
-  });
+  } = useForm({ resolver: zodResolver(forgotPasswordSchema), defaultValues: { email: '' } });
 
   const onSubmit = async (values) => {
     setFormError(null);
-
     try {
       await authApi.forgotPassword(values);
       setSubmitted(true);
     } catch (error) {
-      setFormError(
-        error.message ?? 'Something went wrong. Please try again.',
-      );
+      setFormError(error.message ?? 'Something went wrong. Please try again.');
     }
   };
 
-  const backToLogin = (
-    <Link
-      to="/login"
-      className="
-        font-semibold text-link
-        underline-offset-4
-        hover:underline
-      "
-    >
-      Back to sign in
-    </Link>
-  );
+  const back = <Link to="/login">Back to sign in</Link>;
 
   if (submitted) {
     return (
-      <AuthScreen
-        title="Check your email"
-        subtitle="We've sent password reset instructions if an account exists for that email."
-        footer={backToLogin}
-      >
-        <Alert variant="success">
-          Check your inbox for the password reset link. If you don't see it,
-          check your spam or junk folder.
-        </Alert>
-      </AuthScreen>
+      <AuthShell title="Check your" accent="email." subtitle="We’ve sent reset instructions if an account exists for that email." footer={back}>
+        <p className="auth-alert auth-alert-success" role="status">
+          Check your inbox for the reset link. If you don’t see it, check your spam or junk folder.
+        </p>
+      </AuthShell>
     );
   }
 
   return (
-    <AuthScreen
-      title="Forgot your password?"
-      subtitle="Enter the email linked to your account and we'll send you a reset link."
-      footer={backToLogin}
+    <AuthShell
+      title="Forgot your"
+      accent="password?"
+      subtitle="Enter the email linked to your account and we’ll send you a reset link."
+      footer={back}
     >
-      <form
-        className="flex flex-col"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
+      <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         {formError && (
-          <Alert
-            variant="danger"
-            className="mb-5"
-          >
+          <p className="auth-alert auth-alert-danger" role="alert">
             {formError}
-          </Alert>
+          </p>
         )}
-
-        <div className={sheetClasses()}>
-          <SheetField
-            label="Email"
-            error={errors.email?.message}
-            required
-          >
-            <Input
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              placeholder="you@example.com"
-              {...register('email')}
-            />
-          </SheetField>
-        </div>
-
-        <Button
-          type="submit"
-          size="lg"
-          fullWidth
-          loading={isSubmitting}
-          className="mt-6"
-        >
-          Send reset link
-        </Button>
+        <AuthField
+          label="Email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder="you@example.com"
+          error={errors.email?.message}
+          {...register('email')}
+        />
+        <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Sending…' : 'Send reset link'}
+        </button>
       </form>
-    </AuthScreen>
+    </AuthShell>
   );
 }
 

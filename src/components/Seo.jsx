@@ -1,9 +1,22 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { EDDYRUS_SEO } from '../content/landing/eddyrus.js';
+import { EVERYBODY_EXTRA_PAGES, EVERYBODY_SEO } from '../content/landing/everybody.js';
+import { ADS_OG_ALT, ADS_OG_IMAGE, ADS_PAGES } from '../features/ads/adsSeo.js';
 
 const SITE_URL = 'https://www.testflow.com.ng';
+const MAIN_OG_IMAGE = `${SITE_URL}/og-image.png?v=1`;
+const MAIN_OG_ALT = 'Have you studied today? Testflow.';
 
 const PAGES = {
+  [EDDYRUS_SEO.route]: EDDYRUS_SEO,
+  [EVERYBODY_SEO.route]: EVERYBODY_SEO,
+  ...Object.fromEntries(
+    Object.entries(EVERYBODY_EXTRA_PAGES).map(([path, page]) => [path, { ...page, image: EVERYBODY_SEO.image, imageAlt: EVERYBODY_SEO.imageAlt }]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(ADS_PAGES).map(([path, page]) => [path, { ...page, image: ADS_OG_IMAGE, imageAlt: ADS_OG_ALT }]),
+  ),
   '/': {
     title: 'TestFlow | OAU CBT Practice for Obafemi Awolowo University Students',
     description:
@@ -20,6 +33,21 @@ const PAGES = {
   '/coming-soon': {
     title: 'Coming Soon | Join the Testflow Waitlist',
     description: 'Testflow accounts are opening soon. Join the waitlist to be notified when we launch.',
+    noIndex: true,
+  },
+  '/forgot-password': {
+    title: 'Reset your password | TestFlow',
+    description: 'Manage access to your TestFlow account.',
+    noIndex: true,
+  },
+  '/reset-password': {
+    title: 'Set a new password | TestFlow',
+    description: 'Manage access to your TestFlow account.',
+    noIndex: true,
+  },
+  '/verify-email': {
+    title: 'Verify your email | TestFlow',
+    description: 'Manage access to your TestFlow account.',
     noIndex: true,
   },
   '/register': {
@@ -55,6 +83,8 @@ function Seo() {
   useEffect(() => {
     const page = PAGES[pathname] || DEFAULT_PAGE;
     const canonicalUrl = `${SITE_URL}${pathname === '/' ? '/' : pathname}`;
+    const image = page.image || MAIN_OG_IMAGE;
+    const imageAlt = page.imageAlt || MAIN_OG_ALT;
 
     document.title = page.title;
     setMeta('meta[name="description"]', { name: 'description', content: page.description });
@@ -63,6 +93,11 @@ function Seo() {
     setMeta('meta[property="og:url"]', { property: 'og:url', content: canonicalUrl });
     setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: page.title });
     setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: page.description });
+    setMeta('meta[property="og:locale"]', { property: 'og:locale', content: page.locale || 'en_NG' });
+    document.documentElement.lang = 'en-NG';
+    setMeta('meta[property="og:image"]', { property: 'og:image', content: image });
+    setMeta('meta[property="og:image:alt"]', { property: 'og:image:alt', content: imageAlt });
+    setMeta('meta[name="twitter:image"]', { name: 'twitter:image', content: image });
     setMeta('meta[name="robots"]', {
       name: 'robots',
       content: page.noIndex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',

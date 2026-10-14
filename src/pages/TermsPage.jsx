@@ -1,3 +1,4 @@
+import { REGISTER_CTA_LABEL } from '../features/auth/paths.js';
 import LegalLayout, { LegalSection } from '../components/landing/LegalLayout.jsx';
 
 function TermsPage() {
@@ -6,7 +7,7 @@ function TermsPage() {
       title="Terms and Conditions"
       updated="September 28, 2026"
       intro="These Terms govern your use of TestFlow, an OAU CBT practice platform operated by Eddyrus Media. By creating an account or using TestFlow, you agree to these Terms and our Privacy Policy."
-      cta="Join the waitlist"
+      cta={REGISTER_CTA_LABEL}
     >
     <LegalSection title="Using TestFlow">
       <p>TestFlow provides learning and practice tools. It does not guarantee examination results, admission outcomes, course grades, or the accuracy of every question, explanation, or study recommendation. You are responsible for using the platform as a supplement to your own study and official university information.</p>

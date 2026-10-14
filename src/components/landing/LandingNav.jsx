@@ -3,16 +3,21 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
 import Logo from '../Logo.jsx';
 import { useAuth } from '../../features/auth/useAuth.js';
-import { COMING_SOON_PATH } from '../../features/waitlist/waitlist.js';
+import { LOGIN_PATH, REGISTER_PATH } from '../../features/auth/paths.js';
 
-const NAV_LINKS = [
+const DEFAULT_LINKS = [
   { to: '/#approach', label: 'Our approach' },
   { to: '/#subjects', label: 'Courses' },
   { to: '/#how-it-works', label: 'How it works' },
   { to: '/#faq', label: 'FAQs' },
+  { to: '/ads', label: 'Advertise' },
 ];
 
-function LandingNav() {
+function LandingNav({
+  links = DEFAULT_LINKS,
+  loginTo = LOGIN_PATH,
+  primary = { to: REGISTER_PATH, label: 'Get started' },
+}) {
   const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -33,7 +38,7 @@ function LandingNav() {
           Testflow
         </Link>
         <nav aria-label="Main">
-          {NAV_LINKS.map(({ to, label }) => (
+          {links.map(({ to, label }) => (
             <Link key={label} to={to}>
               {label}
             </Link>
@@ -46,11 +51,11 @@ function LandingNav() {
             </Link>
           ) : (
             <>
-              <Link to={COMING_SOON_PATH} className="login">
+              <Link to={loginTo} className="login">
                 Log in
               </Link>
-              <Link to={COMING_SOON_PATH} className="btn btn-primary">
-                Get started <ArrowUpRight size={14} aria-hidden="true" />
+              <Link to={primary.to} className="btn btn-primary">
+                {primary.label} <ArrowUpRight size={14} aria-hidden="true" />
               </Link>
             </>
           )}
@@ -68,7 +73,7 @@ function LandingNav() {
       </header>
       {open && (
         <div id="landing-mobile-menu" className="container mobile-menu">
-          {NAV_LINKS.map(({ to, label }) => (
+          {links.map(({ to, label }) => (
             <Link key={label} to={to} onClick={close}>
               {label}
             </Link>
@@ -79,11 +84,11 @@ function LandingNav() {
             </Link>
           ) : (
             <>
-              <Link to={COMING_SOON_PATH} onClick={close}>
+              <Link to={loginTo} onClick={close}>
                 Log in
               </Link>
-              <Link to={COMING_SOON_PATH} className="btn btn-primary" onClick={close}>
-                Get started <ArrowUpRight size={14} aria-hidden="true" />
+              <Link to={primary.to} className="btn btn-primary" onClick={close}>
+                {primary.label} <ArrowUpRight size={14} aria-hidden="true" />
               </Link>
             </>
           )}

@@ -1,20 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import {
-  Alert,
-  Button,
-  Input,
-  PasswordInput,
-  SheetField,
-  sheetClasses,
-} from '../../../components/ui/index.js';
 import { zodResolver } from '../../../utils/zodResolver.js';
 import { loginSchema } from '../schemas.js';
 import { useAuth } from '../useAuth.js';
-import AuthScreen from '../AuthScreen.jsx';
+import { adsAuthApi } from '../../ads/adsAuthApi.js';
+import { AUTH_PRODUCTS } from '../paths.js';
+import AuthShell from '../ui/AuthShell.jsx';
+import AuthField from '../ui/AuthField.jsx';
 
-function LoginPage() {
+/** Sign in. `product="ads"` signs an advertiser in through /api/ads/auth/login. */
+function LoginPage({ product = 'student' }) {
+  const cfg = AUTH_PRODUCTS[product];
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,123 +21,75 @@ function LoginPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  } = useForm({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '' } });
 
-  const from = location.state?.from?.pathname ?? '/dashboard';
+  const from = location.state?.from?.pathname ?? cfg.afterLogin;
 
   const onSubmit = async (values) => {
     setFormError(null);
-
     try {
-      await login(values);
+      if (product === 'ads') await adsAuthApi.login(values);
+      else await login(product === 'everybody' ? { ...values, product: 'everybody' } : values);
       navigate(from, { replace: true });
     } catch (error) {
-      const message =
+      setFormError(
         error.code === 'VALIDATION_ERROR'
           ? 'Please enter a valid email and password.'
-          : (error.message ?? 'Unable to sign in. Please try again.');
-
-      setFormError(message);
+          : error.code === 'NO_MEMBERSHIP' || error.code === 'NOT_AN_ADVERTISER'
+            ? `This account isn’t set up for ${product === 'ads' ? 'TestFlow Ads' : cfg.label ?? 'this product'} yet. Create an account to get started.`
+            : (error.message ?? 'Unable to sign in. Please try again.'),
+      );
     }
   };
 
   return (
-    <AuthScreen
-      title="Sign in"
-      subtitle="Continue to your papers, scores and streak."
+    <AuthShell
+      product={product}
+      title="Welcome"
+      accent="back."
+      subtitle={product === 'ads' ? 'Sign in to manage your campaigns.' : product === 'everybody' ? 'Sign in to manage your organisation.' : 'Continue to your papers, scores and streak.'}
       footer={
         <>
-          No account yet?{' '}
-          <Link
-            to="/register"
-            className="
-              font-semibold text-link
-              underline-offset-4
-              hover:underline
-            "
-          >
-            Create one
-          </Link>
+          {product === 'ads' ? 'New advertiser?' : product === 'everybody' ? 'New here?' : 'No account yet?'}{' '}
+          <Link to={cfg.register}>{product === 'ads' ? 'Create an advertiser account' : product === 'everybody' ? 'Create your platform' : 'Create one'}</Link>
         </>
       }
     >
-      <form
-        className="flex flex-col"
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-      >
+      <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
         {formError && (
-          <Alert
-            variant="danger"
-            className="mb-5"
-          >
+          <p className="auth-alert auth-alert-danger" role="alert">
             {formError}
-          </Alert>
+          </p>
         )}
-
-        <div className={sheetClasses()}>
-          <SheetField
-            label="Email"
-            error={errors.email?.message}
-            required
-          >
-            <Input
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              placeholder="you@example.com"
-              {...register('email')}
-            />
-          </SheetField>
-
-          <SheetField
-            label="Password"
-            error={errors.password?.message}
-            required
-          >
-            <PasswordInput
-              autoComplete="current-password"
-              placeholder="Your password"
-              {...register('password')}
-            />
-          </SheetField>
+        <AuthField
+          label="Email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder="you@example.com"
+          error={errors.email?.message}
+          {...register('email')}
+        />
+        <AuthField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Your password"
+          error={errors.password?.message}
+          {...register('password')}
+        />
+        <div className="auth-row">
+          <Link to={cfg.forgot} className="auth-link">
+            Forgot password?
+          </Link>
         </div>
-
-        <Link
-          to="/forgot-password"
-          className="
-            tf-pressable
-            mt-3 self-start
-            rounded-full
-            text-[13px] font-semibold
-            text-link
-            underline-offset-4
-            hover:underline
-          "
-        >
-          Forgot password?
-        </Link>
-
-        <Button
-          type="submit"
-          size="lg"
-          fullWidth
-          loading={isSubmitting}
-          className="mt-6"
-        >
-          Sign in
-        </Button>
+        <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing in…' : 'Sign in'}
+        </button>
       </form>
-    </AuthScreen>
+    </AuthShell>
   );
 }
 

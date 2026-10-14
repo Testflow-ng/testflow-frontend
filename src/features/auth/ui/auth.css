@@ -1,0 +1,50 @@
+/* Auth screens in the landing-page language. Scoped under .tfl; tokens come from pages/landing.css. */
+.tfl .auth-main{display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:56px;align-items:center;padding-block:120px 80px;min-height:calc(100svh - 120px)}
+.tfl .auth-card{background:#fff;border:1px solid var(--line);border-radius:28px;padding:40px;box-shadow:0 24px 60px rgba(30,40,30,.1)}
+.tfl .auth-head h1{font-size:clamp(2rem,4.4vw,2.8rem);margin-bottom:.8rem}
+.tfl .auth-head .lead{margin:0 0 1.6rem;max-width:none;font-size:.95rem}
+.tfl .auth-form{display:grid;gap:16px}
+.tfl .auth-field{display:grid;gap:6px}
+.tfl .auth-field label{font-size:.78rem;font-weight:700;color:var(--green)}
+.tfl .auth-input-wrap{position:relative}
+.tfl .auth-input{width:100%;height:50px;border-radius:999px;border:1px solid var(--line);background:var(--bg);padding:0 1.3rem;font:inherit;font-size:.92rem;color:var(--green);transition:border-color .15s,box-shadow .15s}
+.tfl .auth-input::placeholder{color:var(--muted)}
+.tfl .auth-input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 4px rgba(74,53,240,.14)}
+.tfl .auth-input[aria-invalid="true"]{border-color:#c0392b}
+.tfl .auth-input-wrap .auth-input{padding-right:3.2rem}
+.tfl .auth-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:none;border-radius:50%;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.tfl .auth-eye:hover{color:var(--green);background:rgba(0,0,0,.05)}
+.tfl .auth-error{font-size:.76rem;color:#b03a2e}
+.tfl .auth-hint{font-size:.74rem;color:var(--muted)}
+.tfl .auth-alert{border-radius:var(--r-md);padding:12px 16px;font-size:.84rem;line-height:1.5}
+.tfl .auth-alert-danger{background:#fbe9e7;color:#8c2a1f}
+.tfl .auth-alert-success{background:var(--sage);color:var(--green)}
+.tfl .auth-submit{justify-content:center;width:100%;height:50px;margin-top:6px;font-size:.92rem}
+.tfl .auth-submit:disabled{opacity:.7;cursor:progress}
+.tfl .auth-row{display:flex;justify-content:flex-end;margin-top:-6px}
+.tfl .auth-link{font-size:.8rem;font-weight:600;color:var(--indigo)}
+.tfl .auth-link:hover{text-decoration:underline}
+.tfl .auth-foot{margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.tfl .auth-foot a{font-weight:700;color:var(--indigo)}
+.tfl .auth-foot a:hover{text-decoration:underline}
+.tfl .auth-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+.tfl .auth-aside{position:relative;background:var(--lavender);border-radius:var(--r-lg);padding:44px;min-height:420px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.tfl .auth-aside h2{font-size:clamp(2rem,3.4vw,2.8rem);margin-bottom:1.6rem}
+.tfl .auth-points{list-style:none;padding:0;display:grid;gap:.9rem}
+.tfl .auth-points li{display:flex;gap:.7rem;align-items:flex-start;font-size:.95rem;color:var(--green);font-weight:500}
+.tfl .auth-points svg{flex:none;margin-top:3px;background:var(--indigo);color:#fff;border-radius:50%;padding:3px;width:20px;height:20px}
+.tfl .auth-aside.is-ads{background:var(--sage)}
+.tfl .auth-aside.is-ads .auth-points svg{background:var(--green)}
+
+@media(max-width:900px){
+  .tfl .auth-main{grid-template-columns:1fr;padding-block:104px 56px;min-height:0}
+  .tfl .auth-aside{display:none}
+  .tfl .auth-card{padding:28px 22px;border-radius:24px}
+  .tfl .auth-two{grid-template-columns:1fr}
+}
+:root[data-theme='dark'] .tfl .auth-card{background:#14231b}
+:root[data-theme='dark'] .tfl .auth-input{background:#0e1813}
+:root[data-theme='dark'] .tfl .auth-alert-danger{background:#3a1c18;color:#ffb4a8}
+:root[data-theme='dark'] .tfl .auth-aside{background:#1c1a38}
+:root[data-theme='dark'] .tfl .auth-aside.is-ads{background:#17281f}

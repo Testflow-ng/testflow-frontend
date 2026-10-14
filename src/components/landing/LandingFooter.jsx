@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { ORG_NAME, ORG_PATH, PRODUCT_NAME_PUBLIC, PRODUCT_PATH } from '../../constants/products.js';
 import Logo from '../Logo.jsx';
 import { COMING_SOON_PATH, WAITLIST_EMAIL } from '../../features/waitlist/waitlist.js';
+import { WHATSAPP_CHANNEL_URL } from '../../constants/social.js';
+import { LOGIN_PATH, REGISTER_PATH } from '../../features/auth/paths.js';
 import '../../pages/landing.css';
 
 function LandingFooter() {
@@ -13,7 +16,7 @@ function LandingFooter() {
               <Logo size={28} withWordmark={false} />
               Testflow
             </Link>
-            <p>Focused practice for brighter next chapters. Made for students in OAU.</p>
+            <p>Focused practice for brighter next chapters. Made for students in OAU. Built by <Link to={ORG_PATH}>{ORG_NAME}</Link>.</p>
           </div>
           <div>
             <h4>Explore</h4>
@@ -24,9 +27,24 @@ function LandingFooter() {
           </div>
           <div>
             <h4>Account</h4>
-            <Link to={COMING_SOON_PATH}>Get started</Link>
-            <Link to={COMING_SOON_PATH}>Log in</Link>
+            <Link to={REGISTER_PATH}>Get started</Link>
+            <Link to={LOGIN_PATH}>Log in</Link>
             <Link to={COMING_SOON_PATH}>Join the waitlist</Link>
+          </div>
+          <div>
+            <h4>Products</h4>
+            <Link to={PRODUCT_PATH}>{PRODUCT_NAME_PUBLIC}</Link>
+            <Link to="/ads">Advertise with TestFlow</Link>
+            <Link to="/ads/terms">Advertising terms</Link>
+            <Link to="/ads/rules">Ad content rules</Link>
+          </div>
+          <div>
+            <h4>Company</h4>
+            <Link to={ORG_PATH}>{ORG_NAME}</Link>
+            <Link to={`${ORG_PATH}#team`}>Meet the team</Link>
+            <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
+              WhatsApp channel
+            </a>
           </div>
           <div>
             <h4>Support</h4>

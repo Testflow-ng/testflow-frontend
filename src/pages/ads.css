@@ -1,0 +1,134 @@
+/* TestFlow Ads: additions on top of landing.css */
+.tfl .ad-card{position:relative;width:min(300px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 20px 50px rgba(30,40,30,.16);display:grid;gap:8px}
+.tfl .ad-tag{position:absolute;top:24px;left:24px;z-index:1;background:rgba(27,67,50,.9);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:.2rem .6rem}
+.tfl .ad-card-img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:12px;display:block;background:var(--sage)}
+.tfl .ad-card h3{font-size:1.05rem;margin-top:4px}
+.tfl .ad-card p{font-size:.78rem;color:var(--muted);line-height:1.5}
+.tfl .ad-btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;background:#25d366;color:#08331a;font-weight:700;font-size:.8rem;border-radius:999px;padding:.6rem 1rem;margin-top:4px}
+
+.tfl .ads-visual .ad-hero-card{position:relative;z-index:1;margin-left:40px;transform:rotate(-3deg);animation:tfl-card 7s ease-in-out infinite}
+.tfl .ads-visual .chip-streak{background:#1b3d2e}
+
+.tfl .ads-why-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:start}
+.tfl .ads-benefits{display:grid;gap:16px}
+.tfl .ads-benefits .feature{min-height:0;padding:24px 28px}
+.tfl .ads-ic{color:var(--indigo)}
+.tfl .ads-preview{display:grid;gap:14px;justify-items:center;background:var(--sage);border-radius:var(--r-lg);padding:28px}
+.tfl .ads-preview figcaption{justify-self:stretch}
+.tfl .ads-preview .side{max-width:none}
+.tfl .ads-preview .ad-card{transform:rotate(2deg)}
+
+@media(max-width:900px){
+  .tfl .ads-why-grid{grid-template-columns:1fr}
+  .tfl .ads-visual .ad-hero-card{margin-left:0;margin-inline:auto}
+}
+@media(prefers-reduced-motion:reduce){.tfl .ads-visual .ad-hero-card{animation:none!important}}
+
+/* ---- Pricing ---- */
+.tfl .ads-pricing .price-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;align-items:stretch}
+.tfl .price-card{border-radius:var(--r-lg);padding:32px}
+.tfl .price-rate{background:var(--lime);color:#16301f}
+.tfl .price-rate p,.tfl .price-rate li{color:#16301f}
+.tfl .price-kicker{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.tfl .price-big{display:flex;align-items:baseline;gap:.5rem;margin:.4rem 0 1.4rem}
+.tfl .price-big b{font-size:clamp(2.8rem,6vw,4rem);letter-spacing:-.04em;line-height:1;color:#0f2a1a}
+.tfl .price-big span{font-size:1rem;font-weight:600}
+.tfl .price-list{list-style:none;padding:0;display:grid;gap:.7rem}
+.tfl .price-list li{display:flex;gap:.6rem;align-items:flex-start;font-size:.88rem;font-weight:500}
+.tfl .price-list svg{flex:none;margin-top:3px;background:#0f2a1a;color:var(--lime);border-radius:50%;padding:2px;width:18px;height:18px}
+.tfl .price-tiers{list-style:none;padding:0;display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.4rem}
+.tfl .price-tiers li{background:rgba(15,42,26,.12);border-radius:999px;padding:.25rem .75rem;font-size:.74rem;font-weight:600;color:#0f2a1a}
+.tfl .price-calc{background:#f6f4ee;display:grid;gap:14px;align-content:start}
+.tfl .price-label{display:flex;justify-content:space-between;align-items:baseline;font-size:.95rem;font-weight:600;color:var(--green)}
+.tfl .price-label b{font-size:1.5rem;color:var(--indigo);letter-spacing:-.02em}
+.tfl .price-range{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;border:0;padding:0;cursor:pointer}
+.tfl .price-range::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--indigo) var(--fill),#dedbd0 var(--fill))}
+.tfl .price-range::-moz-range-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--indigo) var(--fill),#dedbd0 var(--fill))}
+.tfl .price-range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:50%;background:#fff;border:4px solid var(--indigo);box-shadow:0 4px 12px rgba(74,53,240,.35)}
+.tfl .price-range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:4px solid var(--indigo)}
+.tfl .price-scale{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:-6px}
+.tfl .price-total{border-top:1px solid var(--line);padding-top:18px;display:grid;gap:4px}
+.tfl .price-total>span{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tfl .price-total p{display:flex;align-items:baseline;gap:.7rem}
+.tfl .price-total b{font-size:clamp(2.2rem,5vw,3rem);letter-spacing:-.03em;color:var(--green);line-height:1.1}
+.tfl .price-total s{color:var(--muted)}
+.tfl .price-off{align-self:start;font-family:var(--font);font-style:normal;font-size:.72rem;font-weight:700;background:var(--lime);color:#16301f;border-radius:999px;padding:.15rem .6rem}
+.tfl .price-note{color:var(--muted)}
+
+@media(max-width:900px){
+  .tfl .ads-pricing .price-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .tfl .price-card{padding:24px}
+}
+:root[data-theme='dark'] .tfl .price-calc{background:#17281f}
+:root[data-theme='dark'] .tfl .price-rate{color:#16301f}
+
+/* Red office push-pin holding the sponsored card */
+.tfl .ads-preview .ad-card{margin-top:22px}
+.tfl .pin{position:absolute;top:-34px;left:50%;width:56px;height:72px;margin-left:-28px;z-index:3;overflow:visible;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));animation:tfl-pin .7s .2s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes tfl-pin{from{transform:translateY(-26px) scale(1.2);opacity:0}to{transform:none;opacity:1}}
+@media(prefers-reduced-motion:reduce){.tfl .pin{animation:none}}
+
+/* ---- Hero: phone showing the sponsored card after a CBT session (static) ---- */
+.tfl .ads-visual{padding:40px 0 60px;display:grid;place-items:center}
+.tfl .ads-visual *{animation:none!important}
+.tfl .ads-visual .blob{right:4px;top:90px;width:360px;height:400px;opacity:1}
+.tfl .phone{position:relative;z-index:1;width:276px;padding:3.5px;border-radius:50px;
+  background:linear-gradient(135deg,#f1f2f3 0%,#9ea3a8 18%,#d9dcdf 38%,#7b8085 62%,#c9ccd0 82%,#8e9398 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.55),30px 50px 60px -18px rgba(12,28,20,.5),12px 24px 30px -12px rgba(12,28,20,.35)}
+.tfl .phone-bezel{border-radius:46.5px;padding:9px;background:#040605;box-shadow:inset 0 0 0 1.5px #1b1f1d,inset 0 0 6px 1px rgba(255,255,255,.08)}
+.tfl .phone-btn{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#6c7176,#d5d8db 45%,#8b9095);box-shadow:0 0 0 .5px rgba(0,0,0,.4)}
+.tfl .phone-btn-a{left:-4px;top:96px;height:22px}
+.tfl .phone-btn-b{left:-4px;top:136px;height:42px}
+.tfl .phone-btn-c{left:-4px;top:188px;height:42px}
+.tfl .phone-btn-d{right:-4px;top:150px;height:70px;background:linear-gradient(270deg,#6c7176,#d5d8db 45%,#8b9095)}
+.tfl .phone-screen{position:relative;border-radius:38px;overflow:hidden;background:var(--bg);height:540px;padding-top:6px}
+.tfl .phone-island{position:absolute;left:50%;top:10px;width:86px;height:25px;margin-left:-43px;border-radius:16px;background:#000;z-index:3;box-shadow:0 0 0 .5px #1a1d1b}
+.tfl .phone-lens{position:absolute;right:9px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a5a7a 0,#16203a 45%,#05070d 100%);box-shadow:0 0 0 1.5px #0b0d12}
+.tfl .phone-glass{position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(118deg,rgba(255,255,255,.28) 0%,rgba(255,255,255,.08) 22%,transparent 38%,transparent 70%,rgba(255,255,255,.07) 100%)}
+.tfl .phone-ground{position:absolute;z-index:0;left:50%;bottom:18px;width:300px;height:34px;margin-left:-130px;border-radius:50%;background:radial-gradient(closest-side,rgba(10,25,18,.4),transparent);filter:blur(6px)}
+.tfl .phone-status{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 0 28px;font-size:.74rem;font-weight:700;color:var(--green);height:36px;position:relative;z-index:2}
+.tfl .phone-status-icons{display:inline-flex;gap:5px;align-items:center;color:var(--green)}
+.tfl .phone-app{padding:12px 14px 0;display:grid;gap:10px}
+.tfl .phone-bar{display:flex;justify-content:space-between;align-items:baseline}
+.tfl .phone-bar b{font-size:.95rem;color:var(--green);letter-spacing:-.02em}
+.tfl .phone-bar small{font-size:.62rem;font-weight:700;color:var(--indigo);background:var(--lavender);border-radius:999px;padding:.15rem .55rem}
+.tfl .phone-result{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:12px;box-shadow:0 1px 2px rgba(30,40,30,.08),0 8px 16px -8px rgba(30,40,30,.15)}
+.tfl .phone-result>div:last-child{display:grid;gap:2px}
+.tfl .phone-result small{font-size:.6rem;color:var(--muted)}
+.tfl .phone-result b{font-size:.92rem;color:var(--green);letter-spacing:-.01em}
+.tfl .phone-ring{flex:none;width:52px;height:52px;border-radius:50%;background:conic-gradient(var(--indigo) 90%,#e7e5f6 0);display:grid;place-items:center}
+.tfl .phone-ring span{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:.72rem;font-weight:800;color:var(--green)}
+.tfl .phone-label{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:2px 2px -4px}
+.tfl .phone-ad{background:#fff;border-radius:16px;padding:8px;display:grid;gap:5px;box-shadow:0 1px 2px rgba(30,40,30,.08),0 8px 16px -8px rgba(30,40,30,.15)}
+.tfl .phone-ad img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:10px;display:block}
+.tfl .phone-ad h3{font-size:.86rem;margin-top:2px}
+.tfl .phone-ad p{font-size:.66rem;color:var(--muted);line-height:1.4}
+.tfl .phone-ad .ad-btn{font-size:.68rem;padding:.5rem .7rem;white-space:nowrap}
+.tfl .phone-home{position:absolute;left:50%;bottom:8px;width:100px;height:5px;margin-left:-50px;border-radius:3px;background:rgba(15,30,22,.8);z-index:3}
+.tfl .stat-card{position:absolute;z-index:5;left:-8px;bottom:74px;background:#fff;border-radius:16px;padding:12px 16px;display:grid;gap:6px;box-shadow:0 1px 2px rgba(30,40,30,.1),0 18px 34px -10px rgba(30,40,30,.28);transform:rotate(2deg)}
+.tfl .stat-card>small{font-size:.62rem;color:var(--muted);font-weight:700}
+.tfl .stat-card>div{display:flex;gap:16px}
+.tfl .stat-card span{display:grid;font-size:.62rem;color:var(--muted)}
+.tfl .stat-card b{font-size:1.2rem;color:var(--green);letter-spacing:-.02em}
+.tfl .ads-visual .chip-streak{top:30px;right:0;background:#1b3d2e}
+.tfl .ads-preview .pin{animation:none}
+@media(max-width:560px){
+  .tfl .phone{width:244px}
+  .tfl .phone-screen{height:490px}
+  .tfl .ads-visual .blob{width:250px;height:290px;right:0;top:100px}
+  .tfl .stat-card{left:-2px;bottom:54px;padding:10px 12px}
+  .tfl .ads-visual .chip-streak{right:-2px;font-size:.7rem}
+}
+:root[data-theme='dark'] .tfl .phone-result,
+:root[data-theme='dark'] .tfl .phone-ad,
+:root[data-theme='dark'] .tfl .stat-card{background:#1a2a21}
+:root[data-theme='dark'] .tfl .phone-ring span{background:#1a2a21}
+.tfl .ads-visual .chip-streak{top:4px;right:-6px}
+
+.tfl .ads-visual .blob{display:none}
+.tfl .stat-card,.tfl .ads-visual .chip-streak{transform:none}
+.tfl .phone-ground{bottom:22px}

@@ -1,3 +1,4 @@
+import { REGISTER_CTA_LABEL } from '../features/auth/paths.js';
 import LegalLayout, { LegalSection } from '../components/landing/LegalLayout.jsx';
 
 function PrivacyPage() {
@@ -6,7 +7,7 @@ function PrivacyPage() {
       title="Privacy Policy"
       updated="September 28, 2026"
       intro="TestFlow is operated by Eddyrus Media and provides CBT practice tools for Obafemi Awolowo University students. This policy explains how we handle personal data when you use TestFlow."
-      cta="Join the waitlist"
+      cta={REGISTER_CTA_LABEL}
     >
     <LegalSection title="Information we collect">
       <p>We collect details you provide when creating or managing an account, such as your name, email address, username, department, level, and matric number where you choose to provide it.</p>

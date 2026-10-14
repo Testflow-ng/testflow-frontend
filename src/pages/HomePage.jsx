@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import LandingNav from '../components/landing/LandingNav.jsx';
 import LandingFooter from '../components/landing/LandingFooter.jsx';
-import { COMING_SOON_PATH } from '../features/waitlist/waitlist.js';
+import { REGISTER_PATH } from '../features/auth/paths.js';
 import './landing.css';
 
 const STATS = [
@@ -85,7 +85,7 @@ function HomePage() {
                 course load, purposeful practice and progress you can see.
               </p>
               <div className="btn-row">
-                <Link to={COMING_SOON_PATH} className="btn btn-primary">
+                <Link to={REGISTER_PATH} className="btn btn-primary">
                   Start learning <ArrowUpRight size={14} aria-hidden="true" />
                 </Link>
                 <Link to="/#how-it-works" className="btn btn-ghost">
@@ -232,7 +232,7 @@ function HomePage() {
               </div>
               <div className="subject-grid">
                 {SUBJECTS.map(({ name, topics, Icon }) => (
-                  <Link key={name} to={COMING_SOON_PATH} className="subject">
+                  <Link key={name} to={REGISTER_PATH} className="subject">
                     <span className="ic">
                       <Icon size={20} aria-hidden="true" />
                     </span>
@@ -251,7 +251,7 @@ function HomePage() {
               <h2>
                 From “where do I start?” to <em>“I’ve got this.”</em>
               </h2>
-              <Link to={COMING_SOON_PATH} className="btn btn-ghost">
+              <Link to={REGISTER_PATH} className="btn btn-ghost">
                 Find your first step
               </Link>
             </div>
@@ -326,7 +326,7 @@ function HomePage() {
                 <p>A clear plan. A little practice. A more confident you.</p>
               </div>
               <div className="cta-action">
-                <Link to={COMING_SOON_PATH} className="btn btn-lime">
+                <Link to={REGISTER_PATH} className="btn btn-lime">
                   Get started with Testflow <ArrowUpRight size={14} aria-hidden="true" />
                 </Link>
                 <small>Find your pace. Start where you are.</small>

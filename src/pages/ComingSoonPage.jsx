@@ -5,7 +5,13 @@ import LandingFooter from '../components/landing/LandingFooter.jsx';
 import WaitlistForm from '../features/waitlist/WaitlistForm.jsx';
 import './landing.css';
 
-function ComingSoonPage() {
+function ComingSoonPage({
+  title = 'We’re working on',
+  accent = 'something great.',
+  lead = 'Accounts aren’t open just yet. Join the waitlist to be notified when we launch.',
+  backTo = '/',
+  backLabel = '← Back to home',
+}) {
   return (
     <>
       <div className="tfl tfl-page-top">
@@ -16,14 +22,12 @@ function ComingSoonPage() {
               <Sparkles size={12} aria-hidden="true" /> Coming soon
             </p>
             <h1 id="soon-title">
-              We’re working on <em>something great.</em>
+              {title} <em>{accent}</em>
             </h1>
-            <p className="lead">
-              Accounts aren’t open just yet. Join the waitlist to be notified when we launch.
-            </p>
+            <p className="lead">{lead}</p>
             <WaitlistForm />
-            <Link to="/" className="soon-back">
-              ← Back to home
+            <Link to={backTo} className="soon-back">
+              {backLabel}
             </Link>
           </section>
         </main>

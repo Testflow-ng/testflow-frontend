@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { LOGIN_PATH } from '../auth/paths.js';
 import { useAuth } from '../auth/useAuth.js';
 import PageLoader from '../../components/PageLoader.jsx';
 
@@ -11,7 +12,7 @@ function RequireAdmin() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/coming-soon" replace />;
+    return <Navigate to={LOGIN_PATH} replace />;
   }
 
   if (!['admin', 'super_admin'].includes(user?.role)) {

@@ -14,17 +14,30 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-export const registerSchema = z
-  .object({
-    fullName: z.string().trim().min(2, 'Enter your full name').max(120),
-    email,
-    password: strongPassword,
-    confirmPassword: z.string().min(1, 'Confirm your password'),
+const registerBase = z.object({
+  fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+  email,
+  password: strongPassword,
+  confirmPassword: z.string().min(1, 'Confirm your password'),
+});
+
+const passwordsMatch = {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+};
+
+export const registerSchema = registerBase.refine((d) => d.password === d.confirmPassword, passwordsMatch);
+
+export const adsRegisterSchema = registerBase
+  .extend({
+    businessName: z.string().trim().min(2, 'Enter your business or brand name').max(120),
+    contactPhone: z.string().trim().max(32).optional().or(z.literal('')),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+  .refine((d) => d.password === d.confirmPassword, passwordsMatch);
+
+export const everybodyRegisterSchema = registerBase
+  .extend({ organizationName: z.string().trim().min(2, 'Enter your organisation name').max(120) })
+  .refine((d) => d.password === d.confirmPassword, passwordsMatch);
 
 export const forgotPasswordSchema = z.object({ email });
 

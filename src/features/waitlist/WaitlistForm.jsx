@@ -1,12 +1,13 @@
 import { useId, useState } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { WAITLIST_EMAIL, WAITLIST_URL, isValidEmail, joinWaitlist } from './waitlist.js';
+import { WAITLIST_EMAIL, isValidEmail, joinWaitlist } from './waitlist.js';
 
 function WaitlistForm() {
   const inputId = useId();
   const errorId = useId();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [status, setStatus] = useState('idle'); // idle | sending | saved | mailto
 
   const onSubmit = async (event) => {
@@ -18,17 +19,17 @@ function WaitlistForm() {
     setError('');
     setStatus('sending');
     try {
-      setStatus(await joinWaitlist(email));
-    } catch {
+      setStatus(await joinWaitlist(email, honeypot));
+    } catch (err) {
       setStatus('idle');
-      setError('Something went wrong. Please try again in a moment.');
+      setError(err?.message?.startsWith('Too many') ? err.message : 'Something went wrong. Please try again in a moment.');
     }
   };
 
   if (status === 'saved') {
     return (
       <p className="wl-done" role="status">
-        You’re on the list. We’ll email you when Testflow opens.
+        You’re on the list. Check your inbox for a thank-you from us.
       </p>
     );
   }
@@ -43,6 +44,7 @@ function WaitlistForm() {
 
   return (
     <form className="wl-form" onSubmit={onSubmit} noValidate>
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="wl-hp" />
       <label htmlFor={inputId} className="sr-only">
         Email address
       </label>
@@ -70,9 +72,7 @@ function WaitlistForm() {
         </p>
       )}
       <p className="wl-note">
-        {WAITLIST_URL
-          ? 'We’ll only use your email to tell you when we launch.'
-          : 'This opens your email app so you can send us your request.'}
+        We’ll only use your email to tell you when we launch.
       </p>
     </form>
   );

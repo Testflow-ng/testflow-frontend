@@ -5,9 +5,11 @@ import BottomNav from '../components/BottomNav.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 import NightOwlPopup from '../components/NightOwlPopup.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
+import { ORG_PATH, PRODUCT_PATH } from '../constants/products.js';
 import Seo from '../components/Seo.jsx';
 
-const LANDING_PATHS = ['/', '/coming-soon', '/privacy', '/terms'];
+const LANDING_PATHS = ['/', '/coming-soon', '/privacy', '/terms', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
+const isLandingPath = (p) => LANDING_PATHS.includes(p) || p === '/ads' || p.startsWith('/ads/') || p === ORG_PATH || p === PRODUCT_PATH || p.startsWith(`${PRODUCT_PATH}/`);
 const EXAM_PATTERN = /^\/exam\/[^/]+$/;
 
 const pageVariants = {
@@ -19,7 +21,7 @@ function RootLayout() {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
-  const isLanding = LANDING_PATHS.includes(location.pathname);
+  const isLanding = isLandingPath(location.pathname);
   const isExamPage = EXAM_PATTERN.test(location.pathname);
 
   return (

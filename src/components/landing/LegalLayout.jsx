@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 import LandingNav from './LandingNav.jsx';
 import LandingFooter from './LandingFooter.jsx';
-import { COMING_SOON_PATH } from '../../features/waitlist/waitlist.js';
+import { REGISTER_PATH } from '../../features/auth/paths.js';
 import '../../pages/landing.css';
 
 export function LegalSection({ title, children }) {
@@ -14,7 +14,7 @@ export function LegalSection({ title, children }) {
   );
 }
 
-function LegalLayout({ title, updated, intro, cta, children }) {
+function LegalLayout({ title, updated, intro, cta, ctaTo = REGISTER_PATH, children }) {
   return (
     <>
       <div className="tfl tfl-page">
@@ -22,10 +22,12 @@ function LegalLayout({ title, updated, intro, cta, children }) {
         <main className="container legal">
           <p className="eyebrow">Legal</p>
           <h1>{title}</h1>
-          <small className="legal-updated">Last updated: {updated}</small>
+          <small className="legal-updated">
+            {updated === 'Draft' ? 'Draft, pending legal review' : `Last updated: ${updated}`}
+          </small>
           <p className="legal-intro">{intro}</p>
           {children}
-          <Link to={COMING_SOON_PATH} className="btn btn-primary legal-cta">
+          <Link to={ctaTo} className="btn btn-primary legal-cta">
             {cta} <ArrowUpRight size={14} aria-hidden="true" />
           </Link>
         </main>

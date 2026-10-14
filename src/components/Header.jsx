@@ -23,6 +23,7 @@ import ThemeToggle from './ThemeToggle.jsx';
 import WhatsAppIcon from './icons/WhatsAppIcon.jsx';
 import { WHATSAPP_CHANNEL_URL, WHATSAPP_GREEN } from '../constants/social.js';
 import { useAuth } from '../features/auth/useAuth.js';
+import { LOGIN_PATH, REGISTER_PATH } from '../features/auth/paths.js';
 import { buttonClasses } from './ui/index.js';
 import Avatar from './ui/Avatar.jsx';
 
@@ -211,13 +212,13 @@ function Header() {
               ) : (
                 <div className="hidden items-center gap-2 lg:flex">
                   <Link
-                    to="/coming-soon"
+                    to={LOGIN_PATH}
                     className="px-3 text-sm font-semibold text-muted transition-colors hover:text-foreground-strong"
                   >
                     Sign in
                   </Link>
                   <Link
-                    to="/coming-soon"
+                    to={REGISTER_PATH}
                     className={buttonClasses({ size: 'sm', className: 'px-5' })}
                   >
                     Get started
@@ -321,7 +322,7 @@ function Header() {
                   ) : (
                     <div className="flex flex-col gap-3">
                       <Link
-                        to="/coming-soon"
+                        to={LOGIN_PATH}
                         onClick={() => setMenuOpen(false)}
                         className={buttonClasses({
                           variant: 'outline',
@@ -332,7 +333,7 @@ function Header() {
                         Sign in
                       </Link>
                       <Link
-                        to="/coming-soon"
+                        to={REGISTER_PATH}
                         onClick={() => setMenuOpen(false)}
                         className={buttonClasses({
                           size: 'lg',

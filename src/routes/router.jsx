@@ -7,6 +7,16 @@ import TermsPage from '../pages/TermsPage.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import ComingSoonPage from '../pages/ComingSoonPage.jsx';
+import LoginPage from '../features/auth/pages/LoginPage.jsx';
+import RegisterPage from '../features/auth/pages/RegisterPage.jsx';
+import ForgotPasswordPage from '../features/auth/pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from '../features/auth/pages/ResetPasswordPage.jsx';
+import VerifyEmailPage from '../features/auth/pages/VerifyEmailPage.jsx';
+import PublicOnly from '../features/auth/PublicOnly.jsx';
+import AdsDashboardPlaceholder from '../features/ads/AdsDashboardPlaceholder.jsx';
+import { AUTH_ENABLED, WAITLIST_PATH } from '../features/auth/paths.js';
+import PageLoader from '../components/PageLoader.jsx';
+import { ORG_SLUG, PRODUCT_NAME_PUBLIC, PRODUCT_PATH, PRODUCT_SLUG } from '../constants/products.js';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
@@ -52,11 +62,73 @@ export const router = createBrowserRouter([
       { path: 'terms', element: <TermsPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
       { path: 'coming-soon', element: <ComingSoonPage /> },
+      // Eddyrus Media: who is behind Testflow.
+      { path: ORG_SLUG, lazy: async () => ({ Component: (await import('../pages/EddyrusLandingPage.jsx')).default }), HydrateFallback: PageLoader },
+      // Testflow for Everyone (marketing only). Sign-in and register stay on the waitlist.
+      { path: PRODUCT_SLUG, lazy: async () => ({ Component: (await import('../pages/EverybodyLandingPage.jsx')).default }), HydrateFallback: PageLoader },
+      ...(AUTH_ENABLED
+        ? [
+            { path: `${PRODUCT_SLUG}/signin`, element: <LoginPage product="everybody" /> },
+            { path: `${PRODUCT_SLUG}/register`, element: <RegisterPage product="everybody" /> },
+          ]
+        : [
+            { path: `${PRODUCT_SLUG}/signin`, element: <ComingSoonPage title="Sign-in is" accent="coming soon." lead={`We’re getting ${PRODUCT_NAME_PUBLIC} ready. Join the waitlist to hear when it opens.`} backTo={PRODUCT_PATH} backLabel={`← Back to ${PRODUCT_NAME_PUBLIC}`} /> },
+            { path: `${PRODUCT_SLUG}/register`, element: <ComingSoonPage title="Your platform is" accent="coming soon." lead={`We’re getting ${PRODUCT_NAME_PUBLIC} ready. Join the waitlist to hear when it opens.`} backTo={PRODUCT_PATH} backLabel={`← Back to ${PRODUCT_NAME_PUBLIC}`} /> },
+          ]),
+      // TestFlow Ads: lazy-loaded so the main bundle is unaffected.
+      { path: 'ads', lazy: async () => ({ Component: (await import('../pages/AdsLandingPage.jsx')).default }), HydrateFallback: PageLoader },
+      { path: 'ads/terms', lazy: async () => ({ Component: (await import('../pages/AdsTermsPage.jsx')).default }), HydrateFallback: PageLoader },
+      { path: 'ads/rules', lazy: async () => ({ Component: (await import('../pages/AdsRulesPage.jsx')).default }), HydrateFallback: PageLoader },
+      ...(AUTH_ENABLED
+        ? [
+            { path: 'ads/signin', element: <LoginPage product="ads" /> },
+            { path: 'ads/register', element: <RegisterPage product="ads" /> },
+            { path: 'ads/dashboard', element: <AdsDashboardPlaceholder /> },
+          ]
+        : [
+            {
+              path: 'ads/signin',
+              element: (
+                <ComingSoonPage
+                  title="Advertiser sign-in is"
+                  accent="coming soon."
+                  lead="We’re getting the advertiser dashboard ready. Join the waitlist to hear when it opens."
+                  backTo="/ads"
+                  backLabel="← Back to TestFlow Ads"
+                />
+              ),
+            },
+            {
+              path: 'ads/register',
+              element: (
+                <ComingSoonPage
+                  title="Advertiser sign-up is"
+                  accent="coming soon."
+                  lead="We’re getting the advertiser dashboard ready. Join the waitlist to hear when it opens."
+                  backTo="/ads"
+                  backLabel="← Back to TestFlow Ads"
+                />
+              ),
+            },
+          ]),
       // Authentication is paused: every entry point lands on the waitlist.
-      ...['login', 'register', 'forgot-password', 'reset-password', 'verify-email'].map((path) => ({
-        path,
-        element: <Navigate to="/coming-soon" replace />,
-      })),
+      ...(AUTH_ENABLED
+        ? [
+            {
+              element: <PublicOnly />,
+              children: [
+                { path: 'login', element: <LoginPage /> },
+                { path: 'register', element: <RegisterPage /> },
+                { path: 'forgot-password', element: <ForgotPasswordPage /> },
+                { path: 'reset-password', element: <ResetPasswordPage /> },
+              ],
+            },
+            { path: 'verify-email', element: <VerifyEmailPage /> },
+          ]
+        : ['login', 'register', 'forgot-password', 'reset-password', 'verify-email'].map((path) => ({
+            path,
+            element: <Navigate to={WAITLIST_PATH} replace />,
+          }))),
       {
         element: <RequireAuth />,
         children: [

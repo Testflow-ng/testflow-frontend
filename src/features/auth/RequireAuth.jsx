@@ -1,4 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { LOGIN_PATH } from './paths.js';
 import { useAuth } from './useAuth.js';
 import PageLoader from '../../components/PageLoader.jsx';
 
@@ -11,7 +12,7 @@ function RequireAuth() {
     return <PageLoader />;
   }
   if (!isAuthenticated) {
-    return <Navigate to="/coming-soon" replace state={{ from: location }} />;
+    return <Navigate to={LOGIN_PATH} replace state={{ from: location }} />;
   }
   if (user && !user.username && location.pathname !== '/setup') {
     return <Navigate to="/setup" replace />;

@@ -18,6 +18,20 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// The identity service issues a readable `tf_csrf` cookie; unsafe requests must echo it in X-CSRF-Token.
+const readCookie = (name) => {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
+};
+apiClient.interceptors.request.use((config) => {
+  if (['post', 'put', 'patch', 'delete'].includes((config.method ?? 'get').toLowerCase())) {
+    const token = readCookie('tf_csrf');
+    if (token) config.headers['X-CSRF-Token'] = token;
+  }
+  return config;
+});
+
 const normalizeError = (error) => ({
   status: error.response?.status ?? 0,
   code: error.response?.data?.error?.code ?? 'NETWORK_ERROR',
