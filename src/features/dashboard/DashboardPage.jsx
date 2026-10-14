@@ -1,7 +1,5 @@
-import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight, Flame } from 'lucide-react';
-import OnboardingFlow from '../onboarding/OnboardingFlow.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { useStats } from '../analytics/useStats.js';
 import { useHistory } from '../exam/useHistory.js';
@@ -11,7 +9,6 @@ import Screen from '../../components/layout/Screen.jsx';
 import Mascot from '../../components/brand/Mascot.jsx';
 import { lastActivityFrom, moodForDashboard } from '../../components/brand/mascotMood.js';
 import { buttonClasses, sheetClasses, sheetRowClasses } from '../../components/ui/index.js';
-import UsernameSetupModal from '../auth/components/UsernameSetupModal.jsx';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from '../subjects/subjectMeta.js';
 import { deriveReadiness, deriveSubjectEdges } from './readiness.js';
@@ -52,14 +49,6 @@ function DashboardPage() {
   const { data: stats } = useStats();
   const { data: sessions } = useHistory();
   const { data: subjects } = useSubjects();
-  const [setupDismissed, setSetupDismissed] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem('tf_onboarded'),
-  );
-  const dismissOnboarding = useCallback(() => setShowOnboarding(false), []);
-
-  const showSetup = Boolean(user && !user.username) && !setupDismissed;
-
   const inProgress = sessions?.filter((s) => s.status !== 'submitted') ?? [];
   const recent = sessions?.filter((s) => s.status === 'submitted').slice(0, 3) ?? [];
 
@@ -83,14 +72,8 @@ function DashboardPage() {
   const streakCount = user?.streakCount ?? 0;
   const streakDays = user?.streakDays ?? [];
 
-  if (showOnboarding) {
-    return <OnboardingFlow onComplete={dismissOnboarding} />;
-  }
-
   return (
     <Screen width="lg" className="flex flex-col lg:max-w-3xl">
-      <UsernameSetupModal open={showSetup} onComplete={() => setSetupDismissed(true)} />
-
       {/* Masthead. Date first, in the mono face — this screen is dated work. */}
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">

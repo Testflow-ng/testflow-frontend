@@ -20,15 +20,16 @@ import { ORG_SLUG, PRODUCT_NAME_PUBLIC, PRODUCT_PATH, PRODUCT_SLUG } from '../co
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
-import HistoryPage from '../features/exam/HistoryPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
+import HallOfFamePage from '../features/hall-of-fame/HallOfFamePage.jsx';
+import LiveRedirect from '../features/live/LiveRedirect.jsx';
+import LiveRoomPage from '../features/live/LiveRoomPage.jsx';
 import LiveCBTPage from '../features/live/LiveCBTPage.jsx';
 import AIStudyPage from '../features/ai/AIStudyPage.jsx';
-import PostUtmeHub from '../features/post-utme/pages/PostUtmeHub.jsx';
+import PostUtmeComingSoon from '../features/post-utme/pages/PostUtmeComingSoon.jsx';
 import CoursesPage from '../features/subjects/CoursesPage.jsx';
-import SetupPage from '../features/auth/pages/SetupPage.jsx';
 import SettingsPage from '../features/settings/SettingsPage.jsx';
 import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
@@ -44,6 +45,8 @@ import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
 import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
 import PublicQuestionPage from '../features/public-questions/pages/PublicQuestionPage.jsx';
 
+const uiKit = async () => ({ Component: (await import('../features/ui-kit/UiKitPage.jsx')).default });
+
 export const router = createBrowserRouter([
   {
     // Replaces React Router's default error element, which renders a raw
@@ -51,7 +54,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorState />,
     element: <RequireAuth />,
     children: [
-      { path: 'setup', element: <SetupPage /> },
+      { path: 'setup', element: <Navigate to="/dashboard" replace /> },
     ],
   },
   {
@@ -62,6 +65,8 @@ export const router = createBrowserRouter([
       { path: 'terms', element: <TermsPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
       { path: 'coming-soon', element: <ComingSoonPage /> },
+      { path: 'ui-kit', lazy: uiKit },
+      { path: 'ui-kit/:id', lazy: uiKit },
       // Eddyrus Media: who is behind Testflow.
       { path: ORG_SLUG, lazy: async () => ({ Component: (await import('../pages/EddyrusLandingPage.jsx')).default }), HydrateFallback: PageLoader },
       // Testflow for Everyone (marketing only). Sign-in and register stay on the waitlist.
@@ -134,15 +139,18 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'progress', element: <ProgressPage /> },
+          { path: 'hall-of-fame', element: <HallOfFamePage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'courses', element: <CoursesPage /> },
-          { path: 'history', element: <HistoryPage /> },
+          { path: 'history', element: <Navigate to="/progress" replace /> },
           { path: 'profile', element: <ProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'settings/notifications', element: <NotificationPreferencesPage /> },
           { path: 'live', element: <LiveCBTPage /> },
+          { path: 'live/:code', element: <LiveRoomPage /> },
+          { path: 'live-cbt/:code', element: <LiveRedirect /> },
           { path: 'ai-study', element: <AIStudyPage /> },
-          { path: 'post-utme', element: <PostUtmeHub /> },
+          { path: 'post-utme', element: <PostUtmeComingSoon /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
           {

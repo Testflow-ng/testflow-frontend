@@ -1,50 +1,48 @@
-import { Award, Compass, Flame, Medal, Sparkles, Star } from 'lucide-react';
-import { cn } from '../../utils/cn.js';
-import { deriveAchievements } from './achievements.js';
+import { Star } from 'lucide-react';
+import { AchievementBadge } from '../../components/data/Badges.jsx';
+import { ACHIEVEMENT_ICONS } from './achievementIcons.js';
+import { ACHIEVEMENT_GROUPS, deriveAchievements } from './achievements.js';
 
-const ICONS = {
-  'first-exam': Star,
-  'five-exams': Flame,
-  'high-scorer': Medal,
-  perfect: Sparkles,
-  consistent: Award,
-  explorer: Compass,
-};
 
+/** Badges in sections (Practice, Scores, ...). Locked ones show a progress bar toward unlocking. */
 function Achievements({ stats }) {
   const achievements = deriveAchievements(stats);
 
   return (
-    <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-      {achievements.map((achievement) => {
-        const Icon = ICONS[achievement.key] ?? Star;
+    <div className="space-y-8">
+      {ACHIEVEMENT_GROUPS.map((group) => {
+        const items = achievements.filter((a) => a.group === group.key);
+        const earned = items.filter((a) => a.earned).length;
         return (
-          <li
-            key={achievement.key}
-            className={cn(
-              'flex flex-col items-center gap-2 rounded-2xl border p-4 text-center',
-              achievement.earned
-                ? 'border-border bg-surface'
-                : 'border-dashed border-border opacity-60',
-            )}
-          >
-            <span
-              className={cn(
-                'flex size-11 items-center justify-center rounded-full',
-                achievement.earned ? 'bg-primary/10 text-primary' : 'bg-surface-strong text-muted',
-              )}
-            >
-              <Icon size={20} aria-hidden="true" />
-            </span>
-            <span className="text-[14px] font-semibold leading-snug text-foreground-strong">
-              {achievement.label}
-            </span>
-            <span className="text-[12px] leading-snug text-muted">{achievement.description}</span>
-            <span className="sr-only">{achievement.earned ? 'Earned' : 'Locked'}</span>
-          </li>
+          <section key={group.key} aria-labelledby={`ach-${group.key}`}>
+            <div className="mb-3 flex items-baseline justify-between gap-3">
+              <h2 id={`ach-${group.key}`} className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+                {group.label}
+              </h2>
+              <span className="text-xs font-semibold tabular-nums text-muted">
+                {earned}/{items.length}
+              </span>
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {items.map((a) => (
+                <li key={a.key} className="flex">
+                  <AchievementBadge
+                    icon={ACHIEVEMENT_ICONS[a.key] ?? Star}
+                    title={a.label}
+                    description={a.description}
+                    unlocked={a.earned}
+                    progress={a.description}
+                    current={a.current}
+                    target={a.target}
+                  />
+                  <span className="sr-only">{a.earned ? 'Earned' : 'Locked'}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         );
       })}
-    </ul>
+    </div>
   );
 }
 

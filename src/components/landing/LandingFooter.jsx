@@ -42,6 +42,7 @@ function LandingFooter() {
             <h4>Company</h4>
             <Link to={ORG_PATH}>{ORG_NAME}</Link>
             <Link to={`${ORG_PATH}#team`}>Meet the team</Link>
+            <Link to="/ui-kit">UI Kit</Link>
             <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noopener noreferrer">
               WhatsApp channel
             </a>

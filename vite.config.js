@@ -37,6 +37,8 @@ function adsPrerender() {
     apply: 'build',
     closeBundle() {
       const dist = path.resolve('dist');
+      // If the build itself failed there is no shell to read; skip so the real error is the one reported.
+      if (!fs.existsSync(path.join(dist, 'index.html'))) return;
       const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
       for (const { route, page, image, imageAlt, jsonLd } of PRERENDER) {
         const url = `${SITE_URL}${route}`;

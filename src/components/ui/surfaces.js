@@ -20,7 +20,7 @@ const paddings = {
   lg: 'p-5',
 };
 
-const surfaceBase = 'rounded-2xl border border-border bg-surface';
+const surfaceBase = 'rounded-[20px] border border-border bg-surface';
 
 const interactiveClasses =
   'tf-pressable cursor-pointer active:bg-surface-strong ' +

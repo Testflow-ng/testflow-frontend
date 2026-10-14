@@ -3,6 +3,11 @@ import { cn } from '../../utils/cn.js';
 /**
  * Flo, the TestFlow mascot: an exam script that got up and walked.
  *
+ * Redesigned in the landing-page language: a soft lavender sheet, ink-green face and limbs,
+ * an indigo folded corner (the dog-ear is the brand mark), lime highlighter gloves and a lime
+ * header stripe. Colours come from the --brand-* tokens in global.css, not from currentColor,
+ * so Flo looks the same wherever he is placed.
+ *
  * Vector rather than the generated PNG. The render was 1.4MB with a neon glow
  * and a dark backdrop baked into the pixels, so it could not sit on a light
  * surface and could not change expression. As SVG the whole cast of moods is a
@@ -70,6 +75,17 @@ const ARMS = {
   reads instantly as a thumb.
 */
 const THUMB = 'M66 10.5V5.5';
+
+
+/* Eyebrows per mood (left, right). Raised/slanted brows carry most of the emotion at small sizes. */
+const BROWS = {
+  sad: ['M23.5 26.5 L31 28.6', 'M48.5 26.5 L41 28.6'],
+  surprised: ['M23.5 25.4 Q28 22.4 32.5 25.4', 'M39.5 25.4 Q44 22.4 48.5 25.4'],
+  excited: ['M23.8 26 Q28 23.4 32 26', 'M40 26 Q44 23.4 48.2 26'],
+  thinking: [null, 'M39.5 25.6 Q44 23 48.5 25.2'],
+  confident: ['M23.5 27.4 Q28 26.4 32.5 27.2', 'M39.5 25.4 Q44 23.6 48.5 25.4'],
+  encouraging: ['M23.8 27 Q28 25.6 32 27', 'M40 27 Q44 25.6 48.2 27'],
+};
 
 const MOODS = {
   happy: {
@@ -144,9 +160,8 @@ function Eyes({ variant }) {
   const cxs = [28, 44];
 
   if (variant === 'closed') {
-    // Two downward arcs: lids, not lashes.
     return (
-      <g strokeWidth={2.4}>
+      <g stroke="var(--flo-ink)" strokeWidth={2.4}>
         {cxs.map((cx) => (
           <path key={cx} d={`M${cx - 3.6} 33 Q${cx} 36.4 ${cx + 3.6} 33`} />
         ))}
@@ -155,9 +170,8 @@ function Eyes({ variant }) {
   }
 
   if (variant === 'squint') {
-    // Upward arcs: the classic happy eye.
     return (
-      <g strokeWidth={2.6}>
+      <g stroke="var(--flo-ink)" strokeWidth={2.6}>
         {cxs.map((cx) => (
           <path key={cx} d={`M${cx - 3.6} 34.4 Q${cx} 30 ${cx + 3.6} 34.4`} />
         ))}
@@ -166,35 +180,23 @@ function Eyes({ variant }) {
   }
 
   const geometry = {
-    open: { rx: 3.4, ry: 4, cy: 33, hi: 1.1 },
-    wide: { rx: 4.2, ry: 4.8, cy: 32.6, hi: 1.4 },
-    up: { rx: 3.4, ry: 4, cy: 31.8, hi: 1.1 },
-    down: { rx: 3.2, ry: 3.4, cy: 34.2, hi: 0.9 },
-  }[variant] ?? { rx: 3.4, ry: 4, cy: 33, hi: 1.1 };
+    open: { rx: 3.8, ry: 4.4, cy: 33, hi: 1.3 },
+    wide: { rx: 4.5, ry: 5.2, cy: 32.6, hi: 1.6 },
+    up: { rx: 3.8, ry: 4.4, cy: 31.8, hi: 1.3 },
+    down: { rx: 3.5, ry: 3.8, cy: 34.2, hi: 1.1 },
+  }[variant] ?? { rx: 3.8, ry: 4.4, cy: 33, hi: 1.3 };
 
   return (
-    <g className="tf-mascot-eyes">
+    <g className="tf-mascot-eyes" strokeWidth={0}>
       {cxs.map((cx) => (
-        <ellipse
-          key={cx}
-          cx={cx}
-          cy={geometry.cy}
-          rx={geometry.rx}
-          ry={geometry.ry}
-          className="fill-current"
-          strokeWidth={0}
-        />
+        <ellipse key={cx} cx={cx} cy={geometry.cy} rx={geometry.rx} ry={geometry.ry} fill="var(--flo-ink)" />
       ))}
-      {/* Catchlights in the page colour, so they read as highlights. */}
+      {/* Two catchlights per eye: the big one gives life, the small one gives depth. */}
       {cxs.map((cx) => (
-        <circle
-          key={cx}
-          cx={cx + 1.3}
-          cy={geometry.cy - 1.6}
-          r={geometry.hi}
-          className="fill-background"
-          strokeWidth={0}
-        />
+        <g key={cx} fill="#fff">
+          <circle cx={cx + 1.4} cy={geometry.cy - 1.8} r={geometry.hi} />
+          <circle cx={cx - 1.4} cy={geometry.cy + 1.7} r={geometry.hi * 0.5} />
+        </g>
       ))}
     </g>
   );
@@ -202,30 +204,44 @@ function Eyes({ variant }) {
 
 function Mouth({ shape }) {
   if (shape === 'open') {
-    // A wide open grin, filled so it reads at small sizes.
     return (
-      <path
-        d="M30 40 Q36 40 42 40 Q42 47.5 36 47.5 Q30 47.5 30 40Z"
-        className="fill-current"
-        strokeWidth={2.2}
-      />
+      <g>
+        <path
+          d="M30 40 Q36 40 42 40 Q42 47.5 36 47.5 Q30 47.5 30 40Z"
+          fill="var(--flo-ink)"
+          stroke="var(--flo-ink)"
+          strokeWidth={2.2}
+        />
+        {/* Tongue in brand indigo. */}
+        <path d="M32.6 45.6 Q36 43.2 39.4 45.6 Q38 47.4 36 47.4 Q34 47.4 32.6 45.6Z" fill="var(--flo-accent)" stroke="none" />
+      </g>
     );
   }
   if (shape === 'o') {
-    return <ellipse cx="36" cy="43" rx="3.2" ry="4" className="fill-current" strokeWidth={2} />;
+    return <ellipse cx="36" cy="43" rx="3.2" ry="4" fill="var(--flo-ink)" stroke="var(--flo-ink)" strokeWidth={2} />;
   }
-  return <path d={shape} strokeWidth={2.6} />;
+  return <path d={shape} stroke="var(--flo-ink)" strokeWidth={2.6} />;
 }
 
+function Brows({ mood }) {
+  const set = BROWS[mood];
+  if (!set) return null;
+  return (
+    <g stroke="var(--flo-ink)" strokeWidth={2.2} opacity={0.9}>
+      {set.map((d, i) => (d ? <path key={i} d={d} /> : null))}
+    </g>
+  );
+}
 
-/** A limb plus its hand, and optionally a thumb. */
+/** A limb plus its glove (lime, outlined in ink), and optionally a thumb. */
 function Arm({ pose, thumb }) {
   const [hx, hy] = pose.hand;
   return (
     <>
-      <path d={pose.d} strokeWidth={2.8} />
-      <circle cx={hx} cy={hy} r={3.4} className="fill-current" strokeWidth={0} />
-      {thumb && <path d={THUMB} strokeWidth={3.6} />}
+      <path d={pose.d} stroke="var(--flo-ink)" strokeWidth={3} />
+      {thumb && <path d={THUMB} stroke="var(--flo-ink)" strokeWidth={5.2} />}
+      {thumb && <path d={THUMB} stroke="var(--flo-hi)" strokeWidth={2.2} />}
+      <circle cx={hx} cy={hy} r={3.9} fill="var(--flo-hi)" stroke="var(--flo-ink)" strokeWidth={1.8} />
     </>
   );
 }
@@ -251,15 +267,14 @@ function Mascot({
       aria-hidden={title ? undefined : 'true'}
       className={cn('tf-mascot shrink-0 overflow-visible', animation && `tf-m-${animation}`, className)}
       fill="none"
-      stroke="currentColor"
-      strokeWidth={2.8}
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {/* Feet and arms sit behind the body so the sheet stays a clean shape. */}
-      <g className="tf-mascot-feet">
-        <ellipse cx="27" cy="62.5" rx="7" ry="3.4" className="fill-current/20" />
-        <ellipse cx="45" cy="62.5" rx="7" ry="3.4" className="fill-current/20" />
+      {/* Ground shadow and feet sit behind the body. */}
+      <ellipse cx="36" cy="66" rx="19" ry="2.8" fill="var(--flo-ink)" opacity="0.12" stroke="none" />
+      <g className="tf-mascot-feet" stroke="none">
+        <rect x="19.5" y="58.6" width="14" height="7.4" rx="3.7" fill="var(--flo-ink)" />
+        <rect x="38.5" y="58.6" width="14" height="7.4" rx="3.7" fill="var(--flo-ink)" />
       </g>
 
       {/* Arms behind the body: every pose except the ones held in front. */}
@@ -270,18 +285,27 @@ function Mascot({
         </g>
       )}
 
-      {/* Sheet body. The implicit close from (14,18) back to (26,6) is the fold. */}
+      {/* The sheet: soft lavender with an ink edge. */}
       <path
-        d="M26 6H52C55.3 6 58 8.7 58 12V54C58 57.3 55.3 60 52 60H20C16.7 60 14 57.3 14 54V18Z"
-        className="fill-current/10"
+        d="M27 6H49C54.5 6 58 9.5 58 15V51C58 56.5 54.5 60 49 60H23C17.5 60 14 56.5 14 51V19Z"
+        fill="var(--flo-body)"
+        stroke="var(--flo-ink)"
+        strokeWidth={2.6}
       />
 
-      {/* The folded-over corner: the detail that makes it paper and not a box. */}
-      <path d="M26 6V12C26 15.3 23.3 18 20 18H14" />
+      {/* The dog-ear, filled indigo: the brand mark in miniature. */}
+      <path d="M27 6V13C27 16.5 24.5 19 21 19H14Z" fill="var(--flo-accent)" stroke="var(--flo-ink)" strokeWidth={2.2} />
 
-      {/* Ruled header line, clear of the fold */}
-      <path d="M22.5 24H49.5" strokeWidth={3.2} className="opacity-60" />
+      {/* Lime highlighter stripe, above the eyebrows and clear of the fold. */}
+      <path d="M31 19.6H51" stroke="var(--flo-hi)" strokeWidth={3.6} />
 
+      {/* Rosy cheeks in the brand accent. */}
+      <g fill="var(--flo-accent)" opacity="0.16" stroke="none">
+        <ellipse cx="22" cy="40" rx="3.6" ry="2.4" />
+        <ellipse cx="50" cy="40" rx="3.6" ry="2.4" />
+      </g>
+
+      <Brows mood={mood} />
       <Eyes variant={spec.eyes} />
       <Mouth shape={spec.mouth} />
 
@@ -293,58 +317,44 @@ function Mascot({
         </g>
       )}
 
-      {/* A single tear, for the one mood that needs it. */}
       {spec.tear && (
         <path
           d="M31 38.5C31 38.5 29.4 41.4 29.4 42.6C29.4 43.6 30.1 44.3 31 44.3C31.9 44.3 32.6 43.6 32.6 42.6C32.6 41.4 31 38.5 31 38.5Z"
-          className="tf-mascot-tear fill-current"
-          strokeWidth={0}
+          className="tf-mascot-tear"
+          fill="#7aa7ff"
+          stroke="none"
         />
       )}
 
-      {/* Thought dots, rising beside the head. */}
       {spec.dots && (
-        <g className="fill-current" strokeWidth={0}>
+        <g fill="var(--flo-accent)" stroke="none">
           <circle cx="64" cy="19" r="2.2" className="tf-mascot-dot" style={{ animationDelay: '0ms' }} />
           <circle cx="68.5" cy="12.5" r="3" className="tf-mascot-dot" style={{ animationDelay: '260ms' }} />
           <circle cx="63" cy="5.5" r="3.8" className="tf-mascot-dot" style={{ animationDelay: '520ms' }} />
         </g>
       )}
 
-      {/* Zzz, drifting up. Text rather than paths: it is literal lettering. */}
       {spec.zzz && (
-        <g className="fill-current font-heading" strokeWidth={0}>
+        <g fill="var(--flo-accent)" className="font-heading" stroke="none">
           {[
             { x: 60, y: 22, s: 8, d: '0ms' },
             { x: 64, y: 15, s: 10, d: '400ms' },
             { x: 59, y: 7, s: 13, d: '800ms' },
           ].map((z) => (
-            <text
-              key={z.d}
-              x={z.x}
-              y={z.y}
-              fontSize={z.s}
-              fontWeight="800"
-              className="tf-mascot-zzz"
-              style={{ animationDelay: z.d }}
-            >
+            <text key={z.d} x={z.x} y={z.y} fontSize={z.s} fontWeight="800" className="tf-mascot-zzz" style={{ animationDelay: z.d }}>
               z
             </text>
           ))}
         </g>
       )}
 
-      {/*
-        Answered boxes down the margin. Two, not the three in the source render:
-        below the mouth there are only ~13 units of body left, and three at that
-        pitch merged into a vertical smudge at the size this is actually drawn.
-      */}
+      {/* Answered boxes down the margin: ink boxes with indigo ticks. */}
       {showTicks && !spec.front && (
-        <g strokeWidth={2}>
+        <g strokeWidth={1.8}>
           {[45.5, 52.5].map((y, i) => (
             <g key={y} className="tf-mascot-tick" style={{ animationDelay: `${540 + i * 170}ms` }}>
-              <rect x="19.5" y={y} width="5" height="5" rx="1.4" />
-              <path d={`M20.6 ${y + 2.5}L22 ${y + 3.9}L25 ${y + 0.6}`} className="tf-mascot-check" />
+              <rect x="19.5" y={y} width="5" height="5" rx="1.4" stroke="var(--flo-ink)" fill="#fff" />
+              <path d={`M20.6 ${y + 2.5}L22 ${y + 3.9}L25 ${y + 0.6}`} className="tf-mascot-check" stroke="var(--flo-accent)" strokeWidth={1.9} />
             </g>
           ))}
         </g>

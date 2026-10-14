@@ -1,18 +1,15 @@
 import Logo from './Logo.jsx';
+import Spinner from './ui/Spinner.jsx';
 
 /**
- * Full-page loading state: the TestFlow mark and three quiet dots.
+ * Full-page loading state: the TestFlow mark over the brand spinner.
  * `label` is announced to screen readers; the mark is decoration.
  */
 function PageLoader({ label = 'Loading' }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-20">
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 py-20">
       <Logo size={52} withWordmark={false} />
-      <div role="status" aria-label={label} className="flex items-center gap-2">
-        <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.3s]" />
-        <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.15s]" />
-        <span className="size-2 animate-bounce rounded-full bg-primary/70" />
-      </div>
+      <Spinner size="lg" label={label} className="text-primary" />
     </div>
   );
 }

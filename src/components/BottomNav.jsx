@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, GraduationCap, Home, User, Users, Zap } from 'lucide-react';
+import { GraduationCap, Home, User, Users, Zap } from 'lucide-react';
 import { cn } from '../utils/cn.js';
 import { useMemo } from 'react';
 
@@ -44,19 +44,27 @@ function BottomNav() {
             <li key={to} className="flex flex-1">
               <Link
                 to={to}
+                data-tour={`nav-${to}`}
                 aria-current={active ? 'page' : undefined}
                 className={cn(
-                  'group flex min-h-12 flex-1 select-none flex-col items-center justify-center gap-1',
+                  'group flex min-h-12 flex-1 select-none flex-col items-center justify-center gap-0.5',
                   'transition-colors duration-[var(--duration-xs)]',
                   active ? 'text-primary' : 'text-muted',
                 )}
               >
-                <Icon
-                  size={22}
-                  strokeWidth={active ? 2.4 : 1.8}
-                  aria-hidden="true"
-                  className="transition-transform duration-[var(--duration-xs)] ease-[var(--transition-ease)] group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
-                />
+                <span
+                  className={cn(
+                    'flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-[var(--duration-xs)] motion-reduce:transition-none',
+                    active && 'bg-[var(--brand-lavender)]',
+                  )}
+                >
+                  <Icon
+                    size={21}
+                    strokeWidth={active ? 2.2 : 1.6}
+                    aria-hidden="true"
+                    className="transition-transform duration-[var(--duration-xs)] ease-[var(--transition-ease)] group-active:scale-90 motion-reduce:transition-none motion-reduce:group-active:scale-100"
+                  />
+                </span>
                 <span
                   className={cn(
                     'text-[10px] leading-none tracking-tight',

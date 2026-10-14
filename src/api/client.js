@@ -19,6 +19,13 @@ const apiClient = axios.create({
 });
 
 // The identity service issues a readable `tf_csrf` cookie; unsafe requests must echo it in X-CSRF-Token.
+// Local design work: answer API calls from sample data (src/dev/mockData.js) instead of a backend.
+if (import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
+  import('../dev/mockApi.js').then(({ mockAdapter }) => {
+    apiClient.defaults.adapter = mockAdapter;
+  });
+}
+
 const readCookie = (name) => {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`));

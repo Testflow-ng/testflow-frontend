@@ -1,114 +1,91 @@
 import { useCallback, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { BookOpen, ChevronRight, History, KeyRound, LogOut, Pencil, Plus, Save, TrendingUp, X } from 'lucide-react';
 import {
-  BookOpen,
-  ChevronRight,
-  Edit2,
-  Eye,
-  EyeOff,
-  History,
-  Lock,
-  LogOut,
-  Moon,
-  Plus,
-  Save,
-  Sun,
-  TrendingUp,
-  X,
-} from 'lucide-react';
-import { Alert, Avatar, Button, Input, Field, Modal } from '../../components/ui/index.js';
-import {
-  groupListClasses,
-  groupRowClasses,
-  listRowClasses,
-} from '../../components/ui/surfaces.js';
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  ConfirmDialog,
+  EmptyState,
+  Field,
+  IconButton,
+  Input,
+  KeyValueList,
+  Modal,
+  PasswordInput,
+  Switch,
+  useToast,
+} from '../../components/ui/index.js';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
-import { cn } from '../../utils/cn.js';
 import { useSubjects, useTogglePin } from '../subjects/useSubjects.js';
-import { useTheme } from '../../hooks/useTheme.js';
-import { THEME_SWITCHING_ENABLED } from '../../theme.js';
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
 
-const EMPTY_PASSWORD_FORM = {
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-};
+const EMPTY_PASSWORD_FORM = { currentPassword: '', newPassword: '', confirmPassword: '' };
 
 function ProfilePage() {
   const { user, logout, refreshUser } = useAuth();
-  const { isDark, toggle: toggleTheme } = useTheme();
   const { data: subjects } = useSubjects();
   const togglePin = useTogglePin();
+  const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(user.fullName);
+  const [username, setUsernameValue] = useState(user.username ?? '');
   const [showOnLeaderboard, setShowOnLeaderboard] = useState(user.showOnLeaderboard !== false);
   const [isSaving, setIsSaving] = useState(false);
   const [editError, setEditError] = useState(null);
   const [showSubjectPicker, setShowSubjectPicker] = useState(false);
+  const [confirmOut, setConfirmOut] = useState(false);
 
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState(EMPTY_PASSWORD_FORM);
   const [passwordError, setPasswordError] = useState(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  /*
-    Bug: the edit form's state was seeded from `user` once, on first render,
-    and never again. Typing a new name, cancelling, and reopening the dialog
-    brought back the abandoned draft rather than the saved value, so the form
-    showed something that was not the user's name and a second Save would have
-    committed it. Reseeding on open makes Cancel actually cancel.
-  */
+  // Reseed the draft every time the editor opens so Cancel really cancels.
   const openEditor = useCallback(() => {
     setFullName(user.fullName);
+    setUsernameValue(user.username ?? '');
     setShowOnLeaderboard(user.showOnLeaderboard !== false);
     setEditError(null);
     setIsEditing(true);
-  }, [user.fullName, user.showOnLeaderboard]);
+  }, [user.fullName, user.username, user.showOnLeaderboard]);
 
-  /*
-    Settings links here for "Change password", which previously just dropped the
-    user on the profile with nothing open and no indication of what to do next.
-    A `#security` hash opens the dialog on arrival.
-
-    The hash is *derived* into the open state rather than copied into it by an
-    effect. Mirroring it with setState would render once with the dialog closed
-    and again with it open, and it would also fight the user: closing the dialog
-    while the hash was still in the URL would immediately reopen it.
-  */
+  // Settings links here with `#security`; derive the open state from the hash (no effect, no reopen loop).
   const isPasswordModalOpen = passwordModalOpen || location.hash === '#security';
 
-  /* A typed-then-abandoned password sat in memory and the previous error stayed
-     on screen the next time the dialog opened. Closing now clears both, and
-     drops the hash so the dialog stays closed. */
   const closePasswordModal = useCallback(() => {
     setPasswordModalOpen(false);
     setPasswordForm(EMPTY_PASSWORD_FORM);
     setPasswordError(null);
-    if (location.hash === '#security') {
-      navigate(location.pathname, { replace: true });
-    }
+    if (location.hash === '#security') navigate(location.pathname, { replace: true });
   }, [location.hash, location.pathname, navigate]);
 
-  // The API strips `_id` and exposes `id`; the `s._id || s.id` fallback this
-  // used to carry could never match and only masked which field was real.
   const pinnedIds = new Set(user.pinnedSubjects ?? []);
   const pinnedSubjects = subjects?.filter((s) => pinnedIds.has(s.id)) ?? [];
-  const unpinnedSubjects = subjects?.filter((s) => !pinnedIds.has(s.id)) ?? [];
 
   const handleSaveProfile = async () => {
     setIsSaving(true);
     setEditError(null);
     try {
+      const handle = username.trim().toLowerCase();
+      if (handle && handle !== user.username) {
+        if (!/^[a-z0-9_]{3,20}$/.test(handle)) throw new Error('Username: 3 to 20 letters, numbers or underscores.');
+        await authApi.setUsername(handle);
+      }
       await authApi.updateProfile({ fullName, showOnLeaderboard });
       await refreshUser();
       setIsEditing(false);
+      toast.success('Profile updated');
     } catch (err) {
       setEditError(err.message || 'Failed to update profile');
     } finally {
@@ -129,6 +106,7 @@ function ProfilePage() {
         newPassword: passwordForm.newPassword,
       });
       closePasswordModal();
+      toast.success('Password changed. Sign in again.');
       logout();
     } catch (err) {
       setPasswordError(err.message || 'Failed to change password');
@@ -137,257 +115,112 @@ function ProfilePage() {
     }
   };
 
-  const handleTogglePin = (subjectId) => {
-    togglePin.mutate(subjectId);
-  };
+  const setPw = (key) => (e) => setPasswordForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const accountItems = [
+    { label: 'Full name', value: user.fullName },
+    { label: 'Email', value: user.email },
+    ...(user.matricNumber ? [{ label: 'Matric number', value: user.matricNumber }] : []),
+    {
+      label: 'Leaderboard',
+      value: <Badge variant={user.showOnLeaderboard !== false ? 'sage' : 'outline'}>{user.showOnLeaderboard !== false ? 'Visible' : 'Hidden'}</Badge>,
+    },
+  ];
 
   return (
-    <section className="mx-auto w-full max-w-2xl flex-1 tf-nav-clearance">
-      <div className="relative">
-        {/*
-          A quiet brand band, and no image.
+    <Screen width="xl">
+      <PageHeader title="Profile" subtitle="Your details, subjects and security." />
 
-          The Eddyrus artwork is a 1254x1254 social-post graphic with its own
-          busy background. Every way of forcing it into a wide banner failed on
-          its own terms: `object-cover` sheared the wordmark off, `object-contain`
-          centred it directly under the avatar, and moving it aside stamped its
-          white backdrop as a hard rectangle on the tint. It is a square asset
-          and this is a banner slot.
-
-          It is also the wrong content. This is the student's own screen, the
-          logo is already in the header two rows above, and the artwork now has
-          a proper full-bleed home on the last onboarding screen. What belongs
-          here is the person: their avatar, their name, their level.
-        */}
-        <div className="h-24 w-full rounded-b-3xl bg-primary/5 sm:h-32 sm:rounded-b-[2rem]" />
-
-        {/*
-          Avatar is 88px on phones (was 112px), which is half the cover height
-          rather than most of it, so the identity block starts higher up the
-          screen and less of the fold is spent on chrome.
-        */}
-        <div className="absolute -bottom-11 left-1/2 -translate-x-1/2 sm:-bottom-14">
-          <div className="rounded-full border-4 border-background">
-            <Avatar
-              name={user.fullName}
-              size="lg"
-              className="size-[5.5rem] text-2xl sm:size-28 sm:text-3xl"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Identity block */}
-      <div className="mt-14 text-center tf-gutter sm:mt-16">
-        <div className="flex items-center justify-center gap-1">
-          {/* `truncate` clipped a long single-word name to nothing readable. Wrapping
-              shows the whole name; `break-words` stops one long token overflowing. */}
-          <h1 className="min-w-0 break-words font-heading text-[1.625rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
+        <Card padding="lg" className="flex flex-col items-center text-center lg:sticky lg:top-6">
+          <Avatar name={user.fullName} className="size-24 text-3xl" />
+          <h2 className="mt-4 min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
             {user.fullName}
-          </h1>
-          <button
-            type="button"
-            onClick={openEditor}
-            aria-label="Edit profile"
-            className="tf-pressable flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-strong active:text-primary"
-          >
-            <Edit2 size={16} aria-hidden="true" />
-          </button>
-        </div>
-        {user.username && (
-          <p className="text-[13px] font-medium text-muted">@{user.username}</p>
-        )}
-        <p className="mt-1 text-[13px] text-muted">{user.email}</p>
-        <div className="mt-3 flex flex-wrap justify-center gap-2">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
-            {user.role.replace('_', ' ')}
-          </span>
-          {user.createdAt && (
-            <span className="inline-flex items-center rounded-full bg-surface-strong px-3 py-1 text-[11px] font-semibold text-muted">
-              Since {formatDate(user.createdAt)}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-8 space-y-7 tf-gutter">
-        {/* My Subjects */}
-        <section>
-          <div className="mb-2.5 flex items-center justify-between gap-3">
-            <h2 className="px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-              My subjects
-            </h2>
-            <button
-              type="button"
-              onClick={() => setShowSubjectPicker(true)}
-              className="tf-pressable inline-flex h-8 items-center gap-1 rounded-full bg-primary/10 px-3 text-[12px] font-bold text-primary active:bg-primary/20"
-            >
-              <Plus size={14} aria-hidden="true" />
-              Add
-            </button>
-          </div>
-          {pinnedSubjects.length === 0 ? (
-            <button
-              type="button"
-              onClick={() => setShowSubjectPicker(true)}
-              className="tf-pressable flex min-h-[5.5rem] w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-[14px] font-medium text-muted active:border-primary/40 active:text-primary"
-            >
-              <BookOpen size={18} aria-hidden="true" />
-              Choose your subjects
-            </button>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {pinnedSubjects.map((s) => (
-                <span
-                  key={s.id}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border bg-surface py-1 pl-3 pr-1 text-[13px] font-semibold text-foreground-strong"
-                >
-                  <span className="text-[11px] font-bold text-primary">{s.code}</span>
-                  {s.title}
-                  {/*
-                    Remove was `opacity-0 group-hover:opacity-100` — unreachable
-                    on touch. It is now always visible with a 32px target.
-                  */}
-                  <button
-                    type="button"
-                    onClick={() => handleTogglePin(s.id)}
-                    aria-label={`Remove ${s.title}`}
-                    className="tf-pressable flex size-7 items-center justify-center rounded-full text-muted active:bg-danger/10 active:text-danger"
-                  >
-                    <X size={14} aria-hidden="true" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Quick links */}
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          <Link to="/history" className={listRowClasses({ className: 'p-4' })}>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
-              <History size={18} aria-hidden="true" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-semibold leading-snug text-foreground-strong">
-                Exam history
-              </p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted">Review past attempts</p>
-            </div>
-            <ChevronRight size={16} className="shrink-0 text-muted" aria-hidden="true" />
-          </Link>
-          <Link to="/progress" className={listRowClasses({ className: 'p-4' })}>
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-green-500">
-              <TrendingUp size={18} aria-hidden="true" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-semibold leading-snug text-foreground-strong">
-                My progress
-              </p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted">Track performance</p>
-            </div>
-            <ChevronRight size={16} className="shrink-0 text-muted" aria-hidden="true" />
-          </Link>
-        </div>
-
-        {/* Account details */}
-        <section>
-          <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-            Account
           </h2>
-          <dl className={groupListClasses()}>
-            <Row label="Full name" value={user.fullName} />
-            <Row label="Email" value={user.email} />
-            {user.matricNumber && <Row label="Matric number" value={user.matricNumber} />}
-            <Row
-              label="Leaderboard"
-              value={user.showOnLeaderboard !== false ? 'Visible' : 'Hidden'}
-            />
-            {THEME_SWITCHING_ENABLED && (
-              <button type="button" onClick={toggleTheme} className={groupRowClasses()}>
-                <span className="flex items-center gap-3">
-                  {isDark ? (
-                    <Sun size={16} className="text-muted" aria-hidden="true" />
-                  ) : (
-                    <Moon size={16} className="text-muted" aria-hidden="true" />
-                  )}
-                  <span className="text-[15px] font-medium text-foreground-strong">
-                    {isDark ? 'Light mode' : 'Dark mode'}
-                  </span>
-                </span>
-                <Switch checked={isDark} />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setPasswordModalOpen(true)}
-              className={groupRowClasses()}
-            >
-              <span className="flex items-center gap-3">
-                <Lock size={16} className="text-muted" aria-hidden="true" />
-                <span className="text-[15px] font-medium text-foreground-strong">Security</span>
-              </span>
-              <ChevronRight size={16} className="text-muted" aria-hidden="true" />
-            </button>
-          </dl>
-        </section>
+          {user.username && <p className="mt-0.5 text-sm font-medium text-muted">@{user.username}</p>}
+          <p className="mt-1 max-w-full truncate text-sm text-muted">{user.email}</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Badge variant="lavender" className="uppercase tracking-wider">{user.role.replace('_', ' ')}</Badge>
+            {user.createdAt && <Badge variant="outline">Since {formatDate(user.createdAt)}</Badge>}
+          </div>
+          <Button variant="outline" className="mt-6 w-full" onClick={openEditor} leadingIcon={<Pencil size={15} />}>
+            Edit profile
+          </Button>
+        </Card>
 
-        {/* Logout */}
-        <button
-          type="button"
-          onClick={logout}
-          className="tf-pressable flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-danger/20 text-[15px] font-semibold text-danger active:bg-danger/10"
-        >
-          <LogOut size={16} aria-hidden="true" />
-          Sign out
-        </button>
+        <div className="space-y-6">
+          <section aria-labelledby="my-subjects">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 id="my-subjects" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">My subjects</h2>
+              <Button size="sm" variant="ghost" onClick={() => setShowSubjectPicker(true)} leadingIcon={<Plus size={14} />}>
+                Add
+              </Button>
+            </div>
+            {pinnedSubjects.length === 0 ? (
+              <EmptyState
+                icon={BookOpen}
+                title="No subjects yet"
+                description="Choose the courses you are taking and they show up in your sidebar."
+                action={<Button onClick={() => setShowSubjectPicker(true)}>Choose subjects</Button>}
+              />
+            ) : (
+              <Card padding="md" className="flex flex-wrap gap-2">
+                {pinnedSubjects.map((s) => (
+                  <span key={s.id} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-border bg-background py-1 pl-3 pr-1 text-sm font-semibold text-foreground-strong">
+                    <span className="text-[11px] font-bold text-primary">{s.code}</span>
+                    {s.title}
+                    <IconButton size="sm" variant="ghost" aria-label={`Remove ${s.title}`} onClick={() => togglePin.mutate(s.id)}>
+                      <X size={14} aria-hidden="true" />
+                    </IconButton>
+                  </span>
+                ))}
+              </Card>
+            )}
+          </section>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <QuickLink to="/history" icon={History} title="Exam history" hint="Review past attempts" />
+            <QuickLink to="/progress" icon={TrendingUp} title="My progress" hint="Track performance" />
+          </div>
+
+          <section aria-labelledby="account">
+            <h2 id="account" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Account</h2>
+            <KeyValueList items={accountItems} />
+          </section>
+
+          <section aria-labelledby="security">
+            <h2 id="security" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Security</h2>
+            <Card className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary">
+                  <KeyRound size={18} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-semibold text-foreground-strong">Password</p>
+                  <p className="text-sm text-muted">You will be signed out after changing it.</p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={() => setPasswordModalOpen(true)}>Change password</Button>
+            </Card>
+          </section>
+
+          <Button variant="outline" className="w-full border-danger/30 text-danger hover:bg-danger/5 lg:w-auto" onClick={() => setConfirmOut(true)} leadingIcon={<LogOut size={16} />}>
+            Sign out
+          </Button>
+        </div>
       </div>
 
-      {/* Subject picker modal */}
-      <Modal
-        open={showSubjectPicker}
-        onOpenChange={setShowSubjectPicker}
-        title="Choose subjects"
-        description="Pick the courses you are taking this semester"
-      >
+      <Modal open={showSubjectPicker} onOpenChange={setShowSubjectPicker} title="Choose subjects" description="Pick the courses you are taking this semester">
         <div className="flex flex-col gap-2 py-1">
-          {unpinnedSubjects.length === 0 && pinnedSubjects.length > 0 && (
-            <p className="py-6 text-center text-sm text-muted">All subjects added</p>
-          )}
-          {(subjects ?? []).map((s) => {
-            const isPinned = pinnedIds.has(s.id);
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => handleTogglePin(s.id)}
-                aria-pressed={isPinned}
-                className={cn(
-                  'tf-pressable flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left',
-                  isPinned ? 'border-primary bg-primary/5' : 'border-border bg-surface',
-                )}
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-[14px] font-semibold text-foreground-strong">
-                    {s.title}
-                  </span>
-                  <span className="mt-0.5 block text-[12px] font-bold text-muted">{s.code}</span>
-                </span>
-                <span
-                  className={cn(
-                    'flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-                    isPinned ? 'border-primary bg-primary text-white' : 'border-border',
-                  )}
-                >
-                  {isPinned && <span className="text-[11px] font-bold">&#10003;</span>}
-                </span>
-              </button>
-            );
-          })}
+          {(subjects ?? []).length === 0 && <p className="py-6 text-center text-sm text-muted">No subjects available yet.</p>}
+          {(subjects ?? []).map((s) => (
+            <div key={s.id} className="rounded-xl border border-border bg-surface p-3">
+              <Checkbox label={s.title} hint={s.code} checked={pinnedIds.has(s.id)} onChange={() => togglePin.mutate(s.id)} />
+            </div>
+          ))}
         </div>
       </Modal>
 
-      {/* Edit Profile Modal */}
       <Modal
         open={isEditing}
         onOpenChange={setIsEditing}
@@ -395,152 +228,68 @@ function ProfilePage() {
         description="Update your personal information"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
-            <Button loading={isSaving} onClick={handleSaveProfile} leadingIcon={<Save size={16} />}>
-              Save changes
-            </Button>
+            <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button loading={isSaving} onClick={handleSaveProfile} leadingIcon={<Save size={16} />}>Save changes</Button>
           </>
         }
       >
         <div className="space-y-4 py-1">
           {editError && <Alert variant="danger">{editError}</Alert>}
           <Field label="Full name">
-            <Input
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
-              autoComplete="name"
-            />
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" autoComplete="name" />
           </Field>
-          <Field
-            label="Email address"
-            hint="Email address cannot be changed for security reasons."
-          >
+          <Field label="Username" hint="Shown in the Hall of Fame. 3 to 20 letters, numbers or underscores.">
+            <Input value={username} onChange={(e) => setUsernameValue(e.target.value.replace(/\s/g, '_'))} placeholder="scholar_king" autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={20} />
+          </Field>
+          <Field label="Email address" hint="Email address cannot be changed for security reasons.">
             <Input value={user.email} disabled />
           </Field>
-          <div className="pt-1">
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-              Privacy
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowOnLeaderboard(!showOnLeaderboard)}
-              aria-pressed={showOnLeaderboard}
-              className={cn(
-                'tf-pressable flex w-full items-center justify-between gap-3 rounded-xl border p-4 text-left',
-                showOnLeaderboard
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-border bg-surface text-muted',
-              )}
-            >
-              <span className="flex min-w-0 items-center gap-3">
-                {showOnLeaderboard ? (
-                  <Eye size={18} className="shrink-0" aria-hidden="true" />
-                ) : (
-                  <EyeOff size={18} className="shrink-0" aria-hidden="true" />
-                )}
-                <span className="min-w-0">
-                  <span className="block text-[14px] font-semibold">Show on leaderboards</span>
-                  <span className="mt-0.5 block text-[12px] leading-snug opacity-80">
-                    Whether other students can see your scores.
-                  </span>
-                </span>
-              </span>
-              <Switch checked={showOnLeaderboard} />
-            </button>
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border p-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground-strong">Show on leaderboards</p>
+              <p className="mt-0.5 text-xs text-muted">Whether other students can see your scores.</p>
+            </div>
+            <Switch checked={showOnLeaderboard} onCheckedChange={setShowOnLeaderboard} aria-label="Show on leaderboards" />
           </div>
         </div>
       </Modal>
 
-      {/* Change Password Modal */}
-      <Modal
-        open={isPasswordModalOpen}
-        onOpenChange={(next) => (next ? setPasswordModalOpen(true) : closePasswordModal())}
-        title="Change password"
-        description="Strengthen your account security"
-      >
-        <form id="change-password" onSubmit={handleChangePassword} className="space-y-4 py-1">
+      <Modal open={isPasswordModalOpen} onOpenChange={(next) => (next ? setPasswordModalOpen(true) : closePasswordModal())} title="Change password" description="Strengthen your account security">
+        <form onSubmit={handleChangePassword} className="space-y-4 py-1">
           {passwordError && <Alert variant="danger">{passwordError}</Alert>}
           <Field label="Current password">
-            <Input
-              type="password"
-              required
-              autoComplete="current-password"
-              value={passwordForm.currentPassword}
-              onChange={(e) =>
-                setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))
-              }
-            />
+            <PasswordInput required autoComplete="current-password" value={passwordForm.currentPassword} onChange={setPw('currentPassword')} />
           </Field>
           <Field label="New password">
-            <Input
-              type="password"
-              required
-              autoComplete="new-password"
-              value={passwordForm.newPassword}
-              onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
-            />
+            <PasswordInput required autoComplete="new-password" value={passwordForm.newPassword} onChange={setPw('newPassword')} />
           </Field>
           <Field label="Confirm new password">
-            <Input
-              type="password"
-              required
-              autoComplete="new-password"
-              value={passwordForm.confirmPassword}
-              onChange={(e) =>
-                setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))
-              }
-            />
+            <PasswordInput required autoComplete="new-password" value={passwordForm.confirmPassword} onChange={setPw('confirmPassword')} />
           </Field>
           <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="ghost"
-              fullWidth
-              className="sm:w-auto"
-              onClick={closePasswordModal}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" fullWidth className="sm:w-auto" loading={isChangingPassword}>
-              Update password
-            </Button>
+            <Button type="button" variant="ghost" onClick={closePasswordModal}>Cancel</Button>
+            <Button type="submit" loading={isChangingPassword}>Update password</Button>
           </div>
         </form>
       </Modal>
-    </section>
+
+      <ConfirmDialog open={confirmOut} onOpenChange={setConfirmOut} title="Sign out?" description="You will need to sign in again to take exams." confirmLabel="Sign out" tone="danger" onConfirm={logout} />
+    </Screen>
   );
 }
 
-/** Shared toggle visual. Was duplicated inline twice with slightly different
- *  markup; one component keeps both switches identical. */
-function Switch({ checked }) {
+function QuickLink({ to, icon: Icon, title, hint }) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'relative block h-6 w-10 shrink-0 rounded-full transition-colors duration-[var(--duration-sm)]',
-        checked ? 'bg-primary' : 'bg-muted/30',
-      )}
-    >
-      <span
-        className={cn(
-          'absolute top-1 size-4 rounded-full bg-white shadow-sm transition-all duration-[var(--duration-sm)] ease-[var(--transition-ease)]',
-          checked ? 'left-5' : 'left-1',
-        )}
-      />
-    </span>
-  );
-}
-
-function Row({ label, value }) {
-  return (
-    <div className={groupRowClasses({ interactive: false, className: 'gap-4' })}>
-      <dt className="shrink-0 text-[13px] font-medium text-muted">{label}</dt>
-      <dd className="truncate text-[14px] font-semibold text-foreground-strong">{value}</dd>
-    </div>
+    <Link to={to} className="tf-pressable flex items-center gap-3 rounded-[20px] border border-border bg-surface p-4 hover:border-border-strong hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary">
+        <Icon size={18} aria-hidden="true" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold text-foreground-strong">{title}</span>
+        <span className="block text-xs text-muted">{hint}</span>
+      </span>
+      <ChevronRight size={16} className="shrink-0 text-muted" aria-hidden="true" />
+    </Link>
   );
 }
 

@@ -17,6 +17,7 @@ export const buttonVariants = {
   outline:
     'border border-border-strong bg-surface text-foreground-strong hover:bg-surface-strong active:bg-surface-strong',
   ghost: 'bg-transparent text-foreground-strong hover:bg-surface-strong active:bg-surface-strong',
+  accent: 'bg-accent text-accent-foreground shadow-xs hover:bg-accent-hover active:bg-accent-active',
   danger: 'bg-danger text-danger-foreground shadow-xs hover:bg-danger-hover active:bg-danger-active',
 };
 

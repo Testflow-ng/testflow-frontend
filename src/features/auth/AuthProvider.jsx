@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthContext } from './authContext.js';
 import { authApi } from './api.js';
+import { mockUser } from '../../dev/mockData.js';
+
+/**
+ * Local design work only: `VITE_DEV_BYPASS_AUTH=true` (honoured in `npm run dev`, never in a
+ * production build) signs in a fake student so every signed-in screen opens without a backend.
+ */
+const DEV_BYPASS = import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true';
+const DEV_USER = mockUser;
 
 /**
  * Holds auth state for the app. On mount it probes `/me` (the axios interceptor
@@ -8,10 +16,11 @@ import { authApi } from './api.js';
  * session. Status is one of: 'loading' | 'authenticated' | 'unauthenticated'.
  */
 function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [status, setStatus] = useState('loading');
+  const [user, setUser] = useState(DEV_BYPASS ? DEV_USER : null);
+  const [status, setStatus] = useState(DEV_BYPASS ? 'authenticated' : 'loading');
 
   useEffect(() => {
+    if (DEV_BYPASS) return undefined;
     let active = true;
     authApi
       .me()
@@ -39,6 +48,7 @@ function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
+      if (DEV_BYPASS) return; // no server to tell; the state reset below still signs you out locally
       await authApi.logout();
     } finally {
       setUser(null);
@@ -47,6 +57,7 @@ function AuthProvider({ children }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
+    if (DEV_BYPASS) return DEV_USER;
     try {
       const currentUser = await authApi.me();
       setUser(currentUser);

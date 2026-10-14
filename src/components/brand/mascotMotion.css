@@ -33,6 +33,11 @@
 /* The default: settle in from slightly below. Used wherever the mascot simply
    appears as part of a layout. */
 .tf-mascot {
+  /* Flo's palette reads the brand tokens, so he matches the landing pages everywhere. */
+  --flo-ink: var(--brand-ink, #1b4332);
+  --flo-accent: var(--brand-indigo, #4a35f0);
+  --flo-hi: var(--brand-lime, #d6e87c);
+  --flo-body: var(--brand-lavender, #e9e5fb);
   animation: tf-m-arrive 520ms var(--ease-out) both;
 }
 

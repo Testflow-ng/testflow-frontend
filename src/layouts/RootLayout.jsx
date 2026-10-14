@@ -1,6 +1,10 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Header from '../components/Header.jsx';
+import AppSidebar from '../components/AppSidebar.jsx';
+import TourProvider from '../features/tour/TourProvider.jsx';
+import UsernamePrompt from '../components/UsernamePrompt.jsx';
+import { cn } from '../utils/cn.js';
 import BottomNav from '../components/BottomNav.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 import NightOwlPopup from '../components/NightOwlPopup.jsx';
@@ -23,12 +27,28 @@ function RootLayout() {
 
   const isLanding = isLandingPath(location.pathname);
   const isExamPage = EXAM_PATTERN.test(location.pathname);
+  // The UI Kit brings its own sidebar (same design) and no site header.
+  const isKit = location.pathname.startsWith('/ui-kit');
+  // Signed-in desktop gets the sidebar; phones keep the header and bottom bar.
+  const showSidebar = isAuthenticated && !isLoading && !isExamPage && !isLanding && !isKit;
 
   return (
-    <div className="relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+    <TourProvider>
+    <div
+      className={cn(
+        'relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary',
+        (showSidebar || isKit) && 'lg:pl-[var(--sidebar-w)]',
+      )}
+    >
       <Seo />
-      {!isExamPage && !isLanding && <Header />}
+      {showSidebar && <AppSidebar />}
+      {!isExamPage && !isLanding && !isKit && (
+        <div className={showSidebar ? 'contents lg:hidden' : 'contents'}>
+          <Header />
+        </div>
+      )}
       <OfflineBanner />
+      {isAuthenticated && !isExamPage && !isKit && <UsernamePrompt />}
 
       <main className="flex flex-1 flex-col">
         <motion.div
@@ -43,9 +63,10 @@ function RootLayout() {
         </motion.div>
       </main>
 
-      {isAuthenticated && !isLoading && !isExamPage && <BottomNav />}
+      {isAuthenticated && !isLoading && !isExamPage && !isKit && <BottomNav />}
       {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />}
     </div>
+    </TourProvider>
   );
 }
 

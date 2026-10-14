@@ -19,8 +19,8 @@ function Card({ as: Component = 'div', padding = 'md', raised = true, hover = fa
   return (
     <Component
       className={cn(
-        'rounded-2xl border border-border bg-surface transition-all duration-300',
-        raised && 'shadow-sm',
+        'rounded-[20px] border border-border bg-surface transition-all duration-300 motion-reduce:transition-none',
+        raised && 'shadow-[0_1px_2px_rgba(27,67,50,0.04),0_8px_24px_-12px_rgba(27,67,50,0.12)]',
         hover && 'hover:shadow-md hover:-translate-y-0.5 hover:border-border-strong',
         paddings[padding],
         className,

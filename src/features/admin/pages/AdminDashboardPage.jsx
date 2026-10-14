@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   BookOpen,
   CheckCircle2,
@@ -12,34 +11,24 @@ import {
   TrendingUp,
   Users,
   Zap,
-  Check,
-  Search,
   Settings,
   ArrowRight,
   Lightbulb,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
-import { Spinner, Alert, Button, Card } from '../../../components/ui/index.js';
+import { Spinner, Alert, Button, Card, useToast } from '../../../components/ui/index.js';
 import { cn } from '../../../utils/cn.js';
 import { useAuth } from '../../auth/useAuth.js';
-import UsernameSetupModal from '../../auth/components/UsernameSetupModal.jsx';
 import AdminStatCard from '../components/AdminStatCard.jsx';
 import ActiveUsersChart from '../components/ActiveUsersChart.jsx';
 import LevelBarChart from '../components/LevelBarChart.jsx';
 import SessionsDonut from '../components/SessionsDonut.jsx';
 import RecentStudents from '../components/RecentStudents.jsx';
 import AdminActivityFeed from '../components/AdminActivityFeed.jsx';
-import apiClient from '../../../api/client.js';
 
 function AdminDashboardPage() {
   const { user: currentUser } = useAuth();
-  const queryClient = useQueryClient();
-  const [setupDismissed, setSetupDismissed] = useState(false);
-  const [utmeCode, setUtmeCode] = useState('');
-  const [verifying, setVerifying] = useState(false);
-  const [verifyStatus, setVerifyStatus] = useState(null);
-
-  const showSetup = Boolean(currentUser && !currentUser.username) && !setupDismissed;
+  const toast = useToast();
 
   const handleExport = async () => {
     try {
@@ -51,24 +40,7 @@ function AdminDashboardPage() {
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      setVerifyStatus({ type: 'error', message: 'Unable to export results. Please try again.' });
-    }
-  };
-
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    if (!utmeCode || verifying) return;
-    setVerifying(true);
-    setVerifyStatus(null);
-    try {
-      const res = await apiClient.post('/api/admin/verify-utme', { verificationCode: utmeCode });
-      setVerifyStatus({ type: 'success', message: 'User verified successfully!' });
-      setUtmeCode('');
-      queryClient.invalidateQueries(['adminStats']);
-    } catch (err) {
-      setVerifyStatus({ type: 'error', message: err.message });
-    } finally {
-      setVerifying(false);
+      toast.error('Unable to export results', 'Please try again.');
     }
   };
 
@@ -177,7 +149,6 @@ function AdminDashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-8">
-      <UsernameSetupModal open={showSetup} onComplete={() => setSetupDismissed(true)} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

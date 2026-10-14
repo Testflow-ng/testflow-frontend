@@ -1,27 +1,28 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronRight, HelpCircle, Lock, LogOut, Moon, Shield, User } from 'lucide-react';
+import { Bell, ChevronRight, Compass, HelpCircle, Lock, LogOut, Moon, Shield, User } from 'lucide-react';
 import { useAuth } from '../auth/useAuth.js';
-import Avatar from '../../components/ui/Avatar.jsx';
+import { Avatar, Badge, Button, ConfirmDialog } from '../../components/ui/index.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
 import { THEME_SWITCHING_ENABLED } from '../../theme.js';
-import Screen, { ScreenHeader } from '../../components/layout/Screen.jsx';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { groupListClasses, groupRowClasses, listRowClasses } from '../../components/ui/surfaces.js';
 import { cn } from '../../utils/cn.js';
+import { useTour } from '../tour/TourContext.js';
 
 function SettingsPage() {
   const { user, logout } = useAuth();
+  const [confirmOut, setConfirmOut] = useState(false);
+  const { start: startTour } = useTour();
 
   return (
     <Screen width="lg">
-      <ScreenHeader title="Settings" />
+      <PageHeader title="Settings" subtitle="Your account and preferences." />
 
-      {/* Profile card */}
       <Link to="/profile" className={listRowClasses({ className: 'mt-6 gap-3.5 p-4' })}>
         <Avatar name={user.fullName} size="md" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold leading-snug text-foreground-strong">
-            {user.fullName}
-          </p>
+          <p className="truncate text-[15px] font-semibold leading-snug text-foreground-strong">{user.fullName}</p>
           <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{user.email}</p>
         </div>
         <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
@@ -37,108 +38,83 @@ function SettingsPage() {
             <ThemeToggle />
           </div>
         )}
-        <SettingsRow
-          icon={<Bell size={18} aria-hidden="true" />}
-          label="Notifications"
-          to="/settings/notifications"
-        />
+        <SettingsRow icon={<Bell size={18} aria-hidden="true" />} label="Notifications" to="/settings/notifications" />
       </SettingsGroup>
 
       <SettingsGroup title="Account">
         <SettingsRow icon={<User size={18} aria-hidden="true" />} label="Edit profile" to="/profile" />
-        {/*
-          Both of these used to land on /profile with nothing open, so "Change
-          password" was a row that appeared to do nothing. The hash opens the
-          matching dialog on arrival.
-        */}
-        <SettingsRow
-          icon={<Lock size={18} aria-hidden="true" />}
-          label="Change password"
-          to="/profile#security"
-        />
-        <SettingsRow
-          icon={<Shield size={18} aria-hidden="true" />}
-          label="Privacy"
-          sublabel="Coming soon"
-          disabled
-        />
+        <SettingsRow icon={<Lock size={18} aria-hidden="true" />} label="Change password" to="/profile#security" />
+        <SettingsRow icon={<Shield size={18} aria-hidden="true" />} label="Privacy" soon />
       </SettingsGroup>
 
       <SettingsGroup title="Support">
-        <SettingsRow
-          icon={<HelpCircle size={18} aria-hidden="true" />}
-          label="Help center"
-          sublabel="Coming soon"
-          disabled
-        />
+        <button type="button" onClick={startTour} className={groupRowClasses()}>
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="shrink-0 text-muted"><Compass size={18} aria-hidden="true" /></span>
+            <span className="truncate text-[15px] font-medium text-foreground-strong">Take the tour again</span>
+          </div>
+          <ChevronRight size={16} className="text-muted" aria-hidden="true" />
+        </button>
+        <SettingsRow icon={<HelpCircle size={18} aria-hidden="true" />} label="Help center" soon />
       </SettingsGroup>
 
-      <button
-        type="button"
-        onClick={logout}
-        className="tf-pressable mt-8 flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-danger/20 bg-danger/5 text-[15px] font-semibold text-danger active:bg-danger/10"
+      <Button
+        variant="outline"
+        size="lg"
+        className="mt-8 w-full border-danger/30 text-danger hover:bg-danger/5"
+        onClick={() => setConfirmOut(true)}
       >
         <LogOut size={16} aria-hidden="true" />
         Sign out
-      </button>
+      </Button>
 
       <p className="mt-6 text-center text-[11px] text-muted">TestFlow v1.0 by Eddyrus Media</p>
+
+      <ConfirmDialog
+        open={confirmOut}
+        onOpenChange={setConfirmOut}
+        title="Sign out?"
+        description="You will need to sign in again to take exams."
+        confirmLabel="Sign out"
+        tone="danger"
+        onConfirm={logout}
+      />
     </Screen>
   );
 }
 
-/** Titled group of rows. The iOS grouped-list pattern: quiet caps-label above
- *  a single bordered block with hairline dividers. */
 function SettingsGroup({ title, children }) {
   return (
     <section className="mt-7">
-      <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
-        {title}
-      </h2>
+      <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">{title}</h2>
       <div className={groupListClasses()}>{children}</div>
     </section>
   );
 }
 
-function SettingsRow({ icon, label, sublabel, to, disabled }) {
+function SettingsRow({ icon, label, to, soon }) {
   const content = (
     <>
       <div className="flex min-w-0 items-center gap-3">
         <span className="shrink-0 text-muted">{icon}</span>
-        <span
-          className={cn(
-            'truncate text-[15px] font-medium',
-            disabled ? 'text-muted' : 'text-foreground-strong',
-          )}
-        >
+        <span className={cn('truncate text-[15px] font-medium', soon ? 'text-muted' : 'text-foreground-strong')}>
           {label}
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {sublabel && <span className="text-[13px] text-muted">{sublabel}</span>}
-        <ChevronRight size={16} className="text-muted" aria-hidden="true" />
+        {soon ? <Badge variant="lavender">Soon</Badge> : <ChevronRight size={16} className="text-muted" aria-hidden="true" />}
       </div>
     </>
   );
 
-  if (to && !disabled) {
+  if (to && !soon) {
     return (
       <Link to={to} className={groupRowClasses()}>
         {content}
       </Link>
     );
   }
-
-  return (
-    <div
-      className={groupRowClasses({
-        interactive: false,
-        className: disabled ? 'pointer-events-none opacity-50' : undefined,
-      })}
-    >
-      {content}
-    </div>
-  );
+  return <div className={groupRowClasses({ interactive: false })}>{content}</div>;
 }
 
 export default SettingsPage;

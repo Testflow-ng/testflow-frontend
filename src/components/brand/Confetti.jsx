@@ -21,13 +21,14 @@ import { cn } from '../../utils/cn.js';
 const PIECE_COUNT = 30;
 const DURATION_MS = 2600;
 
+// Brand palette: indigo, lime, ink green and lavender.
 const COLORS = [
-  'bg-success',
-  'bg-warning',
-  'bg-primary',
-  'bg-info',
-  'bg-success',
-  'bg-primary',
+  'bg-[var(--brand-indigo)]',
+  'bg-[var(--brand-lime)]',
+  'bg-[var(--brand-ink)]',
+  'bg-[var(--brand-lavender)]',
+  'bg-[var(--brand-indigo)]',
+  'bg-[var(--brand-lime)]',
 ];
 
 /**

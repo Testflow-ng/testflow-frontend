@@ -8,10 +8,10 @@ function CalcButton({ children, onClick, variant = 'default', className }) {
     <button
       onClick={onClick}
       className={cn(
-        "flex h-12 items-center justify-center rounded-xl text-sm font-bold transition-all active:scale-95",
+        "flex h-12 items-center justify-center rounded-full text-sm font-bold transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
         variant === 'default' && "bg-surface-strong text-foreground-strong hover:bg-border",
         variant === 'operator' && "bg-primary/10 text-primary hover:bg-primary/20",
-        variant === 'action' && "bg-foreground text-background hover:opacity-90",
+        variant === 'action' && "bg-secondary text-secondary-foreground hover:bg-secondary-hover",
         className
       )}
     >

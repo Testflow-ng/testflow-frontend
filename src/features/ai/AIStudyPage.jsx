@@ -1,102 +1,50 @@
-import {
-  BookOpen,
-  Brain,
-  LineChart,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
-import Screen from '../../components/layout/Screen.jsx';
-import { cardClasses } from '../../components/ui/surfaces.js';
+import { BookOpen, Brain, LineChart, Sparkles, Target, TrendingUp, Zap } from 'lucide-react';
+import { Badge, Card, Reveal } from '../../components/ui/index.js';
+import Mascot from '../../components/brand/Mascot.jsx';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
+import { FeatureCard, FeatureGrid } from '../../components/marketing/FeatureCard.jsx';
+
+const PLANNED = [
+  { icon: Target, title: 'Smart revision', text: 'Finds your weak areas and builds focused review sessions.' },
+  { icon: Zap, title: 'Auto quiz generation', text: 'Generates practice questions from your weakest topics.' },
+  { icon: Brain, title: 'Learning insights', text: 'Understands your study patterns and suggests the best times to study.' },
+  { icon: TrendingUp, title: 'Progress predictions', text: 'Projects your exam readiness from your current trend.' },
+  { icon: BookOpen, title: 'Study summaries', text: 'Short summaries of the topics you practised, with the key ideas.' },
+  { icon: LineChart, title: 'Adaptive difficulty', text: 'Adjusts question difficulty to your level in each topic.' },
+];
 
 function AIStudyPage() {
   return (
-    <Screen width="lg">
-      <div className="mb-6">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-info/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-info">
-          <Sparkles size={11} aria-hidden="true" /> Coming soon
-        </span>
-        <h1 className="mt-2.5 font-heading text-[1.625rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
-          AI Study Companion
-        </h1>
-        <p className="mt-1 text-sm leading-snug text-muted">
-          Smart tools to help you study more effectively.
-        </p>
-      </div>
+    <Screen width="xl">
+      <PageHeader
+        title="AI Study"
+        subtitle="Smart tools to help you study more effectively."
+        action={<Badge variant="lime"><Sparkles size={12} aria-hidden="true" /> Coming soon</Badge>}
+      />
 
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-        {[
-          {
-            icon: <Target size={20} />,
-            title: 'Smart revision',
-            desc: 'Automatically identifies your weak areas and creates focused review sessions.',
-            accent: 'bg-primary/8 text-primary',
-          },
-          {
-            icon: <Zap size={20} />,
-            title: 'Auto quiz generation',
-            desc: 'Generates practice questions from your weakest topics.',
-            accent: 'bg-warning/8 text-warning',
-          },
-          {
-            icon: <Brain size={20} />,
-            title: 'Learning insights',
-            desc: 'Understands your study patterns and suggests optimal study times.',
-            accent: 'bg-success/8 text-success',
-          },
-          {
-            icon: <LineChart size={20} />,
-            title: 'Progress predictions',
-            desc: 'Projects your exam readiness based on current performance trends.',
-            accent: 'bg-info/8 text-info',
-          },
-          {
-            icon: <BookOpen size={20} />,
-            title: 'Study summaries',
-            desc: 'Concise summaries of topics you have practiced, highlighting key concepts.',
-            accent: 'bg-secondary/8 text-secondary',
-          },
-          {
-            icon: <TrendingUp size={20} />,
-            title: 'Adaptive difficulty',
-            desc: 'Adjusts question difficulty based on your skill level in each topic.',
-            accent: 'bg-danger/8 text-danger',
-          },
-        ].map((feature) => (
-          <div
-            key={feature.title}
-            className={cardClasses({
-              padding: 'lg',
-              className: 'flex flex-col gap-3 opacity-70',
-            })}
-          >
-            <div className={`flex size-10 items-center justify-center rounded-xl ${feature.accent}`}>
-              {feature.icon}
-            </div>
-            <div>
-              <h3 className="text-[15px] font-semibold leading-snug text-foreground-strong">
-                {feature.title}
-              </h3>
-              <p className="mt-1 text-[13px] leading-relaxed text-muted">
-                {feature.desc}
-              </p>
-            </div>
+      <Reveal className="mt-6">
+        <Card padding="lg" className="flex flex-col items-center gap-5 bg-[var(--brand-lavender)] text-center sm:flex-row sm:text-left">
+          <Mascot mood="thinking" animation="float" size={112} />
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Coming soon</p>
+            <h2 className="mt-1 font-heading text-2xl font-extrabold tracking-tight text-foreground-strong">
+              Your study companion is <em className="tf-accent font-normal">on the way</em>
+            </h2>
+            <p className="mt-2 max-w-[52ch] text-sm leading-relaxed text-foreground">
+              We are still building this. Until then, keep practising and your results will shape what it suggests first.
+            </p>
           </div>
-        ))}
-      </div>
+        </Card>
+      </Reveal>
 
-      <div className="mt-6 rounded-2xl border border-dashed border-border bg-surface-strong px-5 py-6 text-center">
-        <Sparkles size={28} className="mx-auto text-muted/40" aria-hidden="true" />
-        <p className="mt-3 text-[15px] font-semibold text-foreground-strong">
-          Under development
-        </p>
-        <p className="mx-auto mt-1.5 max-w-[26rem] text-[13px] leading-relaxed text-muted">
-          These AI features are being built by our team. They will activate
-          automatically once available. Keep practicing to get the most from
-          them.
-        </p>
-      </div>
+      <Reveal delay={0.1} className="mt-8">
+        <h2 className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">What is planned</h2>
+        <FeatureGrid>
+          {PLANNED.map((f) => (
+            <FeatureCard key={f.title} icon={f.icon} title={f.title} text={f.text} tone="surface" />
+          ))}
+        </FeatureGrid>
+      </Reveal>
     </Screen>
   );
 }
