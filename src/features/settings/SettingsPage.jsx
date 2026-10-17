@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronRight, Compass, HelpCircle, Lock, LogOut, Moon, Shield, User } from 'lucide-react';
+import { Bell, ChevronRight, Compass, HelpCircle, Lock, LogOut, MessageSquare, Moon, Shield, User } from 'lucide-react';
 import { useAuth } from '../auth/useAuth.js';
 import { Avatar, Badge, Button, ConfirmDialog } from '../../components/ui/index.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
@@ -44,7 +44,7 @@ function SettingsPage() {
       <SettingsGroup title="Account">
         <SettingsRow icon={<User size={18} aria-hidden="true" />} label="Edit profile" to="/profile" />
         <SettingsRow icon={<Lock size={18} aria-hidden="true" />} label="Change password" to="/profile#security" />
-        <SettingsRow icon={<Shield size={18} aria-hidden="true" />} label="Privacy" soon />
+        <SettingsRow icon={<Shield size={18} aria-hidden="true" />} label="Privacy" to="/privacy" />
       </SettingsGroup>
 
       <SettingsGroup title="Support">
@@ -55,7 +55,8 @@ function SettingsPage() {
           </div>
           <ChevronRight size={16} className="text-muted" aria-hidden="true" />
         </button>
-        <SettingsRow icon={<HelpCircle size={18} aria-hidden="true" />} label="Help center" soon />
+        <SettingsRow icon={<HelpCircle size={18} aria-hidden="true" />} label="Help center" to="/help" />
+        <SettingsRow icon={<MessageSquare size={18} aria-hidden="true" />} label="Send feedback" to="/settings/feedback" />
       </SettingsGroup>
 
       <Button

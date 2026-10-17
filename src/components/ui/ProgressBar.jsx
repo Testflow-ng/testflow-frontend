@@ -11,13 +11,14 @@ const tones = {
 };
 const heights = { sm: 'h-1.5', md: 'h-2.5', lg: 'h-4' };
 
-/** Horizontal progress. `label` names it for screen readers; `showValue` prints the percentage. */
-function ProgressBar({ value = 0, max = 100, tone = 'primary', size = 'md', label, showValue = false, className }) {
+/** Horizontal progress. `label` names it for screen readers; `showValue` prints the percentage. `labelHidden` keeps the name but drops the visible text. */
+function ProgressBar({ value = 0, max = 100, tone = 'primary', size = 'md', label, showValue = false, labelHidden = false, className }) {
   const reduce = useReducedMotion();
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
     <div className={cn('w-full', className)}>
-      {(label || showValue) && (
+      {label && labelHidden && <span className="sr-only">{label}</span>}
+      {((label && !labelHidden) || showValue) && (
         <div className="mb-1.5 flex items-baseline justify-between text-sm">
           <span className="text-foreground-strong">{label}</span>
           {showValue && <span className="font-semibold text-foreground-strong">{Math.round(pct)}%</span>}

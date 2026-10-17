@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Button, CharacterCounter, Checkbox, DatePicker, DateRangePicker, Field, FileUpload, FormSection, Input, MultiSelect, PasswordInput, Radio, SearchField,
-  SegmentedControl, Select, Slider, Switch, TagInput, Textarea,
+  SegmentedControl, Select, Slider, StarRating, Switch, TagInput, Textarea,
 } from '../../../components/ui/index.js';
 
 
@@ -72,6 +72,30 @@ export default [
 <Field label="Description"><Textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} /></Field>
 <CharacterCounter value={text} max={200} />            {/* characters */}
 <CharacterCounter value={text} max={12} unit="words" />`,
+  },
+  {
+    id: 'star-rating', name: 'Star rating', category: 'Forms', source: 'ui/StarRating.jsx',
+    description: 'A 1 to 5 rating built on native radios, so the arrow keys and screen readers work as they do everywhere else. Read-only for showing a rating that was already given.',
+    keywords: ['stars', 'rating', 'rate', 'review', 'score', 'feedback', 'survey'],
+    Preview: function Demo() {
+      const [v, setV] = useState(4);
+      return (
+        <div className="grid gap-5">
+          <div className="flex items-center gap-3">
+            <StarRating value={v} onValueChange={setV} label="Your rating" />
+            <span className="text-sm font-semibold text-foreground-strong">{v} of 5</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted">Read only</span>
+            <StarRating value={3} readOnly size={18} />
+          </div>
+        </div>
+      );
+    },
+    usage: `import { StarRating } from '../components/ui/index.js';
+
+<StarRating value={rating} onValueChange={setRating} label="How is TestFlow treating you?" />
+<StarRating value={entry.rating} readOnly size={14} />   {/* a rating already given */}`,
   },
   {
     id: 'choices', name: 'Checkbox, radio, switch and segmented', category: 'Forms', source: ['ui/Checkbox.jsx', 'ui/Radio.jsx', 'ui/Switch.jsx', 'ui/SegmentedControl.jsx'],

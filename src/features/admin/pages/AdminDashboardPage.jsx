@@ -6,6 +6,7 @@ import {
   Clock,
   Download,
   FileQuestion,
+  Flag,
   Radio,
   ShieldCheck,
   TrendingUp,
@@ -14,6 +15,7 @@ import {
   Settings,
   ArrowRight,
   Lightbulb,
+  MessageSquare,
 } from 'lucide-react';
 import { adminApi } from '../api.js';
 import { Spinner, Alert, Button, Card, useToast } from '../../../components/ui/index.js';
@@ -44,7 +46,7 @@ function AdminDashboardPage() {
     }
   };
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ['adminStats'],
     queryFn: adminApi.getStats,
     refetchInterval: 30000,
@@ -58,6 +60,22 @@ function AdminDashboardPage() {
       icon: FileQuestion,
       color: 'text-primary',
       bg: 'bg-primary/10',
+    },
+    {
+      title: 'Reported questions',
+      description: 'Work through what students flagged as broken.',
+      href: '/admin/reports',
+      icon: Flag,
+      color: 'text-danger',
+      bg: 'bg-danger/10',
+    },
+    {
+      title: 'Feedback',
+      description: 'Ratings, problems and ideas students sent from Settings.',
+      href: '/admin/feedback',
+      icon: MessageSquare,
+      color: 'text-warning',
+      bg: 'bg-warning/10',
     },
     {
       title: 'Subjects',
@@ -120,18 +138,20 @@ function AdminDashboardPage() {
     });
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
+  /*
+    `data` is the only honest check here. During React Query's retry backoff the query is
+    pending but not fetching, which makes `isLoading` false while `isError` is still false and
+    there is no data .trusting those two flags destructured `undefined` and took the whole
+    route down with it.
+  */
+  if (!data) {
+    return isError ? (
       <div className="mx-auto w-full max-w-4xl px-5 py-6">
         <Alert variant="danger">Failed to load dashboard statistics.</Alert>
+      </div>
+    ) : (
+      <div className="flex justify-center py-20">
+        <Spinner size="lg" />
       </div>
     );
   }

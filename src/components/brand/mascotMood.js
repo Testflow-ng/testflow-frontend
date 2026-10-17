@@ -8,9 +8,9 @@
  * lives in one file rather than being guessed at each call site.
  *
  * Each entry returns `{ mood, animation, line }`:
- *   mood      — the expression (see Mascot.jsx)
- *   animation — the motion class, chosen for the frequency of the surface
- *   line      — a short piece of copy in Flo's voice, or null where the screen
+ *   mood      .the expression (see Mascot.jsx)
+ *   animation .the motion class, chosen for the frequency of the surface
+ *   line      .a short piece of copy in Flo's voice, or null where the screen
  *               already says enough and a second voice would be clutter
  */
 

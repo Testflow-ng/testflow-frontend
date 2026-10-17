@@ -50,7 +50,7 @@ function CodePanel({ entry, values }) {
   const tabs = [{ value: 'usage', label: 'Usage example' }, ...(sources.length ? [{ value: 'source', label: 'Component source' }] : [])];
 
   return (
-    <div className="space-y-3">
+    <div className="w-full space-y-3">
       <Tabs items={tabs} value={tab} onValueChange={setTab} idPrefix="kit-code" label="Code views" />
       {tab === 'usage' ? (
         <>

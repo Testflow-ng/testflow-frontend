@@ -74,7 +74,7 @@ function DashboardPage() {
 
   return (
     <Screen width="lg" className="flex flex-col lg:max-w-3xl">
-      {/* Masthead. Date first, in the mono face — this screen is dated work. */}
+      {/* Masthead. Date first, in the mono face .this screen is dated work. */}
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -276,7 +276,7 @@ function ReadinessSheet({ readiness, weakest, strongest, streakCount, streakDays
         {/*
           Two short lines, not one long one.
 
-          As a single run — "needs work · across 15 papers · 18 of 78 correct" —
+          As a single run ."needs work · across 15 papers · 18 of 78 correct" —
           it wrapped on every phone width and orphaned "correct" on its own
           line, which reads as a layout accident rather than a sentence. Split,
           each line is short enough that it cannot wrap, and the verdict gets

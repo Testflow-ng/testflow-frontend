@@ -43,6 +43,7 @@ export { STATUS } from './statusMap.js';
 export { default as Stepper } from './Stepper.jsx';
 export { FormSection, StickyActionBar } from './FormSection.jsx';
 export { default as Slider } from './Slider.jsx';
+export { default as StarRating } from './StarRating.jsx';
 export { default as CharacterCounter } from './CharacterCounter.jsx';
 export { default as TagInput } from './TagInput.jsx';
 export { default as CopyField } from './CopyField.jsx';

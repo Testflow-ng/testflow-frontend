@@ -11,7 +11,7 @@
 
   2. **CSS, not JS.** These are predetermined loops. CSS animations keep running
      off the main thread while React hydrates, queries resolve and images
-     decode — exactly the moments the mascot is on screen. A rAF-driven
+     decode .exactly the moments the mascot is on screen. A rAF-driven
      equivalent would stutter precisely when it is most visible.
 
   3. **Intensity is tiered by how often the animation is seen.** The looping
@@ -57,7 +57,7 @@
 
   The travel and the waddle are ONE keyframe set, not two animations layered on
   the same element. Two concurrent animations both driving `transform` do not
-  compose — the last one in the list wins outright — so an earlier version that
+  compose .the last one in the list wins outright .so an earlier version that
   ran `walk-in` alongside `waddle` lost the travel entirely and just rotated on
   the spot. Anything that needs to move and tilt at once has to say so in a
   single keyframe.

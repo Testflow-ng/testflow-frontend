@@ -2,7 +2,7 @@ import { useCallback, useSyncExternalStore } from 'react';
 
 /**
  * Reactive media query. Used where a breakpoint has to change *behaviour*
- * rather than styling — e.g. the Modal enables swipe-to-dismiss only while it
+ * rather than styling .e.g. the Modal enables swipe-to-dismiss only while it
  * is rendering as a bottom sheet.
  *
  * `useSyncExternalStore` keeps this correct across concurrent renders and gives

@@ -41,7 +41,7 @@ import { cn } from '../../utils/cn.js';
  * The first version drew arms as small filled blobs tucked behind the body.
  * At the ~90px the mascot actually renders, a raised blob read as a nub on the
  * shoulder, which made `thumbsUp` and `confident` indistinguishable from
- * `happy` — the exact moods whose whole job is to look different.
+ * `happy` .the exact moods whose whole job is to look different.
  *
  * A limb that clearly leaves the silhouette, ending in a round hand, is
  * legible at every size. `hand` is the circle centre; `thumb` adds the stub

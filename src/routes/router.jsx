@@ -4,6 +4,7 @@ import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import PrivacyPage from '../pages/PrivacyPage.jsx';
 import TermsPage from '../pages/TermsPage.jsx';
+import HelpCenterPage from '../pages/HelpCenterPage.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import ComingSoonPage from '../pages/ComingSoonPage.jsx';
@@ -20,18 +21,23 @@ import { ORG_SLUG, PRODUCT_NAME_PUBLIC, PRODUCT_PATH, PRODUCT_SLUG } from '../co
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
 import ExamResultPage from '../features/exam/ExamResultPage.jsx';
+import ExamReportPage from '../features/exam/ExamReportPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
+import BookmarksPage from '../features/bookmarks/BookmarksPage.jsx';
 import HallOfFamePage from '../features/hall-of-fame/HallOfFamePage.jsx';
 import LiveRedirect from '../features/live/LiveRedirect.jsx';
 import LiveRoomPage from '../features/live/LiveRoomPage.jsx';
 import LiveCBTPage from '../features/live/LiveCBTPage.jsx';
 import AIStudyPage from '../features/ai/AIStudyPage.jsx';
 import PostUtmeComingSoon from '../features/post-utme/pages/PostUtmeComingSoon.jsx';
+import LibraryPage from '../features/library/LibraryPage.jsx';
+import ReaderPage from '../features/library/ReaderPage.jsx';
 import CoursesPage from '../features/subjects/CoursesPage.jsx';
 import SettingsPage from '../features/settings/SettingsPage.jsx';
 import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
+import FeedbackPage from '../features/feedback/FeedbackPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
 import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
 import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
@@ -43,6 +49,8 @@ import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage
 import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
 import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
 import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
+import FlaggedQuestionsPage from '../features/admin/pages/FlaggedQuestionsPage.jsx';
+import AdminFeedbackPage from '../features/admin/pages/FeedbackPage.jsx';
 import PublicQuestionPage from '../features/public-questions/pages/PublicQuestionPage.jsx';
 
 const uiKit = async () => ({ Component: (await import('../features/ui-kit/UiKitPage.jsx')).default });
@@ -63,6 +71,7 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
+      { path: 'help', element: <HelpCenterPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
       { path: 'coming-soon', element: <ComingSoonPage /> },
       { path: 'ui-kit', lazy: uiKit },
@@ -142,10 +151,14 @@ export const router = createBrowserRouter([
           { path: 'hall-of-fame', element: <HallOfFamePage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'courses', element: <CoursesPage /> },
+          { path: 'library', element: <LibraryPage /> },
+          { path: 'library/:id/read', element: <ReaderPage /> },
           { path: 'history', element: <Navigate to="/progress" replace /> },
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'profile/bookmarks', element: <BookmarksPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'settings/notifications', element: <NotificationPreferencesPage /> },
+          { path: 'settings/feedback', element: <FeedbackPage /> },
           { path: 'live', element: <LiveCBTPage /> },
           { path: 'live/:code', element: <LiveRoomPage /> },
           { path: 'live-cbt/:code', element: <LiveRedirect /> },
@@ -153,6 +166,7 @@ export const router = createBrowserRouter([
           { path: 'post-utme', element: <PostUtmeComingSoon /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
           { path: 'exam/:id/result', element: <ExamResultPage /> },
+          { path: 'exam/:id/report', element: <ExamReportPage /> },
           {
             element: <RequireAdmin />,
             children: [
@@ -165,6 +179,8 @@ export const router = createBrowserRouter([
               { path: 'admin/rankings', element: <PostUtmeRankingsPage /> },
               { path: 'admin/verifications', element: <VerificationQueuePage /> },
               { path: 'admin/activity', element: <AdminActivityPage /> },
+              { path: 'admin/reports', element: <FlaggedQuestionsPage /> },
+              { path: 'admin/feedback', element: <AdminFeedbackPage /> },
               { path: 'admin/settings', element: <AdminSettingsPage /> },
               { path: 'admin/roster', element: <AdminRosterPage /> },
             ],

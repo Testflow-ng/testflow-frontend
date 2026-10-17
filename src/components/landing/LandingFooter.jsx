@@ -50,6 +50,7 @@ function LandingFooter() {
           <div>
             <h4>Support</h4>
             <a href={`mailto:${WAITLIST_EMAIL}`}>Contact us</a>
+            <Link to="/help">Help center</Link>
             <Link to="/privacy">Privacy policy</Link>
             <Link to="/terms">Terms of use</Link>
           </div>

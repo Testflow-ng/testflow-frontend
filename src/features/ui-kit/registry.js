@@ -3,6 +3,7 @@ import forms from './entries/forms.jsx';
 import feedback from './entries/feedback.jsx';
 import navigation from './entries/navigation.jsx';
 import data from './entries/data.jsx';
+import library from './entries/library.jsx';
 import exam from './entries/exam.jsx';
 import marketing from './entries/marketing.jsx';
 import ads from './entries/ads.jsx';
@@ -20,9 +21,9 @@ import everybody from './entries/everybody.jsx';
  *   usage       a short written example, with imports
  *   source      optional path(s) under src/components, shown as the real source
  */
-export const ENTRIES = [...foundations, ...forms, ...feedback, ...navigation, ...data, ...exam, ...marketing, ...ads, ...everybody];
+export const ENTRIES = [...foundations, ...forms, ...feedback, ...navigation, ...data, ...library, ...exam, ...marketing, ...ads, ...everybody];
 
-export const CATEGORY_ORDER = ['Foundations', 'Forms', 'Feedback', 'Navigation', 'Data', 'Exam', 'Marketing', 'Ads', 'Everyone'];
+export const CATEGORY_ORDER = ['Foundations', 'Forms', 'Feedback', 'Navigation', 'Data', 'Library', 'Exam', 'Marketing', 'Ads', 'Everyone'];
 
 const norm = (s) => String(s).toLowerCase();
 

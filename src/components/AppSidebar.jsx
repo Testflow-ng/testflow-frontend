@@ -1,4 +1,4 @@
-import { Award, BookOpen, ChartLine, LayoutDashboard, Palette, Radio, ShieldAlert, Sparkles, Target, Trophy, User } from 'lucide-react';
+import { Award, BookOpen, ChartLine, LayoutDashboard, LibraryBig, Palette, Radio, ShieldAlert, Sparkles, Target, Trophy, User } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from './ui/index.js';
 import SidebarShell from './SidebarShell.jsx';
@@ -8,6 +8,7 @@ import { useSubjects } from '../features/subjects/useSubjects.js';
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { to: '/courses', label: 'Courses', Icon: BookOpen },
+  { to: '/library', label: 'Library', Icon: LibraryBig },
   { to: '/post-utme', label: 'Post-UTME', Icon: Target, tag: 'Soon' },
   { to: '/live', label: 'Live CBT', Icon: Radio },
   { to: '/ai-study', label: 'AI Study', Icon: Sparkles, tag: 'Soon' },

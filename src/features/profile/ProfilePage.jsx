@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronRight, History, KeyRound, LogOut, Pencil, Plus, Save, TrendingUp, X } from 'lucide-react';
+import { Bookmark, BookOpen, ChevronRight, History, KeyRound, LogOut, Pencil, Plus, Save, TrendingUp, X } from 'lucide-react';
 import {
   Alert,
   Avatar,
@@ -181,6 +181,12 @@ function ProfilePage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <QuickLink to="/history" icon={History} title="Exam history" hint="Review past attempts" />
             <QuickLink to="/progress" icon={TrendingUp} title="My progress" hint="Track performance" />
+            <QuickLink
+              to="/profile/bookmarks"
+              icon={Bookmark}
+              title="Saved questions"
+              hint="Questions you kept, with answers"
+            />
           </div>
 
           <section aria-labelledby="account">

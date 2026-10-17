@@ -7,14 +7,16 @@ import UsernamePrompt from '../components/UsernamePrompt.jsx';
 import { cn } from '../utils/cn.js';
 import BottomNav from '../components/BottomNav.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
-import NightOwlPopup from '../components/NightOwlPopup.jsx';
+// import NightOwlPopup from '../components/NightOwlPopup.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
 import { ORG_PATH, PRODUCT_PATH } from '../constants/products.js';
 import Seo from '../components/Seo.jsx';
 
-const LANDING_PATHS = ['/', '/coming-soon', '/privacy', '/terms', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
+const LANDING_PATHS = ['/', '/coming-soon', '/privacy', '/terms', '/help', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
 const isLandingPath = (p) => LANDING_PATHS.includes(p) || p === '/ads' || p.startsWith('/ads/') || p === ORG_PATH || p === PRODUCT_PATH || p.startsWith(`${PRODUCT_PATH}/`);
-const EXAM_PATTERN = /^\/exam\/[^/]+$/;
+// The exam runtime and its printed report are full-screen takeovers; the result page
+// that links the two stays inside the normal signed-in shell.
+const EXAM_PATTERN = /^\/exam\/[^/]+(\/report)?$/;
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -52,7 +54,14 @@ function RootLayout() {
 
       <main className="flex flex-1 flex-col">
         <motion.div
-          key={location.pathname}
+          /*
+            The key drives the fade between screens, but it must not apply to
+            the UI Kit: keying on the pathname remounted its sidebar on every
+            entry click, which threw away the sidebar's scroll position and the
+            search text. One stable key keeps that sidebar alive while the
+            entry beside it changes.
+          */
+          key={isKit ? 'ui-kit' : location.pathname}
           variants={pageVariants}
           initial="initial"
           animate="animate"
@@ -64,7 +73,7 @@ function RootLayout() {
       </main>
 
       {isAuthenticated && !isLoading && !isExamPage && !isKit && <BottomNav />}
-      {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />}
+      {/* {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />} */}
     </div>
     </TourProvider>
   );

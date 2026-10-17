@@ -24,7 +24,7 @@ const readSeen = () => {
  * No effects. The seen set is read once into state via a lazy initialiser, and
  * `fresh` is derived from it during render. An earlier version mirrored the
  * result into state inside an effect and re-read storage during render to
- * invalidate — that renders once without the celebration and again with it,
+ * invalidate .that renders once without the celebration and again with it,
  * which is exactly the flash this is meant to avoid.
  *
  * Nothing is marked seen until `acknowledge` runs, so a badge earned while the

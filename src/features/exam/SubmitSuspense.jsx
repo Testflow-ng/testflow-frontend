@@ -9,7 +9,7 @@ import Mascot from '../../components/brand/Mascot.jsx';
  *
  * The overlay is held for a minimum time by its caller (see ExamRuntimePage),
  * so it never flickers. It is deliberately NOT dismissible: unlike the
- * countdown, there is nothing to skip to — the score is not ready yet, and an
+ * countdown, there is nothing to skip to .the score is not ready yet, and an
  * escape hatch here would just show an empty screen.
  *
  * The messages step so the wait reads as progress rather than a stall.

@@ -39,7 +39,7 @@ const dialogMotion = {
  * dismissible), body scroll is locked, and focus returns to the trigger on
  * close.
  *
- * Mobile presentation is a true bottom sheet — it slides up, carries a grab
+ * Mobile presentation is a true bottom sheet .it slides up, carries a grab
  * handle, and can be flicked down to dismiss. Drag is bound to the handle and
  * header via `useDragControls` rather than the whole panel, so a swipe inside a
  * long body scrolls the body instead of dragging the sheet away. From `sm` up
@@ -223,7 +223,7 @@ function Modal({
 
             {/*
               Actions sit above the home indicator and stack full-width on
-              phones — a 44px-tall edge-to-edge button is far easier to hit
+              phones .a 44px-tall edge-to-edge button is far easier to hit
               than a right-aligned pair.
             */}
             {footer ? (

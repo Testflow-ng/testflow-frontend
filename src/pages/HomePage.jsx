@@ -282,7 +282,7 @@ function HomePage() {
                   feel <em>prepared, not panicked.</em>”
                 </blockquote>
                 <p className="who">A student’s next chapter</p>
-                <small>Illustrative student story — not a verified testimonial.</small>
+                <small>Illustrative student story .not a verified testimonial.</small>
               </figcaption>
             </figure>
           </section>

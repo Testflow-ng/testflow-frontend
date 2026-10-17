@@ -14,7 +14,7 @@ import Confetti from '../../components/brand/Confetti.jsx';
  * celebration that lands on top of it would bury the number.
  *
  * Multiple badges from one paper are listed in a single sheet rather than
- * queued as separate dialogs — three modals in a row is a chore, not a reward.
+ * queued as separate dialogs .three modals in a row is a chore, not a reward.
  */
 function AchievementUnlock({ achievements, open, onClose }) {
   if (!achievements?.length) return null;

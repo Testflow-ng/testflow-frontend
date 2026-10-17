@@ -112,7 +112,8 @@ Layout: wrap every in-app page in `Screen` with a `PageHeader`. Do not hand-roll
 ### Data and content (`components/data`)
 `StatCard`, `charts.jsx` (`BrandBarChart`, `BrandLineChart`, `BrandDonutChart`, `BrandRadarChart`),
 `DataTable` (sortable, paginated) + `Pagination`, `FilterableList`, `LeaderboardRow`, `CourseCard`,
-`Badges.jsx` (`StreakBadge`, `AchievementBadge`).
+`Book` (a course as a book on a shelf: code on the cover, TestFlow mark in the middle, title underneath;
+seven cover colours in `bookColors.js`), `Badges.jsx` (`StreakBadge`, `AchievementBadge`).
 
 ### Exam (`components/exam`): the most sensitive area
 `QuestionCard` (LaTeX via `MathText`), `OptionRow` (idle, selected, correct, wrong, missed),

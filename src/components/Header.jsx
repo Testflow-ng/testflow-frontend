@@ -61,7 +61,7 @@ function Header() {
   return (
     /*
       `viewport-fit=cover` lets the page run under the status bar, so the
-      header has to add the top inset itself — without it the pill sits behind
+      header has to add the top inset itself .without it the pill sits behind
       the clock and notch on an installed iPhone PWA.
     */
     <header className="sticky top-0 z-50 w-full px-4 pt-[calc(0.5rem+var(--safe-top))] sm:px-5">

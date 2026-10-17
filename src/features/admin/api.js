@@ -50,4 +50,29 @@ export const adminApi = {
   bulkDeleteQuestions: (ids) => apiClient.post('/api/admin/questions/bulk-delete', { ids }).then((res) => res.data),
   bulkToggleQuestions: (ids, isActive) => apiClient.post('/api/admin/questions/bulk-toggle', { ids, isActive }).then((res) => res.data),
   getQuestionAnalytics: (id) => apiClient.get(`/api/admin/questions/${id}/analytics`).then((res) => res.data),
+
+  /*
+    Reported questions.
+
+    A student who thinks a question is broken reports it from the paper or the corrections
+    review; these are the endpoints the review queue reads. `listQuestionFlags` returns the
+    reports *and* the per-status counts, so the queue can label its own filter without a
+    second request.
+  */
+  listQuestionFlags: (params) =>
+    apiClient.get('/api/admin/question-flags', { params }).then((res) => res.data),
+  resolveQuestionFlag: (id, payload) =>
+    apiClient.patch(`/api/admin/question-flags/${id}`, payload).then((res) => res.data.flag),
+
+  /*
+    Student feedback.
+
+    The other queue: what students sent from Settings .ratings, problems and ideas .rather
+    than what they said about a question. One request returns the entries and the counts, so
+    the filter labels need no second call.
+  */
+  listFeedback: (params) =>
+    apiClient.get('/api/admin/feedback', { params }).then((res) => res.data),
+  updateFeedback: (id, payload) =>
+    apiClient.patch(`/api/admin/feedback/${id}`, payload).then((res) => res.data.feedback),
 };

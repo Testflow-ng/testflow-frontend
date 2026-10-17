@@ -221,7 +221,7 @@
     `cubic-bezier(0.4, 0, 0.2, 1)` (what this file used to carry) is the
     generic Material curve nobody chose. These three are the standard strong
     UI curves: enter/exit, on-screen movement, and the iOS drawer curve used
-    by the bottom sheet. There is deliberately no ease-in token — ease-in on
+    by the bottom sheet. There is deliberately no ease-in token .ease-in on
     UI starts slow at exactly the moment the user is watching.
   */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -309,7 +309,7 @@
   /*
     Text-safe variants.
 
-    The base brand colours are tuned for fills — `bg-primary` with white on it,
+    The base brand colours are tuned for fills .`bg-primary` with white on it,
     an amber streak pip, a green success chip. As *text on a light surface* three
     of them fail WCAG AA: success #16a34a is 3.3:1, warning #f59e0b is 2.15:1,
     and primary #0f6fec is 4.46:1, all under the 4.5:1 floor for normal text.
@@ -876,6 +876,19 @@ select {
   appearance: none;
 }
 
+/*
+  `appearance: none` on the input does not remove WebKit's search cancel
+  button .the pseudo-element keeps its own inline box, so a search field
+  showed our clear button and the browser's side by side. We always ship our
+  own, so the native pair is removed outright.
+*/
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
 button {
   display: inline-flex;
   align-items: center;
@@ -1105,8 +1118,8 @@ table {
 
     Padding positions the content; scroll-padding insets the *snapport*, the
     box snap positions align against. Without it, `scroll-snap-align: start` on
-    the first chip snapped it flush to the scroll container's edge — scrolling
-    straight past the 16px padding — so the first chip sat hard against the
+    the first chip snapped it flush to the scroll container's edge .scrolling
+    straight past the 16px padding .so the first chip sat hard against the
     screen edge while everything above it lined up on the margin.
   */
   scroll-padding-left: var(--screen-gutter);
@@ -1207,4 +1220,40 @@ table {
 }
 .tf-slider:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 5px rgba(74, 53, 240, 0.25);
+}
+
+/* --- Print ---------------------------------------------------------------
+   The performance report is the one screen meant to end up on paper, so it
+   gets real page geometry. Its own toolbar carries `print:hidden`, and the
+   sheet drops its on-screen card treatment (radius, border, shadow) so the
+   printed page is ink on paper rather than a screenshot of a web page. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  .tf-print-sheet {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .tf-print-sheet .tf-print-flat {
+    border-color: #d7d7d7 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep a question and its answer on the same sheet of paper. */
+  .tf-print-sheet li {
+    break-inside: avoid;
+  }
 }

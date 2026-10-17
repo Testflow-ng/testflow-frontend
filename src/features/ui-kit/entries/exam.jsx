@@ -10,24 +10,35 @@ import Calculator from '../../post-utme/components/Calculator.jsx';
 export default [
   {
     id: 'question', name: 'Question card and options', category: 'Exam', source: ['exam/QuestionCard.jsx', 'exam/OptionRow.jsx'],
-    description: 'A question with LaTeX support and answer rows. Presentational: the runtime owns answers and scoring.',
-    keywords: ['exam', 'question', 'option', 'answer', 'latex', 'math', 'flag', 'mcq'],
+    description: 'A question with LaTeX support, its actions (flag, save, report) and answer rows. Presentational: the runtime owns answers and scoring.',
+    keywords: ['exam', 'question', 'option', 'answer', 'latex', 'math', 'flag', 'bookmark', 'report', 'mcq'],
     Preview: function Demo() {
       const [ans, setAns] = useState('B');
       const [flag, setFlag] = useState(false);
+      const [saved, setSaved] = useState(false);
       return (
         <div className="space-y-6">
-          <QuestionCard number={4} total={20} topic="Algebra" flagged={flag} onFlag={() => setFlag((f) => !f)} stem={'If $x^2 - 5x + 6 = 0$, what are the values of $x$?'}>
+          <QuestionCard
+            number={4}
+            total={20}
+            topic="Algebra"
+            flagged={flag}
+            onFlag={() => setFlag((f) => !f)}
+            bookmarked={saved}
+            onBookmark={() => setSaved((s) => !s)}
+            onReport={() => {}}
+            stem={'If $x^2 - 5x + 6 = 0$, what are the values of $x$?'}
+          >
             {['2 and 3', '1 and 6', '-2 and -3', '0 and 5'].map((t, i) => {
               const k = 'ABCD'[i];
               return <OptionRow key={k} label={k} state={ans === k ? 'selected' : 'idle'} onSelect={() => setAns(k)}>{t}</OptionRow>;
             })}
           </QuestionCard>
           <div className="grid max-w-lg gap-2">
-            <OptionRow label="A" state="correct">2 and 3</OptionRow>
-            <OptionRow label="B" state="wrong">1 and 6</OptionRow>
+            <OptionRow label="A" state="correct">2 and 3 (the answer, and you picked it)</OptionRow>
+            <OptionRow label="B" state="wrong">1 and 6 (your answer, and it is wrong)</OptionRow>
             <OptionRow label="C" state="missed">-2 and -3 (the right answer you missed)</OptionRow>
-            <OptionRow label="D" state="idle">0 and 5</OptionRow>
+            <OptionRow label="D" state="answer">0 and 5 (the answer, with nothing chosen)</OptionRow>
           </div>
         </div>
       );
@@ -35,7 +46,8 @@ export default [
     usage: `import QuestionCard from '../components/exam/QuestionCard.jsx';
 import OptionRow from '../components/exam/OptionRow.jsx';
 
-// OptionRow state: idle | selected (during the paper) | correct | wrong | missed (review)
+// OptionRow state: idle | selected (during the paper) | correct | answer | wrong | missed (review)
+// correct says "you chose this"; answer is the same look for a question nobody attempted
 <QuestionCard number={4} total={20} stem={'If $x^2 - 5x + 6 = 0$, find $x$.'} flagged={flag} onFlag={toggleFlag}>
   {options.map((text, i) => (
     <OptionRow key={i} label={'ABCD'[i]} state={answer === i ? 'selected' : 'idle'} onSelect={() => choose(i)}>

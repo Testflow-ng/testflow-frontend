@@ -27,6 +27,11 @@ export const STATUS = {
   approved: { label: 'Approved', tone: 'success', icon: CheckCircle2 },
   submitted: { label: 'Submitted', tone: 'success', icon: CheckCircle2 },
   timed_out: { label: 'Timed out', tone: 'warning', icon: Clock },
+  // support: what students report and what we send them
+  open: { label: 'Open', tone: 'warning', icon: AlertCircle },
+  in_review: { label: 'In review', tone: 'info', icon: Hourglass },
+  resolved: { label: 'Resolved', tone: 'success', icon: CheckCircle2 },
+  dismissed: { label: 'Dismissed', tone: 'neutral', icon: XCircle },
   // domains and sites
   pending: { label: 'Pending', tone: 'warning', icon: Hourglass },
   verified: { label: 'Verified', tone: 'info', icon: CheckCircle2 },

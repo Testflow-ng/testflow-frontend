@@ -6,6 +6,7 @@ import {
 
 
 import { Row } from './helpers.jsx';
+import ShareDialog from '../../../components/share/ShareDialog.jsx';
 
 export default [
   {
@@ -131,6 +132,40 @@ toast.toast({ title: 'Plain message', duration: 3000 });
 />`,
   },
   {
+    id: 'share', name: 'Share dialog', category: 'Feedback', source: ['share/ShareDialog.jsx', 'share/shareTargets.js'],
+    description: 'Share a public link: copy field, chat targets and the native sheet. The link is passed in, never built here.',
+    keywords: ['share', 'link', 'whatsapp', 'telegram', 'x', 'twitter', 'copy', 'invite', 'og', 'preview'],
+    Preview: function Demo() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <Button onClick={() => setOpen(true)}>Share result</Button>
+          <ShareDialog
+            open={open}
+            onOpenChange={setOpen}
+            title="Share your result"
+            description="Anyone who opens this link sees your score card."
+            url="https://www.testflow.com.ng/r/e5.31jrb4"
+            caption="76% in GST101 on TestFlow. 38/50 correct."
+          />
+        </>
+      );
+    },
+    usage: `import ShareDialog from '../components/share/ShareDialog.jsx';
+
+// The link is always passed in: it is a URL the backend serves as a page carrying the
+// Open Graph image, so it is minted server-side (a result), or a public id (a question).
+<ShareDialog
+  open={open}
+  onOpenChange={setOpen}
+  title="Share your result"
+  url={share.url}        // absolute, backend-served
+  caption={shareCaption} // rides along in the WhatsApp text and the native sheet
+  loading={shareLoading}
+  error={shareError}
+/>`,
+  },
+  {
     id: 'empty-state', name: 'Empty state', category: 'Feedback', source: 'ui/EmptyState.jsx',
     description: 'What to show when there is nothing yet. Use Flo or an icon.',
     keywords: ['empty', 'no results', 'nothing', 'blank', 'zero state'],
@@ -153,7 +188,7 @@ toast.toast({ title: 'Plain message', duration: 3000 });
     id: 'status-badge', name: 'Status badge', category: 'Feedback', source: ['ui/StatusBadge.jsx', 'ui/statusMap.js'],
     description: 'One map for every status in the product, so a status always looks the same.',
     keywords: ['state', 'paid', 'active', 'pending', 'rejected', 'draft', 'label'],
-    Preview: () => <Row>{['draft', 'pending_review', 'scheduled', 'active', 'rejected', 'suspended', 'paid', 'failed', 'waiting', 'in_progress', 'results_published', 'verified'].map((k) => <StatusBadge key={k} status={k} />)}</Row>,
+    Preview: () => <Row>{['draft', 'pending_review', 'scheduled', 'active', 'rejected', 'suspended', 'paid', 'failed', 'waiting', 'in_progress', 'open', 'in_review', 'resolved', 'dismissed', 'results_published', 'verified'].map((k) => <StatusBadge key={k} status={k} />)}</Row>,
     usage: `import { StatusBadge } from '../components/ui/index.js';
 
 // status is a key of STATUS in ui/statusMap.js. Add new statuses there.
