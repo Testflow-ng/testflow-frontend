@@ -5,7 +5,7 @@ function PrivacyPage() {
   return (
     <LegalLayout
       title="Privacy Policy"
-      updated="September 28, 2026"
+      updated="October 19, 2026"
       intro="TestFlow is operated by Eddyrus Media and provides CBT practice tools for Obafemi Awolowo University students. This policy explains how we handle personal data when you use TestFlow."
       cta={REGISTER_CTA_LABEL}
     >
@@ -16,6 +16,10 @@ function PrivacyPage() {
 
     <LegalSection title="How we use information">
       <p>We use information to create and secure your account, deliver CBT practice and results, personalise course access, investigate misuse, process payment verification, improve TestFlow, and communicate important service updates.</p>
+    </LegalSection>
+
+    <LegalSection title="Library activity">
+      <p>When you use the Library, we record the books you open, the pages you reach, your bookmarks, and your download requests. We use this to keep your place across devices, to apply fair use so a few heavy downloads cannot slow the Library down for everyone, and to understand which titles are worth adding next. Downloads are served through short-lived links that expire on their own.</p>
     </LegalSection>
 
     <LegalSection title="Legal basis and data protection">

@@ -2,10 +2,11 @@
 export function questionProblems(q) {
   const out = [];
   if (!q.stem?.trim()) out.push('Write the question.');
-  const filled = q.options.map((o) => o.trim()).filter(Boolean);
+  // An option counts when it has words or a picture.
+  const filled = q.options.map((o, i) => (o.trim() ? o.trim() : q.optionImages?.[i] ? `image-${i}` : '')).filter(Boolean);
   if (filled.length < 2) out.push('Add at least two options.');
   if (new Set(filled.map((o) => o.toLowerCase())).size !== filled.length) out.push('Options must be different from each other.');
-  if (!q.options[q.correctIndex]?.trim()) out.push('Mark the correct option.');
+  if (!q.options[q.correctIndex]?.trim() && !q.optionImages?.[q.correctIndex]) out.push('Mark the correct option.');
   return out;
 }
 

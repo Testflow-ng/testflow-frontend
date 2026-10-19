@@ -17,6 +17,10 @@ const isLandingPath = (p) => LANDING_PATHS.includes(p) || p === '/ads' || p.star
 // The exam runtime and its printed report are full-screen takeovers; the result page
 // that links the two stays inside the normal signed-in shell.
 const EXAM_PATTERN = /^\/exam\/[^/]+(\/report)?$/;
+// A live sitting is a takeover too: the room, the waiting states, the paper and the
+// published results all fill the screen, with no sidebar or site header, like the CBT
+// runtime. The live hub (`/live`) keeps the normal shell.
+const LIVE_ROOM_PATTERN = /^\/(live|live-cbt)\/[^/]+$/;
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -29,10 +33,15 @@ function RootLayout() {
 
   const isLanding = isLandingPath(location.pathname);
   const isExamPage = EXAM_PATTERN.test(location.pathname);
+  const isLiveRoom = LIVE_ROOM_PATTERN.test(location.pathname);
+  const fullBleed = isExamPage || isLiveRoom;
+  // Joining a shared live session is time-sensitive; do not cover it with
+  // first-run onboarding. The prompt waits for the dashboard instead.
+  const isLivePage = location.pathname === '/live' || location.pathname.startsWith('/live/');
   // The UI Kit brings its own sidebar (same design) and no site header.
   const isKit = location.pathname.startsWith('/ui-kit');
   // Signed-in desktop gets the sidebar; phones keep the header and bottom bar.
-  const showSidebar = isAuthenticated && !isLoading && !isExamPage && !isLanding && !isKit;
+  const showSidebar = isAuthenticated && !isLoading && !fullBleed && !isLanding && !isKit;
 
   return (
     <TourProvider>
@@ -44,13 +53,13 @@ function RootLayout() {
     >
       <Seo />
       {showSidebar && <AppSidebar />}
-      {!isExamPage && !isLanding && !isKit && (
+      {!fullBleed && !isLanding && !isKit && (
         <div className={showSidebar ? 'contents lg:hidden' : 'contents'}>
           <Header />
         </div>
       )}
       <OfflineBanner />
-      {isAuthenticated && !isExamPage && !isKit && <UsernamePrompt />}
+      {isAuthenticated && !fullBleed && !isKit && !isLivePage && <UsernamePrompt />}
 
       <main className="flex flex-1 flex-col">
         <motion.div
@@ -72,7 +81,7 @@ function RootLayout() {
         </motion.div>
       </main>
 
-      {isAuthenticated && !isLoading && !isExamPage && !isKit && <BottomNav />}
+      {isAuthenticated && !isLoading && !fullBleed && !isKit && <BottomNav />}
       {/* {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />} */}
     </div>
     </TourProvider>
