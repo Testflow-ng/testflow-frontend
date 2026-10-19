@@ -75,4 +75,23 @@ export const adminApi = {
     apiClient.get('/api/admin/feedback', { params }).then((res) => res.data),
   updateFeedback: (id, payload) =>
     apiClient.patch(`/api/admin/feedback/${id}`, payload).then((res) => res.data.feedback),
+
+  // Post-UTME verification requests (a Student uploads a receipt, an admin approves or rejects it)
+  listVerifications: (params) => apiClient.get('/api/verifications/queue', { params }).then((res) => res.data.requests),
+  processVerification: (id, payload) => apiClient.patch(`/api/verifications/${id}/process`, payload).then((res) => res.data),
+
+  // Student pass (ad-free, Library, Live CBT hosting): support tools
+  grantEntitlement: (userId, payload) => apiClient.post(`/api/billing/ad-free/entitlements/${userId}/grant`, payload).then((res) => res.data),
+  revokeEntitlement: (userId, payload) => apiClient.post(`/api/billing/ad-free/entitlements/${userId}/revoke`, payload).then((res) => res.data),
+
+  // Advertising (Testflow Ads marketplace + Google AdSense health)
+  adsOverview: () => apiClient.get('/api/admin/ads/overview').then((res) => res.data),
+  adsCampaigns: (params) => apiClient.get('/api/admin/ads/campaigns', { params }).then((res) => res.data),
+  adsCampaignAction: (id, action, payload) => apiClient.post(`/api/admin/ads/campaigns/${id}/${action}`, payload ?? {}).then((res) => res.data.campaign),
+  adsPayments: (params) => apiClient.get('/api/admin/ads/payments', { params }).then((res) => res.data),
+  adsRefund: (id, payload) => apiClient.post(`/api/admin/ads/payments/${id}/refund`, payload).then((res) => res.data.payment),
+  adsSettings: () => apiClient.get('/api/admin/ads/settings').then((res) => res.data.settings),
+  updateAdsSettings: (payload) => apiClient.patch('/api/admin/ads/settings', payload).then((res) => res.data.settings),
+  adsJobs: () => apiClient.get('/api/admin/ads/jobs').then((res) => res.data.runs),
+  advertisingHealth: () => apiClient.get('/api/advertising/admin/health').then((res) => res.data.health),
 };

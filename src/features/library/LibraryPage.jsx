@@ -1,3 +1,5 @@
+import AdSlot from '../advertising/AdSlot.jsx';
+import { hasLibraryAccess, useEntitlement } from '../billing/useBilling.js';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Bookmark, Search } from 'lucide-react';
@@ -32,6 +34,8 @@ function LibraryPage() {
   const { data: reading } = useReading();
   const setBookmark = useSetBookmark();
   const download = useDownloadBook();
+  const { data: held } = useEntitlement();
+  const locked = !hasLibraryAccess(held);
 
   const books = data?.books ?? [];
   const bookmarked = (book) => bookmarkOverrides[book.id] ?? book.bookmarked;
@@ -219,7 +223,10 @@ function LibraryPage() {
         onDownload={() => onDownload(selectedBook)}
         bookmarkBusy={setBookmark.isPending}
         downloading={download.isPending}
+        locked={locked}
       />
+      {/* One quiet slot under the shelf. The reader itself stays ad-free so reading is never interrupted. */}
+      <AdSlot placement="content_feed" className="mt-10" />
     </Screen>
   );
 }

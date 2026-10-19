@@ -1,3 +1,5 @@
+import AdSlot from '../advertising/AdSlot.jsx';
+import GoAdFreeButton from '../billing/GoAdFreeButton.jsx';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight, Flame } from 'lucide-react';
 import { useAuth } from '../auth/useAuth.js';
@@ -94,13 +96,12 @@ function DashboardPage() {
             <span className="block break-words">{firstName}.</span>
           </h1>
         </div>
-        <Link
-          to="/profile"
-          aria-label="Your profile"
-          className="tf-pressable mt-0.5 shrink-0 rounded-full"
-        >
-          <Avatar name={user.fullName} size="sm" />
-        </Link>
+        <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
+          <GoAdFreeButton />
+          <Link to="/profile" aria-label="Your profile" className="tf-pressable rounded-full">
+            <Avatar name={user.fullName} size="sm" />
+          </Link>
+        </div>
       </header>
 
       {readiness.hasData ? (
@@ -218,6 +219,8 @@ function DashboardPage() {
           <MoreRow to="/ai-study" label="AI study tools" note="Not ready yet" muted />
         </div>
       </Section>
+      {/* The only ad on Home: one quiet slot at the very bottom, never between actions. */}
+      <AdSlot placement="content_feed" className="mt-8" />
     </Screen>
   );
 }

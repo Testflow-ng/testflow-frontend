@@ -48,7 +48,7 @@ function CreateSessionModal({ open, onOpenChange }) {
       setForm(initial);
       navigate(`/live/${exam.shareCode}`);
     } catch (err) {
-      setError(err.message || 'Could not create the session.');
+      setError(err.code === 'PLAN_REQUIRED' || err.status === 402 ? 'Hosting a Live CBT needs a Student Pass. Get one from Settings, then try again.' : err.message || 'Could not create the session.');
     } finally {
       setBusy(false);
     }

@@ -114,7 +114,7 @@ export default defineConfig({
         navigateFallback: '/index.html',
         // `/r/:token` is a server-rendered page (the Open Graph share link), not an app route:
         // letting the worker answer it would hand a crawler the SPA shell instead of the tags.
-        navigateFallbackDenylist: [/^\/api\//, /^\/r\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/r\//, /^\/ads\.txt$/],
         cleanupOutdatedCaches: true,
         skipWaiting: true, // a new deploy replaces the old worker immediately
         clientsClaim: true,

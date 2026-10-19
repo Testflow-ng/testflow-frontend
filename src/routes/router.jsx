@@ -20,7 +20,9 @@ import PageLoader from '../components/PageLoader.jsx';
 import { ORG_SLUG, PRODUCT_NAME_PUBLIC, PRODUCT_PATH, PRODUCT_SLUG } from '../constants/products.js';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
-import ExamResultPage from '../features/exam/ExamResultPage.jsx';
+import ExamResultRoute from '../features/exam/ExamResultRoute.jsx';
+import BillingPage from '../features/billing/BillingPage.jsx';
+import BillingCompletePage from '../features/billing/BillingCompletePage.jsx';
 import ExamReportPage from '../features/exam/ExamReportPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
@@ -39,18 +41,18 @@ import SettingsPage from '../features/settings/SettingsPage.jsx';
 import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
 import FeedbackPage from '../features/feedback/FeedbackPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
-import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
-import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
-import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
-import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
-import StudentManagementPage from '../features/admin/pages/StudentManagementPage.jsx';
-import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
-import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage.jsx';
-import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
-import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
-import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
-import FlaggedQuestionsPage from '../features/admin/pages/FlaggedQuestionsPage.jsx';
-import AdminFeedbackPage from '../features/admin/pages/FeedbackPage.jsx';
+import AdminLayout from '../features/admin/AdminLayout.jsx';
+import OverviewScreen from '../features/admin/screens/OverviewScreen.jsx';
+import UsersScreen from '../features/admin/screens/UsersScreen.jsx';
+import QuestionsScreen from '../features/admin/screens/QuestionsScreen.jsx';
+import QuestionEditorScreen from '../features/admin/screens/QuestionEditorScreen.jsx';
+import SubjectsScreen from '../features/admin/screens/SubjectsScreen.jsx';
+import ReportsScreen from '../features/admin/screens/ReportsScreen.jsx';
+import FeedbackScreen from '../features/admin/screens/FeedbackScreen.jsx';
+import VerificationsScreen from '../features/admin/screens/VerificationsScreen.jsx';
+import AdsScreen from '../features/admin/screens/AdsScreen.jsx';
+import ActivityScreen from '../features/admin/screens/ActivityScreen.jsx';
+import SettingsScreen from '../features/admin/screens/SettingsScreen.jsx';
 import PublicQuestionPage from '../features/public-questions/pages/PublicQuestionPage.jsx';
 
 const uiKit = async () => ({ Component: (await import('../features/ui-kit/UiKitPage.jsx')).default });
@@ -165,24 +167,34 @@ export const router = createBrowserRouter([
           { path: 'ai-study', element: <AIStudyPage /> },
           { path: 'post-utme', element: <PostUtmeComingSoon /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
-          { path: 'exam/:id/result', element: <ExamResultPage /> },
+          { path: 'exam/:id/result', element: <ExamResultRoute /> },
+          { path: 'billing', element: <BillingPage /> },
+          { path: 'billing/complete', element: <BillingCompletePage /> },
           { path: 'exam/:id/report', element: <ExamReportPage /> },
           {
             element: <RequireAdmin />,
             children: [
-              { path: 'admin', element: <AdminDashboardPage /> },
-              { path: 'admin/questions', element: <QuestionBankPage /> },
-              { path: 'admin/questions/new', element: <EditQuestionPage /> },
-              { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
-              { path: 'admin/subjects', element: <SubjectManagementPage /> },
-              { path: 'admin/students', element: <StudentManagementPage /> },
-              { path: 'admin/rankings', element: <PostUtmeRankingsPage /> },
-              { path: 'admin/verifications', element: <VerificationQueuePage /> },
-              { path: 'admin/activity', element: <AdminActivityPage /> },
-              { path: 'admin/reports', element: <FlaggedQuestionsPage /> },
-              { path: 'admin/feedback', element: <AdminFeedbackPage /> },
-              { path: 'admin/settings', element: <AdminSettingsPage /> },
-              { path: 'admin/roster', element: <AdminRosterPage /> },
+              {
+                element: <AdminLayout />,
+                children: [
+                  { path: 'admin', element: <OverviewScreen /> },
+                  { path: 'admin/users', element: <UsersScreen /> },
+                  { path: 'admin/questions', element: <QuestionsScreen /> },
+                  { path: 'admin/questions/new', element: <QuestionEditorScreen /> },
+                  { path: 'admin/questions/:id/edit', element: <QuestionEditorScreen /> },
+                  { path: 'admin/subjects', element: <SubjectsScreen /> },
+                  { path: 'admin/reports', element: <ReportsScreen /> },
+                  { path: 'admin/feedback', element: <FeedbackScreen /> },
+                  { path: 'admin/verifications', element: <VerificationsScreen /> },
+                  { path: 'admin/ads', element: <AdsScreen /> },
+                  { path: 'admin/activity', element: <ActivityScreen /> },
+                  { path: 'admin/settings', element: <SettingsScreen /> },
+                  // Old addresses, kept so bookmarks still work.
+                  { path: 'admin/students', element: <Navigate to="/admin/users" replace /> },
+                  { path: 'admin/roster', element: <Navigate to="/admin/users" replace /> },
+                  { path: 'admin/rankings', element: <Navigate to="/admin" replace /> },
+                ],
+              },
             ],
           },
         ],

@@ -1,3 +1,4 @@
+import { markAdDue } from '../advertising/adDue.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -127,6 +128,8 @@ function ExamRuntime({ session }) {
       clearTimeout(stepB);
     }
 
+    // A finished paper earns one short ad before the corrections (the result route reads this flag).
+    if (!isPostUtme) markAdDue(id);
     navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
   }, [id, navigate, isPostUtme]);
 

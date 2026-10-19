@@ -5,9 +5,20 @@ import { examRoute, summaryFor } from './mockExam.js';
 import { studyRoute, STUDY_PREFIXES } from './mockStudy.js';
 import { feedbackRoute, FEEDBACK_PREFIXES } from './mockFeedback.js';
 import { adminRoute, ADMIN_PREFIXES } from './mockAdmin.js';
+import { adminConsoleRoute, ADMIN_CONSOLE_PREFIXES } from './mockAdminConsole.js';
 import { mockBooks, mockReading, mockSessions, mockStats, mockSubjects, mockUser } from './mockData.js';
 
 const pinned = new Set(mockUser.pinnedSubjects);
+
+// Billing sample state: free until a mock checkout is "paid" by visiting /billing/complete.
+const pass = { paid: false, expiresAt: null, plan: 'pass_30d' };
+const PLANS = [
+  { key: 'pass_30d', name: 'Student Pass', description: '30 days of hosted live sessions and an ad-free Testflow.', priceMinor: 250000, currency: 'NGN', durationDays: 30, removesAds: true, entitlements: { adFree: true, liveCbtHost: true } },
+  { key: 'pass_90d', name: 'Student Pass (term)', description: '90 days of hosted live sessions and an ad-free Testflow.', priceMinor: 600000, currency: 'NGN', durationDays: 90, removesAds: true, entitlements: { adFree: true, liveCbtHost: true } },
+];
+const entitlement = () => ({ status: pass.paid ? 'active' : 'free', adFree: pass.paid, library: pass.paid, liveCbtHost: pass.paid, expiresAt: pass.expiresAt, planKey: pass.paid ? 'pass_30d' : null });
+const ADS_CONFIG = { version: 1, providers: { testflow: { enabled: true }, google_adsense: { enabled: true, publisherId: 'ca-pub-0000000000000000', adUnits: { content_feed: '1111111111', post_activity: '2222222222' } } }, placements: [], issues: [] };
+
 
 /* Library: bookmarks and reading progress are mutated in place, so the mock behaves like the API. */
 const bookmarked = new Set(mockBooks.filter((b) => b.bookmarked).map((b) => b.id));
@@ -29,6 +40,22 @@ const pageBlocks = (b, page) => [
 ];
 
 const routes = [
+  ['GET', /^\/api\/advertising\/config$/, () => ({ advertising: ADS_CONFIG })],
+  ['GET', /^\/api\/advertising\/eligibility$/, () => ({ eligibility: { adFree: pass.paid, adsEnabled: !pass.paid, providers: { testflow: { eligible: !pass.paid }, google_adsense: { eligible: !pass.paid } } } })],
+  ['GET', /^\/api\/billing\/ad-free\/products$/, () => ({ products: PLANS })],
+  ['GET', /^\/api\/billing\/entitlement$/, () => ({ entitlement: entitlement() })],
+  ['POST', /^\/api\/billing\/ad-free\/checkout$/, (_m, body) => {
+    const plan = PLANS.find((p) => p.key === body.planKey) ?? PLANS[0];
+    pass.plan = plan.key;
+    return { purchase: { reference: 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', authorizationUrl: `${window.location.origin}/billing/complete?reference=TFS-MOCK123` } };
+  }],
+  ['GET', /^\/api\/billing\/ad-free\/status$/, (_m, _b, cfg) => {
+    const query = cfg?.params ?? {};
+    const plan = PLANS.find((p) => p.key === pass.plan) ?? PLANS[0];
+    pass.paid = true;
+    pass.expiresAt = new Date(Date.now() + plan.durationDays * 86400000).toISOString();
+    return { entitlement: entitlement(), purchase: { reference: query.reference ?? 'TFS-MOCK123', planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'paid' } };
+  }],
   ['GET', /^\/api\/exam-sessions\/stats$/, () => ({ stats: mockStats })],
   // Scores in the list come from the same marked paper the result page renders (`mockExam.js`),
   // so a history row can never disagree with the report behind it.
@@ -133,6 +160,7 @@ const DELEGATES = [
   { owns: (path) => STUDY_PREFIXES.some((prefix) => path.startsWith(prefix)), route: studyRoute },
   { owns: (path) => FEEDBACK_PREFIXES.some((prefix) => path.startsWith(prefix)), route: feedbackRoute },
   { owns: (path) => ADMIN_PREFIXES.some((prefix) => path.startsWith(prefix)), route: adminRoute },
+  { owns: (path) => ADMIN_CONSOLE_PREFIXES.some((prefix) => path.startsWith(prefix)), route: adminConsoleRoute },
 ];
 
 export function mockAdapter(config) {

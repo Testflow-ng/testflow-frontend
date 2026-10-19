@@ -5,6 +5,8 @@ import { Button, EmptyState, IconButton, ProgressBar, SkeletonText, useToast } f
 import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { ICON } from '../../components/ui/iconProps.js';
 import { saveFile } from './download.js';
+import { hasLibraryAccess, useEntitlement } from '../billing/useBilling.js';
+import LibraryLocked from './components/LibraryLocked.jsx';
 import { useBook, useBookPages, useDownloadBook, useReading, useSaveProgress, useSetBookmark } from './useLibrary.js';
 
 /**
@@ -29,6 +31,7 @@ function ReaderPage() {
   const saveProgress = useSaveProgress();
   const setBookmark = useSetBookmark();
   const download = useDownloadBook();
+  const { data: held } = useEntitlement();
 
   const saved = reading?.find((entry) => entry.bookId === id);
   /* Do not decide the starting page until the reading list has answered, or a
@@ -81,6 +84,15 @@ function ReaderPage() {
       onError: () => toast.error('Could not prepare that download.'),
     });
   };
+
+  if (!hasLibraryAccess(held)) {
+    return (
+      <Screen width="md">
+        <PageHeader back="/library" title={book?.title ?? 'Library'} />
+        <div className="mt-8"><LibraryLocked onBack={() => navigate('/library')} /></div>
+      </Screen>
+    );
+  }
 
   return (
     <Screen width="lg">

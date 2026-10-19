@@ -6,6 +6,7 @@ import CountdownBadge from '../../../components/ads/CountdownBadge.jsx';
 import AnalyticsPanel from '../../../components/ads/AnalyticsPanel.jsx';
 import AdsReviewQueue from '../../../components/ads/AdsReviewQueue.jsx';
 import AdsPaymentsTable from '../../../components/ads/AdsPaymentsTable.jsx';
+import GoogleAdUnit from '../../advertising/GoogleAdUnit.jsx';
 import { adCampaigns, adPayments, dailyAds, daysOut, hoursOut } from './samples.js';
 
 export default [
@@ -65,5 +66,24 @@ import AdsPaymentsTable from '../components/ads/AdsPaymentsTable.jsx';
 // Presentational: the callbacks call the Ads API and may return promises.
 <AdsReviewQueue campaigns={campaigns} onApprove={approve} onReject={reject} onSuspend={suspend} onReinstate={reinstate} />
 <AdsPaymentsTable payments={payments} onRefund={refund} />`,
+  },
+  {
+    id: 'google-ad-unit', name: 'Google ad slot', category: 'Ads', source: null,
+    description: 'The AdSense unit and its labelled slot. With the all-zero placeholder publisher id it draws a box and loads nothing from Google. Whether a real ad may show is decided by the backend (/api/advertising/eligibility).',
+    keywords: ['adsense', 'google', 'advert', 'slot', 'placement', 'monetise', 'ad free', 'billing'],
+    Preview: () => (
+      <div className="max-w-md space-y-3">
+        <GoogleAdUnit publisherId="ca-pub-0000000000000000" slotId="1111111111" minHeight={120} />
+      </div>
+    ),
+    usage: `import AdSlot from '../features/advertising/AdSlot.jsx';
+
+// One quiet, labelled ad (with a "Remove ads" link). It renders nothing when the backend says no ad may show:
+// the student has a pass, the placement is off, or the provider is off.
+// Placements: content_feed (Home, lists) | post_activity (after an exam) | desktop_sidebar.
+// NEVER use exam_session, live_cbt, payment_checkout or auth: the backend refuses them.
+<AdSlot placement="content_feed" className="mt-8" />
+
+// After a paper is submitted, the result route shows PostExamAdGate (5 seconds) once, then the corrections.`,
   },
 ];

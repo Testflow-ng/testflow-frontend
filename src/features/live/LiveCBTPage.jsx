@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Clock, Plus, Trophy, Users } from 'lucide-react';
 import { Button, Card, Input, Reveal } from '../../components/ui/index.js';
 import { ICON_LG } from '../../components/ui/iconProps.js';
@@ -7,6 +7,7 @@ import Mascot from '../../components/brand/Mascot.jsx';
 import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { FeatureCard, FeatureGrid } from '../../components/marketing/FeatureCard.jsx';
 import CreateSessionModal from './CreateSessionModal.jsx';
+import { useEntitlement } from '../billing/useBilling.js';
 
 const STEPS = [
   { icon: Plus, title: 'Create or join', text: 'The host creates a session and shares the join code.' },
@@ -20,6 +21,9 @@ function LiveCBTPage() {
   const [code, setCode] = useState('');
   const [creating, setCreating] = useState(false);
   const ready = code.length >= 6;
+  const { data: held } = useEntitlement();
+  // Only block when the backend says we do not hold the hosting pass; while it loads, let the button work.
+  const needsPass = held ? !held.liveCbtHost : false;
 
   const join = (e) => {
     e.preventDefault();
@@ -40,7 +44,14 @@ function LiveCBTPage() {
               <h2 className="font-heading text-lg font-bold tracking-tight text-foreground-strong">Host a session</h2>
               <p className="mt-1 text-sm leading-relaxed text-foreground">Pick a subject, set the rules and share a code with your study group.</p>
             </div>
-            <Button className="mt-auto w-full" onClick={() => setCreating(true)}>Create a session</Button>
+            {needsPass ? (
+              <div className="mt-auto space-y-2">
+                <Link to="/billing"><Button className="w-full">Get a Student Pass to host</Button></Link>
+                <p className="text-center text-xs text-foreground">Hosting needs a pass. Joining is always free.</p>
+              </div>
+            ) : (
+              <Button className="mt-auto w-full" onClick={() => setCreating(true)}>Create a session</Button>
+            )}
           </Card>
 
           <Card padding="lg" className="flex flex-col gap-4">

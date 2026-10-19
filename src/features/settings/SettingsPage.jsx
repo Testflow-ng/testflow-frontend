@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, ChevronRight, Compass, HelpCircle, Lock, LogOut, MessageSquare, Moon, Shield, User } from 'lucide-react';
+import { Bell, ChevronRight, Compass, CreditCard, HelpCircle, Lock, LogOut, MessageSquare, Moon, Shield, User } from 'lucide-react';
 import { useAuth } from '../auth/useAuth.js';
 import { Avatar, Badge, Button, ConfirmDialog } from '../../components/ui/index.js';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
@@ -27,6 +27,10 @@ function SettingsPage() {
         </div>
         <ChevronRight size={18} className="shrink-0 text-muted" aria-hidden="true" />
       </Link>
+
+      <SettingsGroup title="Plan">
+        <SettingsRow icon={<CreditCard size={18} aria-hidden="true" />} label="Student Pass: go ad-free" to="/billing" />
+      </SettingsGroup>
 
       <SettingsGroup title="Preferences">
         {THEME_SWITCHING_ENABLED && (

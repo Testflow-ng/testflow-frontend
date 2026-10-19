@@ -150,5 +150,5 @@ Tick each box when the screen is merged. Done on the `redesign` branch (not yet 
 **Phase 1** [x] Settings [x] Notifications [x] Achievements [x] Progress and History [x] AI Study (soon) [x] Live CBT [x] Courses [ ] Setup
 **Phase 2** [x] Profile [ ] Dashboard [x] Post-UTME (soon) [ ] Public question
 **Phase 3** [ ] Start dialog [ ] Countdown [ ] Runtime [ ] Submit state [ ] Result and review
-**Phase 4** [ ] Admin dashboard [ ] Question bank [ ] Edit question [ ] Bulk import [ ] Subjects [ ] Students [ ] Roster [ ] Verifications [ ] Rankings [ ] Activity [ ] Admin settings
+**Phase 4** [x] Admin redesigned from scratch: Overview, Users, Questions (bank + editor + import), Subjects, Problems, Feedback, Verifications, Ads, Audit log, Settings
 **Phase 5** [ ] Header [ ] Bottom bar [ ] Error/offline [ ] Dark mode (later)

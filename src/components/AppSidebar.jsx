@@ -1,5 +1,7 @@
 import { Award, BookOpen, ChartLine, LayoutDashboard, LibraryBig, Radio, ShieldAlert, Sparkles, Target, Trophy, User } from 'lucide-react';
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import AdminSidebar from '../features/admin/AdminSidebar.jsx';
 import { ConfirmDialog } from './ui/index.js';
 import SidebarShell from './SidebarShell.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
@@ -20,6 +22,7 @@ const NAV = [
 
 /** The student app's sidebar: the shared SidebarShell with the student menu and pinned courses. */
 function AppSidebar() {
+  const { pathname } = useLocation();
   const { user, logout } = useAuth();
   const [confirmOut, setConfirmOut] = useState(false);
   const { data: subjects } = useSubjects();
@@ -32,6 +35,9 @@ function AppSidebar() {
   const isAdmin = ['admin', 'super_admin'].includes(user?.role);
   const base = isAdmin ? [...NAV, { to: '/admin', label: 'Admin', Icon: ShieldAlert }] : NAV;
   const items = base;
+
+  // Inside the admin area the menu switches to the admin links.
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return <AdminSidebar />;
 
   return (
     <>

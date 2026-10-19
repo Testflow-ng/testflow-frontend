@@ -1,4 +1,5 @@
-import { Bookmark, BookOpen, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Bookmark, BookOpen, Download, Lock } from 'lucide-react';
 import { Badge, Button, IconButton, KeyValueList, Modal, ProgressBar } from '../../../components/ui/index.js';
 import { ICON } from '../../../components/ui/iconProps.js';
 import Book from '../../../components/data/Book.jsx';
@@ -23,6 +24,7 @@ function BookDetailModal({
   onDownload,
   bookmarkBusy = false,
   downloading = false,
+  locked = false,
 }) {
   if (!book) return null;
 
@@ -39,9 +41,13 @@ function BookDetailModal({
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={onRead} leadingIcon={<BookOpen {...ICON} />}>
-            {finished ? 'Read again' : progress ? 'Continue reading' : 'Read'}
-          </Button>
+          {locked ? (
+            <Link to="/billing"><Button leadingIcon={<Lock {...ICON} />}>Get a pass to read</Button></Link>
+          ) : (
+            <Button onClick={onRead} leadingIcon={<BookOpen {...ICON} />}>
+              {finished ? 'Read again' : progress ? 'Continue reading' : 'Read'}
+            </Button>
+          )}
         </>
       }
     >
@@ -54,9 +60,9 @@ function BookDetailModal({
               aria-label={`Download ${book.code}`}
               title="Download"
               onClick={onDownload}
-              disabled={downloading}
+              disabled={downloading || locked}
             >
-              <Download {...ICON} />
+              {locked ? <Lock {...ICON} /> : <Download {...ICON} />}
             </IconButton>
             <IconButton
               aria-label={book.bookmarked ? `Remove bookmark for ${book.code}` : `Bookmark ${book.code}`}
