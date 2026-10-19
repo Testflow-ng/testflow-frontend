@@ -12,7 +12,7 @@ const placements = {
 
 const itemClass = (danger, disabled) =>
   cn(
-    'flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[15px] outline-none transition-colors',
+    'flex w-full items-center justify-start gap-2.5 rounded-xl px-3 py-2.5 text-left text-[15px] outline-none transition-colors',
     'focus-visible:bg-surface-strong hover:bg-surface-strong',
     danger ? 'text-danger hover:bg-danger/10 focus-visible:bg-danger/10' : 'text-foreground-strong',
     disabled && 'pointer-events-none opacity-50',
@@ -90,11 +90,12 @@ function DropdownMenu({ trigger, items = [], placement = 'bottom-end', className
           )}
         >
           {items.map((item, i) => {
-            if (item.separator) return <div key={`sep-${i}`} role="separator" className="my-1 h-px bg-border" />;
+            const anyIcon = items.some((x) => x.icon);
+            if (item.separator) return <div key={`sep-${i}`} role="separator" className="mx-3 my-1.5 h-px bg-border/60" />;
             const Icon = item.icon;
             const content = (
               <>
-                {Icon && <Icon size={17} strokeWidth={1.6} aria-hidden="true" className="shrink-0" />}
+                {Icon ? <Icon size={17} strokeWidth={1.6} aria-hidden="true" className="shrink-0" /> : anyIcon ? <span aria-hidden="true" className="size-[17px] shrink-0" /> : null}
                 <span className="truncate">{item.label}</span>
               </>
             );

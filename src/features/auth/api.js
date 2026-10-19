@@ -9,6 +9,9 @@ export const authApi = {
     apiClient.post('/api/auth/reset-password', { token, password }).then((res) => res.data),
   verifyEmail: (token) => apiClient.post('/api/auth/verify-email', { token }).then((res) => res.data),
   logout: () => apiClient.post('/api/auth/logout'),
+  /** Add a product to the signed-in account (no new password). Needs `profile.organizationName` for `everybody`. */
+  addMembership: (payload) => apiClient.post('/api/auth/memberships', payload).then((res) => res.data.user),
+  switchProduct: (product) => apiClient.post('/api/auth/switch-product', { product }).then((res) => res.data.user),
   setUsername: (username) =>
     apiClient.patch('/api/auth/username', { username }).then((res) => res.data.user),
   updateProfile: (payload) =>

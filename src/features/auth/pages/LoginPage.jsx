@@ -32,6 +32,16 @@ function LoginPage({ product = 'student' }) {
       else await login(product === 'everybody' ? { ...values, product: 'everybody' } : values);
       navigate(from, { replace: true });
     } catch (error) {
+      // A Testflow account without Testflow for Everyone yet: sign in as normal, then ask to authorize.
+      if (product === 'everybody' && error.code === 'NO_MEMBERSHIP') {
+        try {
+          await login(values);
+          navigate('/everybody/authorize', { replace: true });
+          return;
+        } catch {
+          /* fall through to the message below */
+        }
+      }
       setFormError(
         error.code === 'VALIDATION_ERROR'
           ? 'Please enter a valid email and password.'
@@ -51,7 +61,9 @@ function LoginPage({ product = 'student' }) {
       footer={
         <>
           {product === 'ads' ? 'New advertiser?' : product === 'everybody' ? 'New here?' : 'No account yet?'}{' '}
-          <Link to={cfg.register}>{product === 'ads' ? 'Create an advertiser account' : product === 'everybody' ? 'Create your platform' : 'Create one'}</Link>
+          <Link to={cfg.register} state={location.state}>
+            {product === 'ads' ? 'Create an advertiser account' : product === 'everybody' ? 'Create your platform' : 'Create one'}
+          </Link>
         </>
       }
     >

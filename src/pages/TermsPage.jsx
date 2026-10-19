@@ -5,7 +5,7 @@ function TermsPage() {
   return (
     <LegalLayout
       title="Terms and Conditions"
-      updated="September 28, 2026"
+      updated="October 19, 2026"
       intro="These Terms govern your use of TestFlow, an OAU CBT practice platform operated by Eddyrus Media. By creating an account or using TestFlow, you agree to these Terms and our Privacy Policy."
       cta={REGISTER_CTA_LABEL}
     >
@@ -23,6 +23,12 @@ function TermsPage() {
 
     <LegalSection title="Paid features and payment verification">
       <p>Where TestFlow offers paid features, access may be subject to successful payment and verification. Do not submit altered, misleading, or unauthorised payment receipts. Prices, feature availability, and verification requirements may change with notice. Refunds, where applicable, are handled according to the payment terms presented at the time of purchase and applicable law.</p>
+    </LegalSection>
+
+    <LegalSection title="Library reading and downloads">
+      <p>The Library is one of the most demanding parts of TestFlow. Every book has to be sourced, checked, and prepared for the app, and every page you open and every file you download is served from our own infrastructure.</p>
+      <p>We run on modest, low-compute servers. Free and unlimited reading and downloading would let a small number of heavy users slow the Library down or take it offline for everyone else, so reading full books and downloading them are part of the Student Pass. Browsing the shelf, opening a book’s details, saving bookmarks, and keeping your reading progress stay free.</p>
+      <p>Your pass pays for the servers, the storage, and the ongoing work of gathering and maintaining the books, and it keeps the Library fast and available for every student who needs it. Library access is for your personal study. Do not scrape, bulk-download, redistribute, or resell Library content, and do not attempt to bypass the access controls that keep the Library running for everyone.</p>
     </LegalSection>
 
     <LegalSection title="Availability and changes">

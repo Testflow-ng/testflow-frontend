@@ -23,6 +23,9 @@ const write = (key, value) => {
 };
 
 const EXAM = /^\/exam\/[^/]+$/;
+// The tour belongs to the signed-in shell. Registration signs the account in
+// before the route changes, so without this the offer would be spent on /register.
+const AUTH_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
 
 /**
  * Owns the product tour: offers it once to new students, remembers "done" or "skipped", and lets Settings restart it.
@@ -41,7 +44,13 @@ function TourProvider({ children }) {
     return () => window.removeEventListener('tf:username-prompt-closed', bump);
   }, []);
 
-  const eligible = Boolean(isAuthenticated && user && user.role === 'student') && !EXAM.test(location.pathname) && !location.pathname.startsWith('/ui-kit');
+  const eligible =
+    Boolean(isAuthenticated && user && user.role === 'student') &&
+    !EXAM.test(location.pathname) &&
+    !location.pathname.startsWith('/ui-kit') &&
+    !AUTH_PATHS.includes(location.pathname) &&
+    // A live join link is time-sensitive; the tour can wait for the dashboard.
+    !location.pathname.startsWith('/live');
   const usernameSettled = Boolean(user?.username) || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('tf_username_prompt_dismissed') === '1');
   const unseen = eligible && !read(keyFor(user));
 
@@ -52,6 +61,10 @@ function TourProvider({ children }) {
   const finish = useCallback((how) => {
     write(keyFor(user), how);
     setMode('idle');
+    // Bump the gate so this re-renders and re-reads the stored answer even
+    // when mode was already idle ("Skip for now"), which would otherwise
+    // leave the welcome modal open.
+    setGate((g) => g + 1);
   }, [user]);
 
   const start = useCallback(() => setMode('running'), []);

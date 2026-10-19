@@ -2,6 +2,7 @@ import { Award, BookOpen, ChartLine, LayoutDashboard, LibraryBig, Radio, ShieldA
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import AdminSidebar from '../features/admin/AdminSidebar.jsx';
+import WorkspaceSidebar from '../features/workspace/WorkspaceSidebar.jsx';
 import { ConfirmDialog } from './ui/index.js';
 import SidebarShell from './SidebarShell.jsx';
 import { useAuth } from '../features/auth/useAuth.js';
@@ -38,6 +39,9 @@ function AppSidebar() {
 
   // Inside the admin area the menu switches to the admin links.
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return <AdminSidebar />;
+  if (pathname === '/workspace' || pathname.startsWith('/workspace/')) return <WorkspaceSidebar />;
+  // Authorize and first-time setup are full-page screens, never inside a sidebar.
+  if (pathname.startsWith('/everybody')) return null;
 
   return (
     <>
