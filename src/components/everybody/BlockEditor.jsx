@@ -5,6 +5,7 @@ import Textarea from '../ui/Textarea.jsx';
 import Button from '../ui/Button.jsx';
 import CharacterCounter from '../ui/CharacterCounter.jsx';
 import { BLOCK_TYPES } from './blockTypes.js';
+import ImageField from './ImageField.jsx';
 
 const set = (block, patch, onChange) => onChange({ ...block, ...patch });
 
@@ -31,9 +32,10 @@ function Repeater({ label, items, onChange, make, render, addLabel, max = 8 }) {
 
 /**
  * Edit one block. Fields depend on `block.type` (hero, about, features, exams, announcements, faq, contact, cta).
- * Plain text only: the API rejects HTML. Controlled: `block` + `onChange(nextBlock)`.
+ * Plain text only: the API rejects HTML. Controlled: `block` + `onChange(nextBlock)`. Pass `upload(file) => url` to let the
+ * owner add a picture to hero, about and call-to-action sections.
  */
-function BlockEditor({ block, onChange, className }) {
+function BlockEditor({ block, onChange, upload, className }) {
   if (!block) return <p className="text-sm text-muted">Select a section to edit it.</p>;
   const label = BLOCK_TYPES.find((b) => b.type === block.type)?.label ?? block.type;
   const on = (patch) => set(block, patch, onChange);
@@ -46,6 +48,7 @@ function BlockEditor({ block, onChange, className }) {
     <div className={className}>
       <h3 className="mb-4 font-heading text-lg font-bold text-foreground-strong">Edit {label}</h3>
       <div className="space-y-5">
+        {upload && ['hero', 'about', 'cta'].includes(block.type) && <ImageField label="Picture" value={block.imageUrl} onChange={(url) => on({ imageUrl: url })} upload={upload} />}
         {block.type === 'hero' && (
           <>
             {t('heading', 'Heading', 80)}

@@ -42,6 +42,27 @@ import NotificationPreferencesPage from '../features/settings/NotificationPrefer
 import FeedbackPage from '../features/feedback/FeedbackPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
 import AdminLayout from '../features/admin/AdminLayout.jsx';
+import AuthorizePage from '../features/workspace/onboarding/AuthorizePage.jsx';
+import OnboardingPage from '../features/workspace/onboarding/OnboardingPage.jsx';
+import WorkspaceLayout from '../features/workspace/WorkspaceLayout.jsx';
+import WorkspaceOverview from '../features/workspace/screens/OverviewScreen.jsx';
+import WorkspaceWebsite from '../features/workspace/screens/WebsiteScreen.jsx';
+import WebsiteComingSoon from '../features/workspace/screens/WebsiteComingSoon.jsx';
+import LibraryComingSoon from '../features/workspace/screens/LibraryComingSoon.jsx';
+import { LIBRARY_ENABLED, WEBSITE_EDITOR_ENABLED } from '../features/workspace/flags.js';
+import WorkspaceExams from '../features/workspace/screens/ExamsScreen.jsx';
+import ExamDetailScreen from '../features/workspace/screens/ExamDetailScreen.jsx';
+import WorkspaceReports from '../features/workspace/screens/ReportsScreen.jsx';
+import AnnouncementsScreen from '../features/workspace/screens/AnnouncementsScreen.jsx';
+import WorkspaceBanks from '../features/workspace/screens/BanksScreen.jsx';
+import WorkspaceBank from '../features/workspace/screens/BankDetailScreen.jsx';
+import WorkspaceStudents from '../features/workspace/screens/StudentsScreen.jsx';
+import WorkspaceStudentDetail from '../features/workspace/screens/StudentDetailScreen.jsx';
+import WorkspaceLibrary from '../features/workspace/screens/LibraryScreen.jsx';
+import WorkspacePayments from '../features/workspace/screens/PaymentsScreen.jsx';
+import WorkspaceDomains from '../features/workspace/screens/DomainsScreen.jsx';
+import WorkspaceBillingComplete from '../features/workspace/screens/BillingCompleteScreen.jsx';
+import WorkspaceBilling from '../features/workspace/screens/BillingScreen.jsx';
 import OverviewScreen from '../features/admin/screens/OverviewScreen.jsx';
 import UsersScreen from '../features/admin/screens/UsersScreen.jsx';
 import QuestionsScreen from '../features/admin/screens/QuestionsScreen.jsx';
@@ -170,6 +191,29 @@ export const router = createBrowserRouter([
           { path: 'exam/:id/result', element: <ExamResultRoute /> },
           { path: 'billing', element: <BillingPage /> },
           { path: 'billing/complete', element: <BillingCompletePage /> },
+          { path: 'everybody/authorize', element: <AuthorizePage /> },
+          { path: 'everybody/start', element: <OnboardingPage /> },
+          {
+            element: <WorkspaceLayout />,
+            children: [
+              { path: 'workspace', element: <WorkspaceOverview /> },
+              { path: 'workspace/website', element: WEBSITE_EDITOR_ENABLED ? <WorkspaceWebsite /> : <WebsiteComingSoon /> },
+              { path: 'workspace/exams', element: <WorkspaceExams /> },
+              { path: 'workspace/exams/:examId', element: <ExamDetailScreen /> },
+              { path: 'workspace/announcements', element: <AnnouncementsScreen /> },
+              { path: 'workspace/reports', element: <WorkspaceReports /> },
+              { path: 'workspace/banks', element: <WorkspaceBanks /> },
+              { path: 'workspace/banks/:bankId', element: <WorkspaceBank /> },
+              { path: 'workspace/questions', element: <Navigate to="/workspace/banks" replace /> },
+              { path: 'workspace/students', element: <WorkspaceStudents /> },
+              { path: 'workspace/students/:studentId', element: <WorkspaceStudentDetail /> },
+              { path: 'workspace/library', element: LIBRARY_ENABLED ? <WorkspaceLibrary /> : <LibraryComingSoon /> },
+              { path: 'workspace/payments', element: <WorkspacePayments /> },
+              { path: 'workspace/domains', element: <WorkspaceDomains /> },
+              { path: 'workspace/billing', element: <WorkspaceBilling /> },
+              { path: 'workspace/billing/complete', element: <WorkspaceBillingComplete /> },
+            ],
+          },
           { path: 'exam/:id/report', element: <ExamReportPage /> },
           {
             element: <RequireAdmin />,

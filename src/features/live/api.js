@@ -19,6 +19,7 @@ export const liveApi = {
   saveAnswer: (code, payload) => apiClient.patch(`${base(code)}/answer`, payload).then(data('answer')),
   submit: (code, answers) => apiClient.post(`${base(code)}/submit`, { answers }).then(data('result')),
   result: (code) => apiClient.get(`${base(code)}/result`).then(data('result')),
+  participantResult: (code, userId) => apiClient.get(`${base(code)}/participants/${userId}/result`).then(data('result')),
   dashboard: (code) => apiClient.get(`${base(code)}/dashboard`).then(data('dashboard')),
 };
 

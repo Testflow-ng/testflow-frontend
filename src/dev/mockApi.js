@@ -6,6 +6,7 @@ import { studyRoute, STUDY_PREFIXES } from './mockStudy.js';
 import { feedbackRoute, FEEDBACK_PREFIXES } from './mockFeedback.js';
 import { adminRoute, ADMIN_PREFIXES } from './mockAdmin.js';
 import { adminConsoleRoute, ADMIN_CONSOLE_PREFIXES } from './mockAdminConsole.js';
+import { workspaceRoute, WORKSPACE_PREFIXES } from './mockWorkspace.js';
 import { mockBooks, mockReading, mockSessions, mockStats, mockSubjects, mockUser } from './mockData.js';
 
 const pinned = new Set(mockUser.pinnedSubjects);
@@ -40,6 +41,8 @@ const pageBlocks = (b, page) => [
 ];
 
 const routes = [
+  ['POST', /^\/api\/auth\/memberships$/, () => ({ user: { ...mockUser, memberships: [{ product: 'student' }, { product: 'everybody' }] } })],
+  ['POST', /^\/api\/auth\/switch-product$/, () => ({ user: mockUser })],
   ['GET', /^\/api\/advertising\/config$/, () => ({ advertising: ADS_CONFIG })],
   ['GET', /^\/api\/advertising\/eligibility$/, () => ({ eligibility: { adFree: pass.paid, adsEnabled: !pass.paid, providers: { testflow: { eligible: !pass.paid }, google_adsense: { eligible: !pass.paid } } } })],
   ['GET', /^\/api\/billing\/ad-free\/products$/, () => ({ products: PLANS })],
@@ -161,6 +164,7 @@ const DELEGATES = [
   { owns: (path) => FEEDBACK_PREFIXES.some((prefix) => path.startsWith(prefix)), route: feedbackRoute },
   { owns: (path) => ADMIN_PREFIXES.some((prefix) => path.startsWith(prefix)), route: adminRoute },
   { owns: (path) => ADMIN_CONSOLE_PREFIXES.some((prefix) => path.startsWith(prefix)), route: adminConsoleRoute },
+  { owns: (path) => WORKSPACE_PREFIXES.some((prefix) => path.startsWith(prefix)), route: workspaceRoute },
 ];
 
 export function mockAdapter(config) {

@@ -44,6 +44,16 @@ export function useMyResult(code, enabled) {
   return useQuery({ queryKey: ['live', code, 'result'], queryFn: () => liveApi.result(code), enabled, retry: false });
 }
 
+/** The host opening one participant's paper. `userId` is null until a name is picked. */
+export function useParticipantResult(code, userId, enabled) {
+  return useQuery({
+    queryKey: ['live', code, 'participant', userId],
+    queryFn: () => liveApi.participantResult(code, userId),
+    enabled: Boolean(enabled && userId),
+    retry: false,
+  });
+}
+
 /**
  * Seconds left until `endsAt`, measured against the server's clock (`serverTime` from the same response),
  * never the device clock alone. Ticks once a second.

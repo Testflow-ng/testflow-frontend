@@ -21,6 +21,7 @@ import SubscriptionSummary from '../../../components/everybody/SubscriptionSumma
 import InvoiceTable from '../../../components/everybody/InvoiceTable.jsx';
 import PlanChangeDialog from '../../../components/everybody/PlanChangeDialog.jsx';
 import PaymentReturnStatus from '../../../components/everybody/PaymentReturnStatus.jsx';
+import PlanLock from '../../../components/everybody/PlanLock.jsx';
 import { emptyQuestion, examInit, people, siteBlocks, siteTemplates } from './samples.js';
 
 const CAT = 'Everyone';
@@ -173,5 +174,19 @@ import PaymentReturnStatus from '../components/everybody/PaymentReturnStatus.jsx
 <DomainCard domain={{ hostname, type: 'custom', status, records }} onVerify={verify} />
 <SubscriptionSummary subscription={subscription} onChangePlan={openPlans} onCancel={cancel} />
 <PaymentReturnStatus state="verifying" details={[{ label: 'Reference', value: ref }]} continueTo="/" />`,
+  },
+  {
+    id: 'plan-lock', name: 'Plan lock', category: CAT, source: ['everybody/PlanLock.jsx'],
+    description: 'Shows a feature the plan does not include: an upgrade card on top and the real screen dimmed underneath, so people can see what they would get.',
+    Preview: () => (
+      <PlanLock plan="Pro" title="Announcements are part of Pro" description="Upgrade to post notices on your students' home page.">
+        <div className="rounded-[24px] border border-border bg-surface p-5 text-sm text-muted">The locked screen shows here.</div>
+      </PlanLock>
+    ),
+    usage: `import PlanLock from '../components/everybody/PlanLock.jsx';
+
+<PlanLock locked={!canAnnounce} plan="Pro" title="Announcements are part of Pro" description="...">
+  <ScreenContent />
+</PlanLock>`,
   },
 ];

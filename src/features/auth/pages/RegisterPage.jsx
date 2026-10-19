@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '../../../utils/zodResolver.js';
 import { adsRegisterSchema, everybodyRegisterSchema, registerSchema } from '../schemas.js';
@@ -14,11 +14,13 @@ const FIELD_NAMES = ['fullName', 'email', 'password', 'confirmPassword', 'busine
 
 /** Create an account. `product="ads"` creates an advertiser via /api/ads/auth/register. */
 function RegisterPage({ product = 'student' }) {
+  const { isAuthenticated } = useAuth();
   const isAds = product === 'ads';
   const isEverybody = product === 'everybody';
   const cfg = AUTH_PRODUCTS[product];
   const [formError, setFormError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const {
@@ -64,7 +66,11 @@ function RegisterPage({ product = 'student' }) {
         });
         await login({ email: values.email, password: values.password });
       }
-      navigate(cfg.afterRegister);
+      // Carry the page that sent the visitor here (for example an invite link)
+      // through registration. Ads and organisation signups keep their own landing.
+      const from = !isAds && !isEverybody ? location.state?.from : null;
+      const target = from ? `${from.pathname ?? ''}${from.search ?? ''}${from.hash ?? ''}` : cfg.afterRegister;
+      navigate(target, { replace: true });
     } catch (error) {
       if (error.code === 'EMAIL_TAKEN') {
         setError('email', {
@@ -89,6 +95,9 @@ function RegisterPage({ product = 'student' }) {
     }
   };
 
+  // Already signed in to Testflow: no new account. Ask to authorize the product instead.
+  if (isEverybody && isAuthenticated) return <Navigate to="/everybody/authorize" replace />;
+
   return (
     <AuthShell
       product={product}
@@ -103,7 +112,7 @@ function RegisterPage({ product = 'student' }) {
       }
       footer={
         <>
-          Already have an account? <Link to={cfg.login}>Sign in</Link>
+          Already have an account? <Link to={cfg.login} state={location.state}>Sign in</Link>
         </>
       }
     >
@@ -154,7 +163,7 @@ function RegisterPage({ product = 'student' }) {
           error={errors.email?.message}
           {...register('email')}
         />
-        <div className="auth-two">
+        {/* <div className="auth-two"> */}
           <AuthField
             label="Password"
             type="password"
@@ -164,7 +173,8 @@ function RegisterPage({ product = 'student' }) {
             error={errors.password?.message}
             {...register('password')}
           />
-          <AuthField
+        {/* </div> */}
+            <AuthField
             label="Confirm password"
             type="password"
             autoComplete="new-password"
@@ -172,7 +182,6 @@ function RegisterPage({ product = 'student' }) {
             error={errors.confirmPassword?.message}
             {...register('confirmPassword')}
           />
-        </div>
         <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
           {isSubmitting ? 'Creating account…' : isAds ? 'Create advertiser account' : isEverybody ? 'Create my platform' : 'Create account'}
         </button>

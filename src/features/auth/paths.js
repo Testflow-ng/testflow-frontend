@@ -20,7 +20,7 @@ export const ADS_AUTH_PATHS = {
 export const EVERYBODY_AUTH_PATHS = {
   login: '/everybody/signin',
   register: '/everybody/register',
-  dashboard: '/everybody/dashboard',
+  dashboard: '/workspace',
 };
 
 export const AUTH_PRODUCTS = {
