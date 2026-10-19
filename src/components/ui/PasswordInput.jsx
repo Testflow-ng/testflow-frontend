@@ -19,13 +19,13 @@ const PasswordInput = forwardRef(function PasswordInput(
 
   const toggle = (
     <IconButton
-      size={variant === 'bare' ? 'sm' : 'md'}
+      size="sm"
       variant="ghost"
       onClick={() => setVisible((value) => !value)}
       aria-label={visible ? 'Hide password' : 'Show password'}
       aria-pressed={visible}
       tabIndex={-1}
-      className={cn('shrink-0', variant !== 'bare' && 'absolute inset-y-0 right-0')}
+      className="shrink-0"
     >
       {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
     </IconButton>
@@ -53,7 +53,7 @@ const PasswordInput = forwardRef(function PasswordInput(
   return (
     <div className="relative">
       {field}
-      {toggle}
+      <span className="absolute inset-y-0 right-1.5 flex items-center">{toggle}</span>
     </div>
   );
 });

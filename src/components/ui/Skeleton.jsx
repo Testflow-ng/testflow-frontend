@@ -4,7 +4,7 @@ function Skeleton({ className, ...props }) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-xl bg-surface-strong',
+        'tf-shimmer rounded-xl bg-surface-strong',
         className,
       )}
       {...props}
@@ -30,7 +30,7 @@ function SkeletonText({ lines = 3, className }) {
 
 function SkeletonCard({ className }) {
   return (
-    <div className={cn('rounded-2xl border border-border bg-surface p-5', className)}>
+    <div className={cn('rounded-[20px] border border-border bg-surface p-5', className)}>
       <div className="flex items-center gap-3">
         <Skeleton className="size-10 rounded-xl" />
         <div className="flex-1 space-y-2">
@@ -58,24 +58,24 @@ function DashboardSkeleton() {
         <Skeleton className="size-9 rounded-full" />
       </div>
 
-      <Skeleton className="mt-5 h-[9.5rem] rounded-2xl" />
+      <Skeleton className="mt-5 h-[9.5rem] rounded-[20px]" />
 
       <div className="mt-3 grid grid-cols-3 gap-2.5">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-[68px] rounded-2xl" />
+          <Skeleton key={i} className="h-[68px] rounded-[20px]" />
         ))}
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-[7.5rem] rounded-2xl" />
+          <Skeleton key={i} className="h-[7.5rem] rounded-[20px]" />
         ))}
       </div>
 
       <div className="mt-8 space-y-2">
         <Skeleton className="mb-3 h-4 w-40 rounded-full" />
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-[68px] rounded-2xl" />
+          <Skeleton key={i} className="h-[68px] rounded-[20px]" />
         ))}
       </div>
     </div>

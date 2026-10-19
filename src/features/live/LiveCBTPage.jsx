@@ -1,126 +1,98 @@
 import { useState } from 'react';
-import { Plus, Users, Zap, Clock, Trophy } from 'lucide-react';
-import { Button } from '../../components/ui/index.js';
-import { cardClasses } from '../../components/ui/surfaces.js';
-import Screen from '../../components/layout/Screen.jsx';
+import { Link, useNavigate } from 'react-router-dom';
+import { Clock, Plus, Trophy, Users } from 'lucide-react';
+import { Button, Card, Input, Reveal } from '../../components/ui/index.js';
+import { ICON_LG } from '../../components/ui/iconProps.js';
+import Mascot from '../../components/brand/Mascot.jsx';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
+import { FeatureCard, FeatureGrid } from '../../components/marketing/FeatureCard.jsx';
+import CreateSessionModal from './CreateSessionModal.jsx';
+import { useEntitlement } from '../billing/useBilling.js';
+
+const STEPS = [
+  { icon: Plus, title: 'Create or join', text: 'The host creates a session and shares the join code.' },
+  { icon: Users, title: 'Host approves', text: 'The host lets friends in from the waiting room and starts when ready.' },
+  { icon: Clock, title: 'Exam in sync', text: 'Everyone races the same server clock. No pausing.' },
+  { icon: Trophy, title: 'Ranked results', text: 'A leaderboard and full corrections once the host publishes.' },
+];
 
 function LiveCBTPage() {
-  const [joinCode, setJoinCode] = useState('');
+  const navigate = useNavigate();
+  const [code, setCode] = useState('');
+  const [creating, setCreating] = useState(false);
+  const ready = code.length >= 6;
+  const { data: held } = useEntitlement();
+  // Only block when the backend says we do not hold the hosting pass; while it loads, let the button work.
+  const needsPass = held ? !held.liveCbtHost : false;
+
+  const join = (e) => {
+    e.preventDefault();
+    if (ready) navigate(`/live/${code}`);
+  };
 
   return (
-    <Screen width="lg">
-      <div className="mb-6">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-success">
-          <Zap size={11} aria-hidden="true" /> Coming soon
-        </span>
-        <h1 className="mt-2.5 font-heading text-[1.625rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
-          Live CBT
-        </h1>
-        <p className="mt-1 text-sm leading-snug text-muted">
-          Challenge your friends in real-time exam sessions.
-        </p>
-      </div>
+    <Screen width="xl">
+      <PageHeader title="Live CBT" subtitle="Sit the same exam with your friends, at the same time." />
 
-      {/* Create or Join */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className={cardClasses({ padding: 'lg', className: 'flex flex-col gap-4' })}>
-          <div className="flex size-12 items-center justify-center rounded-xl bg-primary/8 text-primary">
-            <Plus size={22} />
-          </div>
-          <div>
-            <h2 className="text-[17px] font-bold leading-snug tracking-tight text-foreground-strong">
-              Create session
-            </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-muted">
-              Pick a subject, set rules, and share a join code with your study
-              group.
-            </p>
-          </div>
-          <Button disabled className="mt-auto w-full">
-            Create Live CBT
-          </Button>
-        </div>
-
-        <div className={cardClasses({ padding: 'lg', className: 'flex flex-col gap-4' })}>
-          <div className="flex size-12 items-center justify-center rounded-xl bg-success/8 text-success">
-            <Users size={22} />
-          </div>
-          <div>
-            <h2 className="text-[17px] font-bold leading-snug tracking-tight text-foreground-strong">
-              Join session
-            </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-muted">
-              Enter a 6-digit code from a friend to join their live exam
-              session.
-            </p>
-          </div>
-          <div className="mt-auto flex gap-2">
-            <input
-              type="text"
-              maxLength={6}
-              value={joinCode}
-              onChange={(e) =>
-                setJoinCode(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())
-              }
-              placeholder="ABC123"
-              aria-label="Session join code"
-              autoCapitalize="characters"
-              autoCorrect="off"
-              spellCheck={false}
-              className="h-12 min-w-0 flex-1 rounded-full border border-border bg-surface-strong px-4 text-center font-mono text-base font-bold uppercase tracking-[0.25em] text-foreground-strong outline-none placeholder:text-muted/50 focus:border-primary sm:h-11"
-            />
-            <Button disabled size="md" className="shrink-0 px-5">
-              Join
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* How it works */}
-      <section className="mt-8">
-        <h2 className="text-[15px] font-bold tracking-tight text-foreground-strong">
-          How Live CBT works
-        </h2>
-        <div className="mt-3 flex flex-col gap-2">
-          {[
-            {
-              icon: <Plus size={16} />,
-              title: 'Create or join',
-              desc: 'Host creates a session and shares the join code.',
-            },
-            {
-              icon: <Users size={16} />,
-              title: 'Wait for participants',
-              desc: 'See who has joined in real time. Host starts when ready.',
-            },
-            {
-              icon: <Clock size={16} />,
-              title: 'Exam in sync',
-              desc: 'Everyone starts simultaneously with a synced timer.',
-            },
-            {
-              icon: <Trophy size={16} />,
-              title: 'Instant results',
-              desc: 'Live leaderboard and detailed performance review.',
-            },
-          ].map((step, i) => (
-            <div
-              key={i}
-              className={cardClasses({ padding: 'md', className: 'flex items-start gap-3' })}
-            >
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-strong text-muted">
-                {step.icon}
-              </div>
-              <div className="min-w-0">
-                <p className="text-[15px] font-semibold leading-snug text-foreground-strong">
-                  {step.title}
-                </p>
-                <p className="mt-0.5 text-[13px] leading-snug text-muted">{step.desc}</p>
-              </div>
+      <Reveal className="mt-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card padding="lg" className="flex flex-col gap-4 bg-[var(--brand-lavender)]">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-surface text-primary">
+              <Plus {...ICON_LG} />
+            </span>
+            <div>
+              <h2 className="font-heading text-lg font-bold tracking-tight text-foreground-strong">Host a session</h2>
+              <p className="mt-1 text-sm leading-relaxed text-foreground">Pick a subject, set the rules and share a code with your study group.</p>
             </div>
-          ))}
+            {needsPass ? (
+              <div className="mt-auto space-y-2">
+                <Link to="/billing"><Button className="w-full">Get a Student Pass to host</Button></Link>
+                <p className="text-center text-xs text-foreground">Hosting needs a pass. Joining is always free.</p>
+              </div>
+            ) : (
+              <Button className="mt-auto w-full" onClick={() => setCreating(true)}>Create a session</Button>
+            )}
+          </Card>
+
+          <Card padding="lg" className="flex flex-col gap-4">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-sage)] text-secondary">
+              <Users {...ICON_LG} />
+            </span>
+            <div>
+              <h2 className="font-heading text-lg font-bold tracking-tight text-foreground-strong">Join a session</h2>
+              <p className="mt-1 text-sm leading-relaxed text-muted">Enter the code from your host. They approve you, then you wait for the start.</p>
+            </div>
+            <form onSubmit={join} className="mt-auto flex gap-2">
+              <Input
+                value={code}
+                maxLength={16}
+                onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z2-9]/g, '').toUpperCase())}
+                placeholder="ABC234"
+                aria-label="Session join code"
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+                className="text-center font-mono font-bold uppercase tracking-[0.25em]"
+              />
+              <Button type="submit" disabled={!ready} className="shrink-0">Join</Button>
+            </form>
+          </Card>
         </div>
-      </section>
+      </Reveal>
+
+      <Reveal delay={0.1} className="mt-8">
+        <div className="mb-3 flex items-center gap-3">
+          <Mascot mood="excited" size={44} />
+          <h2 className="font-heading text-lg font-bold tracking-tight text-foreground-strong">How Live CBT works</h2>
+        </div>
+        <FeatureGrid cols={4}>
+          {STEPS.map((s) => (
+            <FeatureCard key={s.title} icon={s.icon} title={s.title} text={s.text} tone="surface" />
+          ))}
+        </FeatureGrid>
+      </Reveal>
+
+      <CreateSessionModal open={creating} onOpenChange={setCreating} />
     </Screen>
   );
 }

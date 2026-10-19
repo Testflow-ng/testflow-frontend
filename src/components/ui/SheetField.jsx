@@ -5,9 +5,9 @@ import { cn } from '../../utils/cn.js';
 /**
  * A form field rendered as a row on the sheet.
  *
- * Same accessibility contract as `Field` — it owns id generation and wires
+ * Same accessibility contract as `Field` .it owns id generation and wires
  * `htmlFor`, `aria-describedby`, `aria-invalid` and `aria-required` onto its
- * child control — but the control is borderless and the row supplies the
+ * child control .but the control is borderless and the row supplies the
  * boundary. Stack several inside `sheetClasses()` and they read as one ruled
  * form rather than a column of separate boxes.
  *

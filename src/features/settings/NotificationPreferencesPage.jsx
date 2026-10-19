@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Bell, BookOpen, Trophy, Users, Sparkles } from 'lucide-react';
-import Screen from '../../components/layout/Screen.jsx';
+import { Bell, BookOpen, Trophy, Users, Sparkles } from 'lucide-react';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
+import { Banner, Switch } from '../../components/ui/index.js';
 import { groupListClasses, groupRowClasses } from '../../components/ui/surfaces.js';
-import { cn } from '../../utils/cn.js';
+
+const STORAGE_KEY = 'tf_notification_prefs';
 
 const PREFS = [
   {
@@ -33,57 +34,33 @@ const PREFS = [
   { key: 'streak', label: 'Streak reminders', desc: 'Keep your study streak alive', Icon: Bell },
 ];
 
-function Toggle({ checked, onChange, label }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        // 44px hit area around a 24px track, so the switch stays visually light
-        // without being fiddly to hit with a thumb.
-        "tf-pressable relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-[var(--duration-sm)]",
-        "after:absolute after:inset-x-0 after:top-1/2 after:h-11 after:-translate-y-1/2 after:content-['']",
-        checked ? 'bg-primary' : 'bg-border',
-      )}
-    >
-      <span
-        className={cn(
-          'pointer-events-none inline-block size-4 rounded-full bg-white shadow-sm transition-transform duration-[var(--duration-sm)] ease-[var(--transition-ease)]',
-          checked ? 'translate-x-6' : 'translate-x-1',
-        )}
-      />
-    </button>
-  );
-}
-
 function NotificationPreferencesPage() {
-  const [prefs, setPrefs] = useState(() =>
-    Object.fromEntries(PREFS.map((p) => [p.key, true])),
-  );
+  const [prefs, setPrefs] = useState(() => {
+    const defaults = Object.fromEntries(PREFS.map((p) => [p.key, true]));
+    try {
+      return { ...defaults, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') };
+    } catch {
+      return defaults;
+    }
+  });
 
   const update = (key, val) => {
-    setPrefs((prev) => ({ ...prev, [key]: val }));
+    setPrefs((prev) => {
+      const next = { ...prev, [key]: val };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        /* storage unavailable: the choice still applies for this visit */
+      }
+      return next;
+    });
   };
 
   return (
     <Screen width="sm">
-      <div className="mb-6 flex items-center gap-2">
-        <Link
-          to="/settings"
-          aria-label="Back to settings"
-          className="tf-pressable -ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-strong active:text-foreground"
-        >
-          <ArrowLeft size={18} aria-hidden="true" />
-        </Link>
-        <h1 className="font-heading text-[1.375rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
-          Notifications
-        </h1>
-      </div>
+      <PageHeader back="/settings" title="Notifications" subtitle="Choose what you hear about." />
 
-      <div className={groupListClasses()}>
+      <div className={groupListClasses({ className: 'mt-6' })}>
         {PREFS.map((pref) => (
           <div
             key={pref.key}
@@ -100,18 +77,16 @@ function NotificationPreferencesPage() {
                 <p className="mt-0.5 text-[12px] leading-snug text-muted">{pref.desc}</p>
               </div>
             </div>
-            <Toggle
+            <Switch
               checked={prefs[pref.key]}
-              onChange={(val) => update(pref.key, val)}
-              label={pref.label}
+              onCheckedChange={(val) => update(pref.key, val)}
+              aria-label={pref.label}
             />
           </div>
         ))}
       </div>
 
-      <p className="mt-4 px-2 text-center text-[12px] leading-relaxed text-muted">
-        Preferences are saved locally. Push notifications coming soon.
-      </p>
+      <Banner variant="info" className="mt-4">Preferences are saved on this device. Push notifications are coming soon.</Banner>
     </Screen>
   );
 }

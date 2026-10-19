@@ -19,12 +19,35 @@ const apiClient = axios.create({
 });
 
 // The identity service issues a readable `tf_csrf` cookie; unsafe requests must echo it in X-CSRF-Token.
+// Local design work: answer API calls from sample data (src/dev/mockData.js) instead of a backend.
+//
+// The sampler is a dynamic import, so put it on the request itself before it is
+// dispatched. Without this the app's opening queries race the import, resolve
+// their adapter early, and go out to the real backend .which is usually not
+// running during design work.
+let mockReady;
+if (import.meta.env.DEV && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
+  mockReady = import('../dev/mockApi.js')
+    .then(({ mockAdapter }) => {
+      apiClient.defaults.adapter = mockAdapter;
+      return mockAdapter;
+    })
+    .catch((error) => {
+      console.error('Could not load the sample API; requests will go to the real backend.', error);
+      return undefined;
+    });
+}
+
 const readCookie = (name) => {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`));
   return match ? decodeURIComponent(match.slice(name.length + 1)) : null;
 };
-apiClient.interceptors.request.use((config) => {
+apiClient.interceptors.request.use(async (config) => {
+  if (mockReady) {
+    const adapter = await mockReady;
+    if (adapter) config.adapter = adapter;
+  }
   if (['post', 'put', 'patch', 'delete'].includes((config.method ?? 'get').toLowerCase())) {
     const token = readCookie('tf_csrf');
     if (token) config.headers['X-CSRF-Token'] = token;
@@ -70,7 +93,7 @@ apiClient.interceptors.response.use(
         await refreshPromise;
         return apiClient(original);
       } catch {
-        // Refresh failed (expired session or backend down) — fall through to
+        // Refresh failed (expired session or backend down) .fall through to
         // the normalized rejection below so the caller can redirect to login.
       }
     }

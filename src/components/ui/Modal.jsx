@@ -4,7 +4,9 @@ import { AnimatePresence, motion, useDragControls } from 'framer-motion';
 import { cn } from '../../utils/cn.js';
 import { useIsMobile } from '../../hooks/useMediaQuery.js';
 
-const sizes = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' };
+// Explicit widths: this app redefines --container-sm/md/lg (44/60/72rem) in global.css, so Tailwind's
+// max-w-sm/md/lg are NOT 24/28/32rem here and made dialogs span the screen.
+const sizes = { sm: 'max-w-[22rem]', md: 'max-w-[28rem]', lg: 'max-w-[36rem]' };
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])';
@@ -37,7 +39,7 @@ const dialogMotion = {
  * dismissible), body scroll is locked, and focus returns to the trigger on
  * close.
  *
- * Mobile presentation is a true bottom sheet — it slides up, carries a grab
+ * Mobile presentation is a true bottom sheet .it slides up, carries a grab
  * handle, and can be flicked down to dismiss. Drag is bound to the handle and
  * header via `useDragControls` rather than the whole panel, so a swipe inside a
  * long body scrolls the body instead of dragging the sheet away. From `sm` up
@@ -175,7 +177,7 @@ function Modal({
               'relative z-10 flex w-full flex-col border border-border bg-surface focus:outline-none',
               // Never taller than the viewport; the body scrolls inside.
               'max-h-[88svh] rounded-t-[1.75rem]',
-              'sm:max-h-[85svh] sm:rounded-2xl sm:shadow-xl',
+              'sm:max-h-[85svh] sm:rounded-[28px] sm:shadow-xl',
               sizes[size],
             )}
           >
@@ -221,7 +223,7 @@ function Modal({
 
             {/*
               Actions sit above the home indicator and stack full-width on
-              phones — a 44px-tall edge-to-edge button is far easier to hit
+              phones .a 44px-tall edge-to-edge button is far easier to hit
               than a right-aligned pair.
             */}
             {footer ? (

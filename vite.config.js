@@ -37,6 +37,8 @@ function adsPrerender() {
     apply: 'build',
     closeBundle() {
       const dist = path.resolve('dist');
+      // If the build itself failed there is no shell to read; skip so the real error is the one reported.
+      if (!fs.existsSync(path.join(dist, 'index.html'))) return;
       const shell = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
       for (const { route, page, image, imageAlt, jsonLd } of PRERENDER) {
         const url = `${SITE_URL}${route}`;
@@ -110,7 +112,9 @@ export default defineConfig({
         // entry for navigations. API calls stay network-only (server-authoritative).
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff,woff2,ttf}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        // `/r/:token` is a server-rendered page (the Open Graph share link), not an app route:
+        // letting the worker answer it would hand a crawler the SPA shell instead of the tags.
+        navigateFallbackDenylist: [/^\/api\//, /^\/r\//, /^\/ads\.txt$/],
         cleanupOutdatedCaches: true,
         skipWaiting: true, // a new deploy replaces the old worker immediately
         clientsClaim: true,

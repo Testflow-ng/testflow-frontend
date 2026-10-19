@@ -245,7 +245,7 @@ function PostUtmeLockScreen({ config }) {
                     <div className="p-4 rounded-2xl bg-surface-strong border border-border flex items-center justify-between text-left">
                         <div>
                             <p className="text-[9px] font-black text-muted uppercase tracking-widest">Expected Time</p>
-                            <p className="text-xs font-bold text-foreground-strong">15 mins — 24 hours</p>
+                            <p className="text-xs font-bold text-foreground-strong">15 mins .24 hours</p>
                         </div>
                         <div className="size-2 rounded-full bg-amber-500 animate-pulse" />
                     </div>

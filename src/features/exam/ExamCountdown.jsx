@@ -6,7 +6,7 @@ import Mascot from '../../components/brand/Mascot.jsx';
  * The beat between "start" and the first question.
  *
  * The session already exists on the server by the time this shows, so the
- * countdown is not hiding a network wait — it is deliberate. Sitting a timed
+ * countdown is not hiding a network wait .it is deliberate. Sitting a timed
  * paper is the one thing in this app with real stakes, and dropping straight
  * from a settings dialog into question one gives the student no moment to put
  * their pen down and focus. Three seconds of Flo getting ready does that job.
@@ -16,7 +16,7 @@ import Mascot from '../../components/brand/Mascot.jsx';
  * mascot when they want to start.
  *
  * Under reduced motion the countdown is skipped entirely rather than shown
- * without animation — a static "3, 2, 1" is a delay with no purpose.
+ * without animation .a static "3, 2, 1" is a delay with no purpose.
  */
 
 const START_FROM = 3;

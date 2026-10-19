@@ -45,6 +45,10 @@
   --color-danger-foreground: var(--color-danger-foreground);
   --color-danger-hover: var(--color-danger-hover);
   --color-danger-active: var(--color-danger-active);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-active: var(--color-accent-active);
   --color-info: var(--color-info);
   --color-info-foreground: var(--color-info-foreground);
   --color-info-hover: var(--color-info-hover);
@@ -97,6 +101,15 @@
 */
 
 :root {
+  /* Brand tokens from the landing pages. */
+  --brand-ink: #1b4332;
+  --brand-indigo: #4a35f0;
+  --brand-lime: #d6e87c;
+  --brand-lavender: #e9e5fb;
+  --brand-sage: #e4ebdd;
+  --brand-cream: #f6f4ee;
+  --sidebar-w: 276px; /* desktop sidebar + gutters; updated by useSidebar */
+
   color-scheme: light dark;
   font-family:
     Inter,
@@ -191,8 +204,8 @@
   /* Radius scale */
   --radius-none: 0;
   --radius-sm: 0.375rem;
-  --radius: 0.75rem;
-  --radius-lg: 1.5rem;
+  --radius: 0.875rem;
+  --radius-lg: 1.25rem;
   --radius-full: 9999px;
 
   /* Shadows */
@@ -208,7 +221,7 @@
     `cubic-bezier(0.4, 0, 0.2, 1)` (what this file used to carry) is the
     generic Material curve nobody chose. These three are the standard strong
     UI curves: enter/exit, on-screen movement, and the iOS drawer curve used
-    by the bottom sheet. There is deliberately no ease-in token — ease-in on
+    by the bottom sheet. There is deliberately no ease-in token .ease-in on
     UI starts slow at exactly the moment the user is watching.
   */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -260,39 +273,43 @@
   --opacity-100: 1;
 
   /* TestFlow official color system */
-  --color-primary: #0f6fec;
+  --color-primary: #4a35f0;
   --color-primary-foreground: #ffffff;
-  --color-primary-hover: #0b5cc7;
-  --color-primary-active: #084ba3;
-  --color-secondary: #475569;
+  --color-primary-hover: #3b27d6;
+  --color-primary-active: #2f1fb5;
+  --color-secondary: #1b4332;
   --color-secondary-foreground: #ffffff;
-  --color-secondary-hover: #334155;
-  --color-secondary-active: #1e293b;
-  --color-success: #16a34a;
+  --color-secondary-hover: #153a2a;
+  --color-secondary-active: #102e22;
+  --color-success: #1f8a4c;
   --color-success-foreground: #ffffff;
-  --color-success-hover: #15803d;
-  --color-success-active: #166534;
+  --color-success-hover: #197340;
+  --color-success-active: #145c33;
   --color-warning: #f59e0b;
   --color-warning-foreground: #0f172a;
   --color-warning-hover: #d97706;
   --color-warning-active: #b45309;
-  --color-danger: #dc2626;
+  --color-danger: #d4382c;
   --color-danger-foreground: #ffffff;
-  --color-danger-hover: #b91c1c;
-  --color-danger-active: #991b1b;
+  --color-danger-hover: #b72d23;
+  --color-danger-active: #96241c;
+  --color-accent: #d6e87c;
+  --color-accent-foreground: #16301f;
+  --color-accent-hover: #c9dd66;
+  --color-accent-active: #b9ce52;
   --color-info: #0ea5e9;
   --color-info-foreground: #ffffff;
   --color-info-hover: #0284c7;
   --color-info-active: #0369a1;
-  --color-neutral: #64748b;
+  --color-neutral: #6f7a73;
   --color-neutral-foreground: #ffffff;
-  --color-neutral-hover: #475569;
-  --color-neutral-active: #334155;
+  --color-neutral-hover: #565f59;
+  --color-neutral-active: #3d4a43;
 
   /*
     Text-safe variants.
 
-    The base brand colours are tuned for fills — `bg-primary` with white on it,
+    The base brand colours are tuned for fills .`bg-primary` with white on it,
     an amber streak pip, a green success chip. As *text on a light surface* three
     of them fail WCAG AA: success #16a34a is 3.3:1, warning #f59e0b is 2.15:1,
     and primary #0f6fec is 4.46:1, all under the 4.5:1 floor for normal text.
@@ -305,7 +322,7 @@
     Dark mode needs no correction: every base colour clears 6.5:1 on the dark
     surfaces, so the text tokens simply alias the base there.
   */
-  --color-link: #0b5cc7; /* 6.23:1 on white */
+  --color-link: #3b27d6; /* 6.23:1 on white */
   --score-good: #15803d; /* 5.02:1 */
   --score-mid: #b45309; /* 5.02:1 */
   --score-low: #dc2626; /* 4.83:1 */
@@ -322,20 +339,20 @@
   --gray-900: #0f172a;
 
   --color-surface-1: #ffffff;
-  --color-surface-2: #f1f5f9;
-  --color-surface-3: #e2e8f0;
-  --color-background: #f8fafc;
+  --color-surface-2: #f0eee7;
+  --color-surface-3: #e4e2d8;
+  --color-background: #f6f4ee;
   --color-background-strong: #ffffff;
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #334155;
-  --color-text-muted: #64748b;
+  --color-border: #e3e1d8;
+  --color-border-strong: #cfcdc2;
+  --color-text-primary: #1b4332;
+  --color-text-secondary: #3d4a43;
+  --color-text-muted: #6f7a73;
   --color-text-inverse: #ffffff;
-  --color-hover: #e2e8f0;
-  --color-active: #cbd5e1;
-  --color-disabled: #d1d5db;
-  --color-disabled-foreground: #94a3b8;
+  --color-hover: #ebe9e0;
+  --color-active: #dedcd2;
+  --color-disabled: #dcdad0;
+  --color-disabled-foreground: #9aa39d;
 
   /*
     These five were declared only inside the dark-theme block, so in light mode
@@ -348,10 +365,10 @@
     translucent outline changes contrast depending on what it happens to sit
     over and can disappear against a tinted row.
   */
-  --color-focus: #0b5cc7;
-  --color-selection: rgba(15, 111, 236, 0.18);
-  --color-selection-foreground: #0f172a;
-  --color-placeholder: #64748b;
+  --color-focus: #4a35f0;
+  --color-selection: rgba(74, 53, 240, 0.18);
+  --color-selection-foreground: #1b4332;
+  --color-placeholder: #8b958f;
   --color-scrollbar-track: rgba(100, 116, 139, 0.1);
   --color-scrollbar-thumb: rgba(100, 116, 139, 0.35);
   --color-scrollbar-thumb-hover: rgba(100, 116, 139, 0.55);
@@ -859,6 +876,19 @@ select {
   appearance: none;
 }
 
+/*
+  `appearance: none` on the input does not remove WebKit's search cancel
+  button .the pseudo-element keeps its own inline box, so a search field
+  showed our clear button and the browser's side by side. We always ship our
+  own, so the native pair is removed outright.
+*/
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
 button {
   display: inline-flex;
   align-items: center;
@@ -1088,8 +1118,8 @@ table {
 
     Padding positions the content; scroll-padding insets the *snapport*, the
     box snap positions align against. Without it, `scroll-snap-align: start` on
-    the first chip snapped it flush to the scroll container's edge — scrolling
-    straight past the 16px padding — so the first chip sat hard against the
+    the first chip snapped it flush to the scroll container's edge .scrolling
+    straight past the 16px padding .so the first chip sat hard against the
     screen edge while everything above it lined up on the margin.
   */
   scroll-padding-left: var(--screen-gutter);
@@ -1101,3 +1131,129 @@ table {
 }
 
 
+
+/* Toast entrance: a short rise, skipped for reduced motion. */
+@keyframes tf-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tf-toast {
+  animation: tf-toast-in 220ms var(--ease-out, ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-toast {
+    animation: none;
+  }
+}
+
+/* Skeleton shimmer: a soft brand-tinted sweep; static for reduced motion. */
+.tf-shimmer {
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--brand-lavender, #e9e5fb) 70%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: tf-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes tf-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-shimmer { animation: none; background-image: none; }
+}
+
+/* The italic serif accent used in headings: <em class="tf-accent">actually study.</em> */
+.tf-accent {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-size: 1.12em;
+  color: var(--color-primary);
+}
+
+/* Range slider in the brand style (used by <Slider>). */
+.tf-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tf-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--color-primary) var(--fill), var(--color-border-strong) var(--fill));
+}
+.tf-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--color-primary) var(--fill), var(--color-border-strong) var(--fill));
+}
+.tf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-primary);
+  box-shadow: 0 4px 12px rgba(74, 53, 240, 0.35);
+}
+.tf-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-primary);
+}
+.tf-slider:focus-visible {
+  outline: none;
+}
+.tf-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(74, 53, 240, 0.25);
+}
+
+/* --- Print ---------------------------------------------------------------
+   The performance report is the one screen meant to end up on paper, so it
+   gets real page geometry. Its own toolbar carries `print:hidden`, and the
+   sheet drops its on-screen card treatment (radius, border, shadow) so the
+   printed page is ink on paper rather than a screenshot of a web page. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  .tf-print-sheet {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .tf-print-sheet .tf-print-flat {
+    border-color: #d7d7d7 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep a question and its answer on the same sheet of paper. */
+  .tf-print-sheet li {
+    break-inside: avoid;
+  }
+}

@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import AdSlot from '../advertising/AdSlot.jsx';
+import GoAdFreeButton from '../billing/GoAdFreeButton.jsx';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, ChevronRight, Flame } from 'lucide-react';
-import OnboardingFlow from '../onboarding/OnboardingFlow.jsx';
 import { useAuth } from '../auth/useAuth.js';
 import { useStats } from '../analytics/useStats.js';
 import { useHistory } from '../exam/useHistory.js';
@@ -11,7 +11,6 @@ import Screen from '../../components/layout/Screen.jsx';
 import Mascot from '../../components/brand/Mascot.jsx';
 import { lastActivityFrom, moodForDashboard } from '../../components/brand/mascotMood.js';
 import { buttonClasses, sheetClasses, sheetRowClasses } from '../../components/ui/index.js';
-import UsernameSetupModal from '../auth/components/UsernameSetupModal.jsx';
 import { cn } from '../../utils/cn.js';
 import { subjectMeta } from '../subjects/subjectMeta.js';
 import { deriveReadiness, deriveSubjectEdges } from './readiness.js';
@@ -52,14 +51,6 @@ function DashboardPage() {
   const { data: stats } = useStats();
   const { data: sessions } = useHistory();
   const { data: subjects } = useSubjects();
-  const [setupDismissed, setSetupDismissed] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(
-    () => !localStorage.getItem('tf_onboarded'),
-  );
-  const dismissOnboarding = useCallback(() => setShowOnboarding(false), []);
-
-  const showSetup = Boolean(user && !user.username) && !setupDismissed;
-
   const inProgress = sessions?.filter((s) => s.status !== 'submitted') ?? [];
   const recent = sessions?.filter((s) => s.status === 'submitted').slice(0, 3) ?? [];
 
@@ -83,15 +74,9 @@ function DashboardPage() {
   const streakCount = user?.streakCount ?? 0;
   const streakDays = user?.streakDays ?? [];
 
-  if (showOnboarding) {
-    return <OnboardingFlow onComplete={dismissOnboarding} />;
-  }
-
   return (
     <Screen width="lg" className="flex flex-col lg:max-w-3xl">
-      <UsernameSetupModal open={showSetup} onComplete={() => setSetupDismissed(true)} />
-
-      {/* Masthead. Date first, in the mono face — this screen is dated work. */}
+      {/* Masthead. Date first, in the mono face .this screen is dated work. */}
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -111,13 +96,12 @@ function DashboardPage() {
             <span className="block break-words">{firstName}.</span>
           </h1>
         </div>
-        <Link
-          to="/profile"
-          aria-label="Your profile"
-          className="tf-pressable mt-0.5 shrink-0 rounded-full"
-        >
-          <Avatar name={user.fullName} size="sm" />
-        </Link>
+        <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
+          <GoAdFreeButton />
+          <Link to="/profile" aria-label="Your profile" className="tf-pressable rounded-full">
+            <Avatar name={user.fullName} size="sm" />
+          </Link>
+        </div>
       </header>
 
       {readiness.hasData ? (
@@ -235,6 +219,8 @@ function DashboardPage() {
           <MoreRow to="/ai-study" label="AI study tools" note="Not ready yet" muted />
         </div>
       </Section>
+      {/* The only ad on Home: one quiet slot at the very bottom, never between actions. */}
+      <AdSlot placement="content_feed" className="mt-8" />
     </Screen>
   );
 }
@@ -293,7 +279,7 @@ function ReadinessSheet({ readiness, weakest, strongest, streakCount, streakDays
         {/*
           Two short lines, not one long one.
 
-          As a single run — "needs work · across 15 papers · 18 of 78 correct" —
+          As a single run ."needs work · across 15 papers · 18 of 78 correct" —
           it wrapped on every phone width and orphaned "correct" on its own
           line, which reads as a layout accident rather than a sentence. Split,
           each line is short enough that it cannot wrap, and the verdict gets

@@ -68,7 +68,7 @@ export function deriveReadiness(stats, sessions) {
  *
  * The weakest subject is the single most useful thing this app can tell a
  * student, and the old dashboard never said it. Subjects with one attempt are
- * excluded from "strongest" only — a lucky first paper should not be
+ * excluded from "strongest" only .a lucky first paper should not be
  * celebrated, but a bad one is still worth flagging.
  */
 export function deriveSubjectEdges(stats) {

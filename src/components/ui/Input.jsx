@@ -20,10 +20,10 @@ const sizes = {
  */
 const variants = {
   outline:
-    'rounded-md border border-border bg-surface px-4 ' +
+    'rounded-full border border-border-strong bg-surface px-5 ' +
     '[@media(hover:hover)]:hover:border-border-strong ' +
-    'focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 ' +
-    'aria-invalid:border-danger aria-invalid:focus-visible:border-danger aria-invalid:focus-visible:ring-danger/40 ' +
+    'focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/15 ' +
+    'aria-invalid:border-danger aria-invalid:focus-visible:border-danger aria-invalid:focus-visible:ring-danger/15 ' +
     'disabled:bg-surface-strong',
   /*
     `bare` drops the box entirely, for fields that live as rows on a sheet
@@ -61,8 +61,8 @@ const Input = forwardRef(function Input(
         // A bare field takes its breathing room from the sheet row around it,
         // so it only needs enough height for the text itself.
         variant === 'bare' ? 'h-9 text-base sm:h-8 sm:text-[15px]' : sizes[size],
-        leadingAdornment && 'pl-10',
-        trailingAdornment && 'pr-10',
+        leadingAdornment && 'pl-11',
+        trailingAdornment && 'pr-11',
         !hasAdornment && className,
       )}
       {...props}

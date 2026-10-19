@@ -1,4 +1,5 @@
 import Logo from './Logo.jsx';
+import Spinner from './ui/Spinner.jsx';
 
 /**
  * Boot splash: the TestFlow mark, the wordmark and a quiet loader.
@@ -14,15 +15,8 @@ function SplashScreen() {
           TestFlow
         </span>
 
-        <div
-          className="tf-rise-in flex items-center gap-2"
-          style={{ animationDelay: '160ms' }}
-          role="status"
-          aria-label="Loading TestFlow"
-        >
-          <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.3s]" />
-          <span className="size-2 animate-bounce rounded-full bg-primary/70 [animation-delay:-0.15s]" />
-          <span className="size-2 animate-bounce rounded-full bg-primary/70" />
+        <div className="tf-rise-in" style={{ animationDelay: '160ms' }}>
+          <Spinner size="lg" label="Loading TestFlow" className="text-primary" />
         </div>
       </div>
     </div>

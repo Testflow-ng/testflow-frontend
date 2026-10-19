@@ -1,11 +1,20 @@
 import { useState } from 'react';
-import { Plus, Search, Star, X } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
+import { Button, SearchField, SegmentedControl } from '../../components/ui/index.js';
+import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
+import { ICON } from '../../components/ui/iconProps.js';
 import SubjectGrid from './SubjectGrid.jsx';
 import CourseSelectionModal from './components/CourseSelectionModal.jsx';
-import Screen, { ScreenHeader } from '../../components/layout/Screen.jsx';
-import { cn } from '../../utils/cn.js';
 
-const LEVELS = ['all', '100', '200', '300', '400', '500', 'pinned'];
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'pinned', label: 'My courses' },
+  { value: '100', label: '100L' },
+  { value: '200', label: '200L' },
+  { value: '300', label: '300L' },
+  { value: '400', label: '400L' },
+  { value: '500', label: '500L' },
+];
 
 function CoursesPage() {
   const [filter, setFilter] = useState('all');
@@ -13,106 +22,36 @@ function CoursesPage() {
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
 
   return (
-    <Screen width="xl">
-      <ScreenHeader
+    <Screen width="full">
+      <PageHeader
         title="Courses"
-        subtitle="Browse and practice your subjects"
+        subtitle="Browse and practise your subjects."
         action={
-          <button
-            type="button"
-            onClick={() => setIsSelectionModalOpen(true)}
-            className="tf-pressable inline-flex h-9 items-center gap-1.5 rounded-full bg-primary/10 px-3.5 text-[13px] font-semibold text-primary active:bg-primary/20"
-          >
-            <Plus size={16} aria-hidden="true" />
-            Manage
-          </button>
+          <Button data-tour="manage-courses" variant="outline" size="sm" onClick={() => setIsSelectionModalOpen(true)} leadingIcon={<Settings2 {...ICON} />}>
+            Manage courses
+          </Button>
         }
       />
 
-      <div className="mt-5">
-        <div className="relative">
-          <Search
-            size={16}
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-          />
-          <input
-            type="search"
-            inputMode="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search courses"
-            aria-label="Search subjects"
-            // `type="search"` gets the phone keyboard a Search key, but WebKit also
-            // draws its own clear button, which sat right next to ours. Hiding the
-            // native one leaves a single, correctly-sized 36px target.
-            className="h-12 w-full rounded-full border border-border bg-surface pl-11 pr-12 text-base text-foreground-strong outline-none transition-colors placeholder:text-muted focus:border-primary [&::-webkit-search-cancel-button]:appearance-none sm:h-11 sm:text-sm"
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              aria-label="Clear search"
-              className="tf-pressable absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-muted active:bg-surface-strong"
-            >
-              <X size={16} aria-hidden="true" />
-            </button>
-          )}
-        </div>
-
-        {/*
-          Filter rail bleeds into the screen gutter so it scrolls edge to edge
-          (a chip cut off at the margin is the cue that the row scrolls), while
-          the first chip still lines up with the content above it.
-        */}
-        <div className="tf-rail mt-3 items-center gap-2 pb-1">
-          {LEVELS.map((lvl) => {
-            const active = filter === lvl;
-            return (
-              <button
-                key={lvl}
-                type="button"
-                onClick={() => setFilter(lvl)}
-                aria-pressed={active}
-                className={cn(
-                  'tf-pressable inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold',
-                  active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border bg-surface text-muted',
-                )}
-              >
-                {lvl === 'pinned' ? (
-                  <>
-                    <Star
-                      size={14}
-                      aria-hidden="true"
-                      className={cn(active ? 'fill-current' : 'fill-amber-400 text-amber-400')}
-                    />
-                    My courses
-                  </>
-                ) : lvl === 'all' ? (
-                  'All'
-                ) : (
-                  `${lvl}L`
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-4">
-          <SubjectGrid
-            filter={filter}
-            search={search}
-            onOpenSelection={() => setIsSelectionModalOpen(true)}
-          />
+      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
+        <SearchField
+          className="lg:max-w-sm lg:flex-1"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
+          placeholder="Search courses"
+          aria-label="Search subjects"
+        />
+        <div className="-mx-1 overflow-x-auto px-1 pb-1">
+          <SegmentedControl label="Filter courses" size="sm" value={filter} onValueChange={setFilter} options={FILTERS} />
         </div>
       </div>
 
-      <CourseSelectionModal
-        open={isSelectionModalOpen}
-        onOpenChange={setIsSelectionModalOpen}
-      />
+      <div className="mt-5" data-tour="course-grid">
+        <SubjectGrid filter={filter} search={search} onOpenSelection={() => setIsSelectionModalOpen(true)} />
+      </div>
+
+      <CourseSelectionModal open={isSelectionModalOpen} onOpenChange={setIsSelectionModalOpen} />
     </Screen>
   );
 }

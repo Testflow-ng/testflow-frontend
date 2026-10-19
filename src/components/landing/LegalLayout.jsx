@@ -14,17 +14,19 @@ export function LegalSection({ title, children }) {
   );
 }
 
-function LegalLayout({ title, updated, intro, cta, ctaTo = REGISTER_PATH, children }) {
+function LegalLayout({ title, updated, intro, cta, ctaTo = REGISTER_PATH, eyebrow = 'Legal', children }) {
   return (
     <>
       <div className="tfl tfl-page">
         <LandingNav />
         <main className="container legal">
-          <p className="eyebrow">Legal</p>
+          <p className="eyebrow">{eyebrow}</p>
           <h1>{title}</h1>
-          <small className="legal-updated">
-            {updated === 'Draft' ? 'Draft, pending legal review' : `Last updated: ${updated}`}
-          </small>
+          {updated ? (
+            <small className="legal-updated">
+              {updated === 'Draft' ? 'Draft, pending legal review' : `Last updated: ${updated}`}
+            </small>
+          ) : null}
           <p className="legal-intro">{intro}</p>
           {children}
           <Link to={ctaTo} className="btn btn-primary legal-cta">

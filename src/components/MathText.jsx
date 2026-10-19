@@ -23,7 +23,7 @@ const normalizeMath = (math) =>
   math
     .replace(/[‘’ʼ]/g, "'") // ‘ ’ ʼ -> '
     .replace(/[“”]/g, '"') // “ ” -> "
-    .replace(/[−–—]/g, '-') // − – — -> -
+    .replace(/[−–—]/g, '-') // − – .-> -
     .replace(/\u00A0/g, ' '); // nbsp -> space
 
 /**

@@ -1,24 +1,37 @@
+import { markAdDue } from '../advertising/adDue.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Calculator as CalcIcon,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Flag,
-  LayoutGrid,
-  Check,
-  X,
-  AlertTriangle,
   Keyboard,
+  LayoutGrid,
   ShieldAlert,
-  Calculator as CalcIcon,
+  X,
 } from 'lucide-react';
-import { Alert, Button, Modal } from '../../components/ui/index.js';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  ConfirmDialog,
+  IconButton,
+  KeyValueList,
+  Modal,
+  ProgressBar,
+  Tabs,
+  TabPanel,
+} from '../../components/ui/index.js';
+import ExamTimer from '../../components/exam/ExamTimer.jsx';
+import OptionRow from '../../components/exam/OptionRow.jsx';
+import QuestionCard from '../../components/exam/QuestionCard.jsx';
+import QuestionNavigator from '../../components/exam/QuestionNavigator.jsx';
 import PageLoader from '../../components/PageLoader.jsx';
-import MathText from '../../components/MathText.jsx';
-import { cn } from '../../utils/cn.js';
 import { examApi } from './api.js';
+import ReportQuestionDialog from './ReportQuestionDialog.jsx';
+import { useBookmarkedIds, useToggleBookmark } from '../bookmarks/useBookmarks.js';
 import { useCountdown } from './useCountdown.js';
 import SubmitSuspense from './SubmitSuspense.jsx';
 import { formatTime } from './formatTime.js';
@@ -27,67 +40,20 @@ import apiClient from '../../api/client.js';
 
 const letter = (index) => String.fromCharCode(65 + index);
 
-const STATE_ANSWERED = 'answered';
-const STATE_MARKED = 'marked';
-const STATE_EMPTY = 'empty';
-
-/** Answered still counts when a question is also flagged, so the two can stack. */
-const stateOf = (answer) => {
-  if (!answer) return STATE_EMPTY;
-  if (answer.markedForReview) return STATE_MARKED;
-  return answer.selectedOption !== null ? STATE_ANSWERED : STATE_EMPTY;
-};
-
-function QuestionGrid({ questions, answers, current, onJump, className }) {
-  return (
-    <div className={cn('grid grid-cols-6 gap-2 sm:grid-cols-8 lg:grid-cols-5', className)}>
-      {questions.map((_, index) => {
-        const answer = answers[index];
-        const state = stateOf(answer);
-        const isCurrent = index === current;
-        return (
-          <button
-            key={index}
-            type="button"
-            onClick={() => onJump(index)}
-            aria-label={`Question ${index + 1}, ${state === STATE_MARKED ? 'flagged' : state === STATE_ANSWERED ? 'answered' : 'not answered'}`}
-            aria-current={isCurrent ? 'true' : undefined}
-            className={cn(
-              'relative flex h-10 items-center justify-center rounded-lg border text-sm font-bold tabular-nums transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-              isCurrent && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
-              state === STATE_ANSWERED && 'border-primary bg-primary text-primary-foreground',
-              state === STATE_MARKED && 'border-warning bg-warning/15 text-warning',
-              state === STATE_EMPTY && 'border-border bg-surface text-muted',
-            )}
-          >
-            {index + 1}
-            {state === STATE_MARKED && answer?.selectedOption !== null && (
-              <span className="absolute right-1 top-1 size-1.5 rounded-full bg-primary" />
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function Legend() {
-  return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted">
-      <span className="flex items-center gap-1.5">
-        <span className="size-2.5 rounded-sm bg-primary" /> Answered
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2.5 rounded-sm bg-warning/60" /> Flagged
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span className="size-2.5 rounded-sm border border-border bg-surface" /> Not answered
-      </span>
-    </div>
-  );
-}
-
+/**
+ * The paper itself.
+ *
+ * This is the one screen in the app that owns real state a student is betting
+ * marks on, so it stays deliberately conservative: every answer is persisted the
+ * moment it is chosen, the deadline on `session.expiresAt` is the authority (the
+ * client clock is only a courtesy), and the loudest thing on the screen is the
+ * question.
+ *
+ * The interface is assembled from the shared exam components (`QuestionCard`,
+ * `OptionRow`, `QuestionNavigator`, `ExamTimer`) and the UI kit. Those are
+ * presentational by design: nothing about answers, timing or scoring lives
+ * inside them, and none of it moved here.
+ */
 function ExamRuntime({ session }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -112,6 +78,8 @@ function ExamRuntime({ session }) {
   const [exitOpen, setExitOpen] = useState(false);
   const [notice, setNotice] = useState(null);
   const [strikes, setStrikes] = useState(session.strikes || 0);
+  const [reportFor, setReportFor] = useState(null);
+  const reportOpen = Boolean(reportFor);
 
   const saveUrl = isPostUtme ? `/api/post-utme/${id}/answer` : null;
 
@@ -160,6 +128,8 @@ function ExamRuntime({ session }) {
       clearTimeout(stepB);
     }
 
+    // A finished paper earns one short ad before the corrections (the result route reads this flag).
+    if (!isPostUtme) markAdDue(id);
     navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
   }, [id, navigate, isPostUtme]);
 
@@ -171,10 +141,20 @@ function ExamRuntime({ session }) {
     .map((a, i) => (a.selectedOption === null ? i : null))
     .filter((i) => i !== null);
 
+  /* The navigator speaks in 1-based question numbers; the runtime indexes from zero. */
+  const answeredSet = useMemo(
+    () => new Set(answers.flatMap((a, i) => (a.selectedOption !== null ? [i + 1] : []))),
+    [answers],
+  );
+  const flaggedSet = useMemo(
+    () => new Set(answers.flatMap((a, i) => (a.markedForReview ? [i + 1] : []))),
+    [answers],
+  );
+
   const question = questions[current];
   const answer = answers[current];
 
-  // Post-UTME Subject Navigation
+  // Post-UTME runs several subjects in one paper, so it needs its own strip.
   const subjects = useMemo(() => {
     if (!isPostUtme) return [];
     const map = new Map();
@@ -185,18 +165,37 @@ function ExamRuntime({ session }) {
     return Array.from(map.values());
   }, [isPostUtme, questions]);
 
-  // Escalate quietly: a nudge at five minutes, real urgency inside one.
-  const urgency = remaining <= 60 ? 'critical' : remaining <= 300 ? 'warning' : 'normal';
+  const currentSubject = subjects.find((s) => s.questions.includes(current))?.id ?? subjects[0]?.id;
 
-  const goTo = useCallback(
-    (index) => {
-      setCurrent(index);
-      setPaletteOpen(false);
-      // A new question should start at its stem, not wherever the last one was scrolled to.
-      scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
-    },
-    [],
-  );
+  /* The paper needs a calculator and a ruler as much as a hall does. A subject can opt
+     out (a mental-arithmetic paper does), but the default is that one is available. */
+  const showCalculator = session.allowCalculator !== false;
+
+  /*
+    Saving a question and reporting one are about the *question*, not the sitting: both are
+    read from their own queries, and neither travels in the session payload. The bookmark set
+    is shared with the profile page, so a question saved here is already there.
+  */
+  const bookmarkedIds = useBookmarkedIds();
+  const toggleBookmark = useToggleBookmark();
+
+  /** What the bookmarks list needs to draw a row before the server answers. */
+  const bookmarkPayload = (q) => ({
+    id: q.id,
+    subjectCode: session.subjectCode,
+    stem: q.stem,
+    /* Copied, not aliased: this object goes into the react-query cache, and it has no
+       business holding a reference into the session the exam is still editing. */
+    options: [...q.options],
+    topic: q.topic ?? null,
+  });
+
+  const goTo = useCallback((index) => {
+    setCurrent(index);
+    setPaletteOpen(false);
+    // A new question should start at its stem, not wherever the last one was scrolled to.
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, []);
 
   const next = useCallback(() => {
     if (current < total - 1) goTo(current + 1);
@@ -277,13 +276,13 @@ function ExamRuntime({ session }) {
       document.removeEventListener('copy', handleCopy);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [id, navigate, flash]);
+  }, [id, navigate, flash, isPostUtme]);
 
   // JAMB keys, so practice muscle memory transfers to the real hall:
   // A-F pick, N next, P previous, R clears, M flags, S submits.
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (reviewOpen || paletteOpen || submitting) return;
+      if (reviewOpen || paletteOpen || reportOpen || submitting) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const target = e.target;
       if (target instanceof HTMLElement && target.closest('input, textarea, [contenteditable]')) {
@@ -307,50 +306,84 @@ function ExamRuntime({ session }) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [current, questions, answers, reviewOpen, paletteOpen, submitting, persist, next, prev]);
+  }, [current, questions, answers, reviewOpen, paletteOpen, reportOpen, submitting, persist, next, prev]);
 
   if (!question) return null;
 
-  const progressPct = total ? (answeredCount / total) * 100 : 0;
+  const jumpTo = (number) => goTo(number - 1);
 
-  const timer = (
-    <div
-      role="timer"
-      aria-live="off"
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-bold tabular-nums',
-        urgency === 'critical' && 'border-danger/40 bg-danger/10 text-danger',
-        urgency === 'warning' && 'border-warning/40 bg-warning/10 text-warning',
-        urgency === 'normal' && 'border-border bg-surface text-foreground-strong',
+  const questionArea = (
+    <>
+      <QuestionCard
+        number={current + 1}
+        total={total}
+        stem={question.stem}
+        topic={question.topic}
+        flagged={Boolean(answer?.markedForReview)}
+        onFlag={() => persist(current, { markedForReview: !answer?.markedForReview })}
+        /* Both need a question id to point at; a paper served without them simply has no
+           bookmark or report affordance rather than a button that fails. */
+        bookmarked={question.id ? bookmarkedIds.has(question.id) : false}
+        onBookmark={
+          question.id
+            ? () =>
+                toggleBookmark.mutate({
+                  questionId: question.id,
+                  question: bookmarkPayload(question),
+                })
+            : undefined
+        }
+        onReport={question.id ? () => setReportFor(question) : undefined}
+      >
+        {question.options.map((option, index) => (
+          <OptionRow
+            key={index}
+            label={letter(index)}
+            name={`question-${current}`}
+            state={answer?.selectedOption === index ? 'selected' : 'idle'}
+            onSelect={() => persist(current, { selectedOption: index })}
+          >
+            {option}
+          </OptionRow>
+        ))}
+      </QuestionCard>
+
+      {answer?.selectedOption !== null && (
+        <div className="mt-3 flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => persist(current, { selectedOption: null })}
+            leadingIcon={<X size={15} aria-hidden="true" />}
+          >
+            Clear answer
+          </Button>
+        </div>
       )}
-    >
-      <Clock size={15} aria-hidden="true" />
-      <span className="sr-only">Time remaining </span>
-      {formatTime(remaining)}
-    </div>
+    </>
   );
 
   return (
     // Fixed rather than 100svh: the exam is a full-screen takeover, and this keeps it
     // immune to whatever height the surrounding layout chain contributes.
     <div className="fixed inset-0 z-40 flex flex-col bg-background">
-      {/* Fixed top: the timer and progress must never scroll out of reach. */}
+      {/* Fixed top: the clock and the progress must never scroll out of reach. */}
       <header className="shrink-0 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:px-6">
           {/*
             Leave. The exam was a trap without this: the only exits were
             submitting (which scores every unanswered question wrong) or the
             browser's back gesture, which is not discoverable and on iOS is an
             edge swipe a student may never try.
           */}
-          <button
-            type="button"
+          <IconButton
+            variant="ghost"
             onClick={() => setExitOpen(true)}
             aria-label="Leave this paper"
-            className="tf-pressable -ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-strong active:text-foreground-strong"
+            className="-ml-2 shrink-0"
           >
             <ChevronLeft size={20} aria-hidden="true" />
-          </button>
+          </IconButton>
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
@@ -361,96 +394,78 @@ function ExamRuntime({ session }) {
               <span className="text-muted"> / {total}</span>
             </p>
           </div>
+
           <div className="flex shrink-0 items-center gap-2">
             {isPostUtme && (
-              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-danger/10 border border-danger/20 text-danger text-[10px] font-black uppercase tracking-widest">
-                 <ShieldAlert size={12} />
-                 Strict Mode: {strikes}/3
-              </div>
-            )}
-            {isPostUtme && (
-              <button
-                type="button"
-                onClick={() => setCalcOpen(!calcOpen)}
-                className={cn(
-                  "inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-bold transition-all",
-                  calcOpen ? "bg-primary text-primary-foreground border-primary" : "border-border bg-surface text-foreground-strong hover:bg-surface-strong"
-                )}
+              <Badge
+                variant="danger"
+                className="hidden gap-1.5 py-1.5 text-[10px] font-black uppercase tracking-widest md:inline-flex"
               >
-                <CalcIcon size={15} />
-                <span className="hidden sm:inline">Calculator</span>
-              </button>
+                <ShieldAlert size={12} aria-hidden="true" />
+                Strict mode {strikes}/3
+              </Badge>
             )}
-            {timer}
-            <button
-              type="button"
+            {showCalculator && (
+              <Button
+                variant={calcOpen ? 'primary' : 'outline'}
+                size="sm"
+                onClick={() => setCalcOpen((open) => !open)}
+                aria-pressed={calcOpen}
+                leadingIcon={<CalcIcon size={15} aria-hidden="true" />}
+              >
+                <span className="hidden sm:inline">Calculator</span>
+              </Button>
+            )}
+            <ExamTimer secondsLeft={remaining} totalSeconds={session.timeLimitSeconds} />
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPaletteOpen(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-sm font-bold tabular-nums text-foreground-strong transition-colors hover:bg-surface-strong lg:hidden"
+              className="tabular-nums lg:hidden"
+              leadingIcon={<LayoutGrid size={15} aria-hidden="true" />}
             >
-              <LayoutGrid size={15} aria-hidden="true" />
               {answeredCount}/{total}
-            </button>
+            </Button>
           </div>
         </div>
 
-        {isPostUtme && (
-          <div className="border-t border-border bg-surface-strong/30 overflow-x-auto custom-scrollbar no-scrollbar">
-            <div className="mx-auto flex max-w-5xl items-center px-4 sm:px-6">
-               {subjects.map((sub, idx) => {
-                 const isCurrent = sub.questions.includes(current);
-                 const answeredInSub = sub.questions.filter(qIdx => answers[qIdx]?.selectedOption !== null).length;
-                 const subjectCode = session.subjectCodes?.[idx] || `Sub ${idx+1}`;
-
-                 return (
-                   <button
-                    key={sub.id}
-                    onClick={() => goTo(sub.questions[0])}
-                    className={cn(
-                      "flex h-10 shrink-0 items-center gap-2 border-b-2 px-4 text-[10px] font-black uppercase tracking-widest transition-all",
-                      isCurrent
-                        ? "border-primary text-primary bg-primary/5"
-                        : "border-transparent text-muted hover:text-foreground"
-                    )}
-                   >
-                     {subjectCode}
-                     <span className={cn(
-                       "rounded-full px-1.5 py-0.5 text-[8px]",
-                       isCurrent ? "bg-primary text-primary-foreground" : "bg-border text-muted"
-                     )}>
-                       {sub.questions.length}
-                     </span>
-                   </button>
-                 );
-               })}
+        {subjects.length > 1 && (
+          <div className="no-scrollbar overflow-x-auto border-t border-border bg-surface-strong/30 px-4 py-2 sm:px-6">
+            <div className="mx-auto w-full max-w-5xl">
+              <Tabs
+                idPrefix="paper"
+                label="Paper sections"
+                value={currentSubject}
+                onValueChange={(value) => goTo(subjects.find((s) => s.id === value)?.questions[0] ?? 0)}
+                items={subjects.map((sub, idx) => ({
+                  value: sub.id,
+                  label: session.subjectCodes?.[idx] || `Section ${idx + 1}`,
+                  count: sub.questions.length,
+                }))}
+              />
             </div>
           </div>
         )}
 
-        <div
-          className="h-1 w-full bg-surface-strong"
-          role="progressbar"
-          aria-valuenow={answeredCount}
-          aria-valuemin={0}
-          aria-valuemax={total}
-          aria-label="Questions answered"
-        >
-          <div
-            className="h-full bg-primary transition-[width] duration-300 ease-out"
-            style={{ width: `${progressPct}%` }}
+        <div className="mx-auto w-full max-w-5xl px-4 pb-3 sm:px-6">
+          <ProgressBar
+            value={answeredCount}
+            max={total}
+            size="sm"
+            label="Questions answered"
+            labelHidden
           />
         </div>
       </header>
 
       {notice && (
-        <div
-          role="status"
-          className={cn(
-            'shrink-0 px-4 py-2 text-center text-xs font-semibold sm:px-6',
-            notice.tone === 'danger' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning',
-          )}
-        >
-          <AlertTriangle size={13} className="mr-1.5 inline" aria-hidden="true" />
-          {notice.message}
+        <div className="shrink-0 px-4 pb-3 sm:px-6">
+          <Alert
+            variant={notice.tone === 'danger' ? 'danger' : 'warning'}
+            className="mx-auto max-w-5xl py-2 text-xs font-semibold"
+          >
+            {notice.message}
+          </Alert>
         </div>
       )}
 
@@ -468,151 +483,51 @@ function ExamRuntime({ session }) {
         submitted paper because we let them assume the clock stopped would have
         every right to be furious.
       */}
-      <Modal
+      <ConfirmDialog
         open={exitOpen}
         onOpenChange={setExitOpen}
         title="Leave this paper?"
-        description="Your answers so far are saved. You can pick it up from the dashboard."
-        footer={
-          <>
-            <Button variant="ghost" size="lg" onClick={() => setExitOpen(false)}>
-              Keep going
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="text-danger"
-              onClick={() => navigate('/dashboard')}
-            >
-              Leave
-            </Button>
-          </>
-        }
-      >
-        <div className="flex items-start gap-3 rounded-xl border border-warning/20 bg-warning/5 p-3.5">
-          <Clock size={16} className="mt-0.5 shrink-0 text-score-mid" aria-hidden="true" />
-          <p className="text-[13px] leading-relaxed text-foreground/80">
-            The timer keeps running while you are away. {formatTime(remaining)} left, and the
-            paper submits itself when it reaches zero.
-          </p>
-        </div>
-      </Modal>
+        description={`Your answers so far are saved and you can pick it up from the dashboard. The timer keeps running while you are away: ${formatTime(remaining)} left, and the paper submits itself at zero.`}
+        confirmLabel="Leave"
+        cancelLabel="Keep going"
+        tone="danger"
+        onConfirm={() => navigate('/dashboard')}
+      />
 
       {/* Only this middle band scrolls. */}
       <div className="flex min-h-0 flex-1">
         <main ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-10 lg:py-8">
+          <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10 lg:py-8">
             <div className="min-w-0">
-              <MathText className="font-display text-lg font-bold leading-relaxed tracking-tight text-foreground-strong sm:text-xl lg:text-2xl">
-                {question.stem}
-              </MathText>
-
-              <fieldset className="mt-6 flex flex-col gap-2.5">
-                <legend className="sr-only">Select your answer</legend>
-                {question.options.map((option, index) => {
-                  const selected = answer?.selectedOption === index;
-                  return (
-                    <label
-                      key={index}
-                      className={cn(
-                        'group flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition-colors sm:p-4',
-                        'focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background',
-                        selected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-surface hover:border-border-strong hover:bg-surface-strong',
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${current}`}
-                        className="sr-only"
-                        checked={selected}
-                        onChange={() => persist(current, { selectedOption: index })}
-                      />
-                      <span
-                        className={cn(
-                          'mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border text-xs font-black transition-colors',
-                          selected
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-border text-muted group-hover:border-border-strong',
-                        )}
-                        aria-hidden="true"
-                      >
-                        {letter(index)}
-                      </span>
-                      <MathText
-                        className={cn(
-                          'min-w-0 flex-1 text-base leading-relaxed',
-                          selected ? 'font-semibold text-foreground-strong' : 'text-foreground',
-                        )}
-                      >
-                        {option}
-                      </MathText>
-                      {selected && (
-                        <Check size={18} className="mt-1 shrink-0 text-primary" aria-hidden="true" />
-                      )}
-                    </label>
-                  );
-                })}
-              </fieldset>
-
-              <div className="mt-5 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => persist(current, { markedForReview: !answer?.markedForReview })}
-                  aria-pressed={Boolean(answer?.markedForReview)}
-                  className={cn(
-                    'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-bold transition-colors',
-                    answer?.markedForReview
-                      ? 'bg-warning/15 text-warning'
-                      : 'text-muted hover:bg-surface-strong hover:text-foreground',
-                  )}
-                >
-                  <Flag
-                    size={15}
-                    className={answer?.markedForReview ? 'fill-current' : ''}
-                    aria-hidden="true"
-                  />
-                  {answer?.markedForReview ? 'Flagged' : 'Flag for review'}
-                </button>
-
-                {answer?.selectedOption !== null && (
-                  <button
-                    type="button"
-                    onClick={() => persist(current, { selectedOption: null })}
-                    className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-muted transition-colors hover:bg-surface-strong hover:text-foreground"
-                  >
-                    <X size={15} aria-hidden="true" />
-                    Clear
-                  </button>
-                )}
-              </div>
+              {subjects.length > 1 ? (
+                <TabPanel idPrefix="paper" value={currentSubject} active={currentSubject}>
+                  {questionArea}
+                </TabPanel>
+              ) : (
+                questionArea
+              )}
             </div>
 
             {/* Desktop navigator, in-flow so it scrolls with the question. */}
-            <aside className="hidden lg:block">
-              <div className="rounded-2xl border border-border bg-surface p-5">
+            <aside className="mt-6 hidden lg:mt-0 lg:block">
+              <Card padding="md">
                 <div className="mb-4 flex items-baseline justify-between">
-                  <h2 className="text-xs font-black uppercase tracking-widest text-muted">
-                    Navigator
-                  </h2>
+                  <h2 className="text-xs font-black uppercase tracking-widest text-muted">Navigator</h2>
                   <span className="text-xs font-bold tabular-nums text-primary">
                     {answeredCount}/{total}
                   </span>
                 </div>
-                <QuestionGrid
-                  questions={questions}
-                  answers={answers}
-                  current={current}
-                  onJump={goTo}
+                <QuestionNavigator
+                  total={total}
+                  current={current + 1}
+                  answered={answeredSet}
+                  flagged={flaggedSet}
+                  onJump={jumpTo}
                 />
-                <div className="mt-5 border-t border-border pt-4">
-                  <Legend />
-                </div>
                 <Button className="mt-5 w-full" onClick={() => setReviewOpen(true)}>
                   Review &amp; submit
                 </Button>
-              </div>
+              </Card>
 
               <p className="mt-4 flex items-start gap-2 px-1 text-xs leading-relaxed text-muted">
                 <Keyboard size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -630,24 +545,29 @@ function ExamRuntime({ session }) {
       {/* Fixed bottom, clear of the iOS home indicator. */}
       <footer className="shrink-0 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)]">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-end gap-2.5 px-4 py-3 sm:px-6">
-          <Button
+          <IconButton
             variant="outline"
+            size="lg"
             onClick={prev}
             disabled={current === 0}
-            className="h-12 w-12 shrink-0 rounded-xl p-0 lg:mr-auto"
             aria-label="Previous question"
+            className="lg:mr-auto"
           >
             <ChevronLeft size={20} aria-hidden="true" />
-          </Button>
+          </IconButton>
 
           {current === total - 1 ? (
-            <Button onClick={() => setReviewOpen(true)} className="h-12 flex-1 rounded-xl text-base lg:flex-none lg:px-10">
+            <Button size="lg" onClick={() => setReviewOpen(true)} className="flex-1 lg:flex-none lg:px-10">
               Review &amp; submit
             </Button>
           ) : (
-            <Button onClick={next} className="h-12 flex-1 rounded-xl text-base lg:flex-none lg:px-12">
+            <Button
+              size="lg"
+              onClick={next}
+              trailingIcon={<ChevronRight size={18} aria-hidden="true" />}
+              className="flex-1 lg:flex-none lg:px-12"
+            >
               Next
-              <ChevronRight size={18} className="ml-1" aria-hidden="true" />
             </Button>
           )}
         </div>
@@ -659,14 +579,14 @@ function ExamRuntime({ session }) {
         title="Questions"
         description={`${answeredCount} answered · ${flaggedCount} flagged · ${unanswered.length} left`}
       >
-        <div className="space-y-4 pt-1">
-          <QuestionGrid
-            questions={questions}
-            answers={answers}
-            current={current}
-            onJump={goTo}
+        <div className="pb-2 pt-1">
+          <QuestionNavigator
+            total={total}
+            current={current + 1}
+            answered={answeredSet}
+            flagged={flaggedSet}
+            onJump={jumpTo}
           />
-          <Legend />
         </div>
       </Modal>
 
@@ -690,21 +610,14 @@ function ExamRuntime({ session }) {
           </>
         }
       >
-        <div className="space-y-4 pt-1">
-          <div className="grid grid-cols-3 gap-2 text-center">
-            {[
-              { label: 'Answered', value: answeredCount, tone: 'text-primary' },
-              { label: 'Flagged', value: flaggedCount, tone: 'text-warning' },
-              { label: 'Blank', value: unanswered.length, tone: 'text-muted' },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-xl border border-border bg-surface px-2 py-3">
-                <p className={cn('text-2xl font-extrabold tabular-nums', stat.tone)}>{stat.value}</p>
-                <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
+        <div className="space-y-4 pb-2 pt-1">
+          <KeyValueList
+            items={[
+              { label: 'Answered', value: <span className="font-bold tabular-nums text-primary">{answeredCount}</span> },
+              { label: 'Flagged', value: <span className="font-bold tabular-nums text-score-mid">{flaggedCount}</span> },
+              { label: 'Left blank', value: <span className="font-bold tabular-nums text-muted">{unanswered.length}</span> },
+            ]}
+          />
 
           {/* Jumping straight to a gap is the whole point of a review step. */}
           {unanswered.length > 0 && (
@@ -714,29 +627,42 @@ function ExamRuntime({ session }) {
               </p>
               <div className="flex flex-wrap gap-2">
                 {unanswered.map((index) => (
-                  <button
+                  <Button
                     key={index}
-                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-w-9 tabular-nums"
                     onClick={() => {
                       setReviewOpen(false);
                       goTo(index);
                     }}
-                    className="h-9 min-w-9 rounded-lg border border-border bg-surface px-2.5 text-sm font-bold tabular-nums text-foreground-strong transition-colors hover:border-primary hover:text-primary"
                   >
                     {index + 1}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
           )}
 
-          <p className="rounded-xl bg-danger/5 p-3 text-xs leading-relaxed text-danger">
+          <Alert variant="danger" className="py-2.5 text-xs">
             Submitting is final. Unanswered questions are scored as incorrect.
-          </p>
+          </Alert>
         </div>
       </Modal>
 
       {calcOpen && <Calculator onClose={() => setCalcOpen(false)} />}
+
+      {/*
+        Reporting is about the question on screen, so the dialog carries that question and
+        the runtime does not care what happens inside it.
+      */}
+      <ReportQuestionDialog
+        open={Boolean(reportFor)}
+        onOpenChange={(open) => {
+          if (!open) setReportFor(null);
+        }}
+        question={reportFor}
+      />
     </div>
   );
 }

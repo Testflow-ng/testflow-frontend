@@ -4,6 +4,7 @@ import HomePage from '../pages/HomePage.jsx';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
 import PrivacyPage from '../pages/PrivacyPage.jsx';
 import TermsPage from '../pages/TermsPage.jsx';
+import HelpCenterPage from '../pages/HelpCenterPage.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import RequireAuth from '../features/auth/RequireAuth.jsx';
 import ComingSoonPage from '../pages/ComingSoonPage.jsx';
@@ -19,30 +20,42 @@ import PageLoader from '../components/PageLoader.jsx';
 import { ORG_SLUG, PRODUCT_NAME_PUBLIC, PRODUCT_PATH, PRODUCT_SLUG } from '../constants/products.js';
 import DashboardPage from '../features/dashboard/DashboardPage.jsx';
 import ExamRuntimePage from '../features/exam/ExamRuntimePage.jsx';
-import ExamResultPage from '../features/exam/ExamResultPage.jsx';
-import HistoryPage from '../features/exam/HistoryPage.jsx';
+import ExamResultRoute from '../features/exam/ExamResultRoute.jsx';
+import BillingPage from '../features/billing/BillingPage.jsx';
+import BillingCompletePage from '../features/billing/BillingCompletePage.jsx';
+import ExamReportPage from '../features/exam/ExamReportPage.jsx';
 import ProgressPage from '../features/analytics/ProgressPage.jsx';
 import AchievementsPage from '../features/analytics/AchievementsPage.jsx';
 import ProfilePage from '../features/profile/ProfilePage.jsx';
+import BookmarksPage from '../features/bookmarks/BookmarksPage.jsx';
+import HallOfFamePage from '../features/hall-of-fame/HallOfFamePage.jsx';
+import LiveRedirect from '../features/live/LiveRedirect.jsx';
+import LiveRoomPage from '../features/live/LiveRoomPage.jsx';
 import LiveCBTPage from '../features/live/LiveCBTPage.jsx';
 import AIStudyPage from '../features/ai/AIStudyPage.jsx';
-import PostUtmeHub from '../features/post-utme/pages/PostUtmeHub.jsx';
+import PostUtmeComingSoon from '../features/post-utme/pages/PostUtmeComingSoon.jsx';
+import LibraryPage from '../features/library/LibraryPage.jsx';
+import ReaderPage from '../features/library/ReaderPage.jsx';
 import CoursesPage from '../features/subjects/CoursesPage.jsx';
-import SetupPage from '../features/auth/pages/SetupPage.jsx';
 import SettingsPage from '../features/settings/SettingsPage.jsx';
 import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
+import FeedbackPage from '../features/feedback/FeedbackPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
-import AdminDashboardPage from '../features/admin/pages/AdminDashboardPage.jsx';
-import QuestionBankPage from '../features/admin/pages/QuestionBankPage.jsx';
-import EditQuestionPage from '../features/admin/pages/EditQuestionPage.jsx';
-import SubjectManagementPage from '../features/admin/pages/SubjectManagementPage.jsx';
-import StudentManagementPage from '../features/admin/pages/StudentManagementPage.jsx';
-import AdminRosterPage from '../features/admin/pages/AdminRosterPage.jsx';
-import VerificationQueuePage from '../features/admin/pages/VerificationQueuePage.jsx';
-import PostUtmeRankingsPage from '../features/admin/pages/PostUtmeRankingsPage.jsx';
-import AdminSettingsPage from '../features/admin/pages/AdminSettingsPage.jsx';
-import AdminActivityPage from '../features/admin/pages/AdminActivityPage.jsx';
+import AdminLayout from '../features/admin/AdminLayout.jsx';
+import OverviewScreen from '../features/admin/screens/OverviewScreen.jsx';
+import UsersScreen from '../features/admin/screens/UsersScreen.jsx';
+import QuestionsScreen from '../features/admin/screens/QuestionsScreen.jsx';
+import QuestionEditorScreen from '../features/admin/screens/QuestionEditorScreen.jsx';
+import SubjectsScreen from '../features/admin/screens/SubjectsScreen.jsx';
+import ReportsScreen from '../features/admin/screens/ReportsScreen.jsx';
+import FeedbackScreen from '../features/admin/screens/FeedbackScreen.jsx';
+import VerificationsScreen from '../features/admin/screens/VerificationsScreen.jsx';
+import AdsScreen from '../features/admin/screens/AdsScreen.jsx';
+import ActivityScreen from '../features/admin/screens/ActivityScreen.jsx';
+import SettingsScreen from '../features/admin/screens/SettingsScreen.jsx';
 import PublicQuestionPage from '../features/public-questions/pages/PublicQuestionPage.jsx';
+
+const uiKit = async () => ({ Component: (await import('../features/ui-kit/UiKitPage.jsx')).default });
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +64,7 @@ export const router = createBrowserRouter([
     errorElement: <ErrorState />,
     element: <RequireAuth />,
     children: [
-      { path: 'setup', element: <SetupPage /> },
+      { path: 'setup', element: <Navigate to="/dashboard" replace /> },
     ],
   },
   {
@@ -60,8 +73,11 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
+      { path: 'help', element: <HelpCenterPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
       { path: 'coming-soon', element: <ComingSoonPage /> },
+      { path: 'ui-kit', lazy: uiKit },
+      { path: 'ui-kit/:id', lazy: uiKit },
       // Eddyrus Media: who is behind Testflow.
       { path: ORG_SLUG, lazy: async () => ({ Component: (await import('../pages/EddyrusLandingPage.jsx')).default }), HydrateFallback: PageLoader },
       // Testflow for Everyone (marketing only). Sign-in and register stay on the waitlist.
@@ -134,31 +150,51 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'progress', element: <ProgressPage /> },
+          { path: 'hall-of-fame', element: <HallOfFamePage /> },
           { path: 'achievements', element: <AchievementsPage /> },
           { path: 'courses', element: <CoursesPage /> },
-          { path: 'history', element: <HistoryPage /> },
+          { path: 'library', element: <LibraryPage /> },
+          { path: 'library/:id/read', element: <ReaderPage /> },
+          { path: 'history', element: <Navigate to="/progress" replace /> },
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'profile/bookmarks', element: <BookmarksPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: 'settings/notifications', element: <NotificationPreferencesPage /> },
+          { path: 'settings/feedback', element: <FeedbackPage /> },
           { path: 'live', element: <LiveCBTPage /> },
+          { path: 'live/:code', element: <LiveRoomPage /> },
+          { path: 'live-cbt/:code', element: <LiveRedirect /> },
           { path: 'ai-study', element: <AIStudyPage /> },
-          { path: 'post-utme', element: <PostUtmeHub /> },
+          { path: 'post-utme', element: <PostUtmeComingSoon /> },
           { path: 'exam/:id', element: <ExamRuntimePage /> },
-          { path: 'exam/:id/result', element: <ExamResultPage /> },
+          { path: 'exam/:id/result', element: <ExamResultRoute /> },
+          { path: 'billing', element: <BillingPage /> },
+          { path: 'billing/complete', element: <BillingCompletePage /> },
+          { path: 'exam/:id/report', element: <ExamReportPage /> },
           {
             element: <RequireAdmin />,
             children: [
-              { path: 'admin', element: <AdminDashboardPage /> },
-              { path: 'admin/questions', element: <QuestionBankPage /> },
-              { path: 'admin/questions/new', element: <EditQuestionPage /> },
-              { path: 'admin/questions/:id/edit', element: <EditQuestionPage /> },
-              { path: 'admin/subjects', element: <SubjectManagementPage /> },
-              { path: 'admin/students', element: <StudentManagementPage /> },
-              { path: 'admin/rankings', element: <PostUtmeRankingsPage /> },
-              { path: 'admin/verifications', element: <VerificationQueuePage /> },
-              { path: 'admin/activity', element: <AdminActivityPage /> },
-              { path: 'admin/settings', element: <AdminSettingsPage /> },
-              { path: 'admin/roster', element: <AdminRosterPage /> },
+              {
+                element: <AdminLayout />,
+                children: [
+                  { path: 'admin', element: <OverviewScreen /> },
+                  { path: 'admin/users', element: <UsersScreen /> },
+                  { path: 'admin/questions', element: <QuestionsScreen /> },
+                  { path: 'admin/questions/new', element: <QuestionEditorScreen /> },
+                  { path: 'admin/questions/:id/edit', element: <QuestionEditorScreen /> },
+                  { path: 'admin/subjects', element: <SubjectsScreen /> },
+                  { path: 'admin/reports', element: <ReportsScreen /> },
+                  { path: 'admin/feedback', element: <FeedbackScreen /> },
+                  { path: 'admin/verifications', element: <VerificationsScreen /> },
+                  { path: 'admin/ads', element: <AdsScreen /> },
+                  { path: 'admin/activity', element: <ActivityScreen /> },
+                  { path: 'admin/settings', element: <SettingsScreen /> },
+                  // Old addresses, kept so bookmarks still work.
+                  { path: 'admin/students', element: <Navigate to="/admin/users" replace /> },
+                  { path: 'admin/roster', element: <Navigate to="/admin/users" replace /> },
+                  { path: 'admin/rankings', element: <Navigate to="/admin" replace /> },
+                ],
+              },
             ],
           },
         ],

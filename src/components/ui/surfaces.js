@@ -3,7 +3,7 @@ import { cn } from '../../utils/cn.js';
 /**
  * Class recipes for the two surfaces this app is built out of: the card and
  * the tappable list row. Same single-source-of-truth pattern as
- * `buttonClasses` — markup that can't render a `<Card>` (a router `Link`, a
+ * `buttonClasses` .markup that can't render a `<Card>` (a router `Link`, a
  * `<button>`, an `<li>`) still gets identical styling.
  *
  * The important mobile detail is `interactive`: the codebase previously
@@ -20,7 +20,7 @@ const paddings = {
   lg: 'p-5',
 };
 
-const surfaceBase = 'rounded-2xl border border-border bg-surface';
+const surfaceBase = 'rounded-[20px] border border-border bg-surface';
 
 const interactiveClasses =
   'tf-pressable cursor-pointer active:bg-surface-strong ' +
@@ -46,7 +46,7 @@ export function listRowClasses({ interactive = true, className } = {}) {
 
 /**
  * Rows inside a grouped, divided list (Settings, Profile > Account). Full-bleed
- * horizontal padding, 52px minimum height — the iOS grouped-table proportions.
+ * horizontal padding, 52px minimum height .the iOS grouped-table proportions.
  */
 export function groupRowClasses({ interactive = true, className } = {}) {
   return cn(
@@ -70,7 +70,7 @@ export function groupListClasses({ className } = {}) {
  * separately-bordered cards. One border and one silhouette per group means the
  * eye lands on the content, not on twelve repeated rectangles.
  *
- * Radius is deliberately larger than a card (20px vs 16px) — the sheet is the
+ * Radius is deliberately larger than a card (20px vs 16px) .the sheet is the
  * page's primary object and reads as one plane, while its internal rows carry
  * no radius at all. Radius varies by role here, it is not one global value.
  */

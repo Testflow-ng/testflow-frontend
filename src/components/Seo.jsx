@@ -30,6 +30,11 @@ const PAGES = {
     title: 'Terms and Conditions | TestFlow OAU CBT Practice',
     description: 'Read the terms for using TestFlow, the OAU CBT practice platform.',
   },
+  '/help': {
+    title: 'Help Center | TestFlow OAU CBT Practice',
+    description:
+      'How to practise on TestFlow, where your results and saved questions live, and what to do when something looks wrong.',
+  },
   '/coming-soon': {
     title: 'Coming Soon | Join the Testflow Waitlist',
     description: 'Testflow accounts are opening soon. Join the waitlist to be notified when we launch.',

@@ -11,7 +11,7 @@
 
   2. **CSS, not JS.** These are predetermined loops. CSS animations keep running
      off the main thread while React hydrates, queries resolve and images
-     decode — exactly the moments the mascot is on screen. A rAF-driven
+     decode .exactly the moments the mascot is on screen. A rAF-driven
      equivalent would stutter precisely when it is most visible.
 
   3. **Intensity is tiered by how often the animation is seen.** The looping
@@ -33,6 +33,11 @@
 /* The default: settle in from slightly below. Used wherever the mascot simply
    appears as part of a layout. */
 .tf-mascot {
+  /* Flo's palette reads the brand tokens, so he matches the landing pages everywhere. */
+  --flo-ink: var(--brand-ink, #1b4332);
+  --flo-accent: var(--brand-indigo, #4a35f0);
+  --flo-hi: var(--brand-lime, #d6e87c);
+  --flo-body: var(--brand-lavender, #e9e5fb);
   animation: tf-m-arrive 520ms var(--ease-out) both;
 }
 
@@ -52,7 +57,7 @@
 
   The travel and the waddle are ONE keyframe set, not two animations layered on
   the same element. Two concurrent animations both driving `transform` do not
-  compose — the last one in the list wins outright — so an earlier version that
+  compose .the last one in the list wins outright .so an earlier version that
   ran `walk-in` alongside `waddle` lost the travel entirely and just rotated on
   the spot. Anything that needs to move and tilt at once has to say so in a
   single keyframe.

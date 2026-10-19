@@ -30,7 +30,7 @@ export const AUTH_PRODUCTS = {
     register: '/register',
     forgot: '/forgot-password',
     afterLogin: '/dashboard',
-    afterRegister: '/setup',
+    afterRegister: '/dashboard',
     asideEyebrow: 'Made for university students',
     asideTitle: 'Small steps.',
     asideAccent: 'Real confidence.',

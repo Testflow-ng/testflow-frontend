@@ -1,41 +1,41 @@
-/** Derive the achievement list (earned/locked) from a student's stats. */
+/**
+ * Derive the achievement list (earned/locked, with progress) from a student's stats.
+ * `group` sections the page; `current`/`target` drive the progress bar on locked badges.
+ */
+export const ACHIEVEMENT_GROUPS = [
+  { key: 'practice', label: 'Practice' },
+  { key: 'scores', label: 'Scores' },
+  { key: 'consistency', label: 'Consistency' },
+  { key: 'explore', label: 'Explore' },
+];
+
 export function deriveAchievements(stats) {
+  const exams = stats.totalExams ?? 0;
+  const best = stats.bestScore ?? 0;
+  const avg = stats.averageScore ?? 0;
+  const subjects = stats.perSubject?.length ?? 0;
+
+  const make = (key, group, label, description, current, target) => ({
+    key,
+    group,
+    label,
+    description,
+    current: Math.min(current, target),
+    target,
+    earned: current >= target,
+  });
+
   return [
-    {
-      key: 'first-exam',
-      label: 'First step',
-      description: 'Complete your first exam',
-      earned: stats.totalExams >= 1,
-    },
-    {
-      key: 'five-exams',
-      label: 'Warming up',
-      description: 'Complete 5 exams',
-      earned: stats.totalExams >= 5,
-    },
-    {
-      key: 'high-scorer',
-      label: 'High scorer',
-      description: 'Score 80% or higher',
-      earned: stats.bestScore >= 80,
-    },
-    {
-      key: 'perfect',
-      label: 'Flawless',
-      description: 'Score 100% on an exam',
-      earned: stats.bestScore >= 100,
-    },
-    {
-      key: 'consistent',
-      label: 'Consistent',
-      description: 'Average 70% across 3+ exams',
-      earned: stats.totalExams >= 3 && stats.averageScore >= 70,
-    },
-    {
-      key: 'explorer',
-      label: 'Explorer',
-      description: 'Practice 3 different subjects',
-      earned: stats.perSubject.length >= 3,
-    },
+    make('first-exam', 'practice', 'First step', 'Complete your first exam', exams, 1),
+    make('five-exams', 'practice', 'Warming up', 'Complete 5 exams', exams, 5),
+    make('ten-exams', 'practice', 'On a roll', 'Complete 10 exams', exams, 10),
+    make('twenty-five-exams', 'practice', 'Dedicated', 'Complete 25 exams', exams, 25),
+    make('high-scorer', 'scores', 'High scorer', 'Score 80% or higher', best, 80),
+    make('top-marks', 'scores', 'Top marks', 'Score 90% or higher', best, 90),
+    make('perfect', 'scores', 'Flawless', 'Score 100% on an exam', best, 100),
+    make('consistent', 'consistency', 'Consistent', 'Average 70% across 3+ exams', exams >= 3 ? avg : 0, 70),
+    make('rising-star', 'consistency', 'Rising star', 'Average 80% across 5+ exams', exams >= 5 ? avg : 0, 80),
+    make('explorer', 'explore', 'Explorer', 'Practice 3 different subjects', subjects, 3),
+    make('all-rounder', 'explore', 'All-rounder', 'Practice 5 different subjects', subjects, 5),
   ];
 }

@@ -1,11 +1,13 @@
 import { cn } from '../../utils/cn.js';
+import Breadcrumb from '../ui/Breadcrumb.jsx';
+import BackButton from '../ui/BackButton.jsx';
 
 const widths = {
-  sm: 'max-w-lg',
-  md: 'max-w-xl',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-5xl',
+  sm: 'max-w-[32rem]',
+  md: 'max-w-[40rem]',
+  lg: 'max-w-[44rem]',
+  xl: 'max-w-[56rem]',
+  full: 'max-w-[72rem]',
 };
 
 /**
@@ -48,21 +50,27 @@ function Screen({
  * `text-xl font-black` on the next); one component keeps the type hierarchy
  * identical everywhere.
  */
-function ScreenHeader({ title, subtitle, action, className }) {
+function ScreenHeader({ title, subtitle, action, eyebrow, breadcrumbs, back, className }) {
   return (
-    <header className={cn('flex items-start justify-between gap-3', className)}>
-      <div className="min-w-0">
-        <h1 className="font-heading text-[1.625rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
-          {title}
-        </h1>
-        {subtitle ? (
-          <p className="mt-1 text-sm leading-snug text-muted">{subtitle}</p>
-        ) : null}
+    <header className={cn('flex flex-col gap-3', className)}>
+      {back ? <BackButton to={back === true ? undefined : back} className="-mb-1 self-start" /> : null}
+      {breadcrumbs ? <Breadcrumb items={breadcrumbs} /> : null}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          {eyebrow ? <p className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-primary">{eyebrow}</p> : null}
+          <h1 className="font-heading text-[1.75rem] font-extrabold leading-tight tracking-tight text-foreground-strong">
+            {title}
+          </h1>
+          {subtitle ? <p className="mt-1.5 text-[15px] leading-snug text-muted">{subtitle}</p> : null}
+        </div>
+        {action ? <div className="flex shrink-0 items-center gap-2 pt-1">{action}</div> : null}
       </div>
-      {action ? <div className="shrink-0 pt-1">{action}</div> : null}
     </header>
   );
 }
 
-export { Screen, ScreenHeader };
+/** Same component under its design-system name: title, subtitle, actions, optional back link or breadcrumbs. */
+const PageHeader = ScreenHeader;
+
+export { Screen, ScreenHeader, PageHeader };
 export default Screen;
