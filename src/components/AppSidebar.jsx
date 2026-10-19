@@ -1,4 +1,4 @@
-import { Award, BookOpen, ChartLine, LayoutDashboard, LibraryBig, Palette, Radio, ShieldAlert, Sparkles, Target, Trophy, User } from 'lucide-react';
+import { Award, BookOpen, ChartLine, LayoutDashboard, LibraryBig, Radio, ShieldAlert, Sparkles, Target, Trophy, User } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from './ui/index.js';
 import SidebarShell from './SidebarShell.jsx';
@@ -31,8 +31,7 @@ function AppSidebar() {
     .map((s) => ({ key: s.id, to: '/courses', label: s.name ? `${s.code} · ${s.name}` : s.code, title: s.name ?? s.code }));
   const isAdmin = ['admin', 'super_admin'].includes(user?.role);
   const base = isAdmin ? [...NAV, { to: '/admin', label: 'Admin', Icon: ShieldAlert }] : NAV;
-  // Developer reference for the shared components (development only here; the footer links to it everywhere).
-  const items = import.meta.env.DEV ? [...base, { to: '/ui-kit', label: 'UI Kit', Icon: Palette }] : base;
+  const items = base;
 
   return (
     <>

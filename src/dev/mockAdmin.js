@@ -3,7 +3,7 @@
 // `VITE_DEV_BYPASS_AUTH=true`.
 //
 // Only the three things the dashboard itself asks for live here. The other admin screens
-// (students, subjects, verifications, roster, question bank) still need the real backend —
+// (students, subjects, verifications, roster, question bank) still need the real backend:
 // they answer MOCK_MISSING in dev.
 
 const students = [

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { REGISTER_PATH } from '../../auth/paths.js';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, Button, Alert, Spinner } from '../../../components/ui/index.js';
+import { Card, Button } from '../../../components/ui/index.js';
 import PageLoader from '../../../components/PageLoader.jsx';
 import MathText from '../../../components/MathText.jsx';
 import Confetti from '../../../components/brand/Confetti.jsx';
@@ -94,7 +94,7 @@ function PublicQuestionPage() {
           Quick Practice
         </h1>
         <p className="mt-2 text-sm text-muted">
-          From {question.subject?.title || 'General Knowledge'} ({question.subject?.code || 'GEN'})
+          From {question.subjectCode || 'General Knowledge'}
         </p>
       </header>
 
@@ -111,7 +111,7 @@ function PublicQuestionPage() {
             <div className="space-y-3">
                 {question.options.map((option, index) => {
                     const isSelected = selectedOption === index;
-                    const isCorrect = isAnswered && index === result.correctIndex;
+                    const isCorrect = isAnswered && index === result.correctOption;
                     const isWrong = isAnswered && isSelected && !result.isCorrect;
 
                     return (

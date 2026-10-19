@@ -6,13 +6,21 @@ import { useHostRoom, useMembership } from './useLive.js';
 import HostRoom from './HostRoom.jsx';
 import ParticipantRoom from './ParticipantRoom.jsx';
 
-/** /live/:code. The host sees the control room; everyone else sees the participant flow. */
+/**
+ * /live/:code. The host sees the control room; everyone else sees the participant flow.
+ *
+ * Rendering keys off cached `data`, never off the latest fetch: while a connection drops and comes
+ * back, the poll that failed must not tear the paper out from under whoever is sitting it.
+ */
 function LiveRoomPage() {
   const { code } = useParams();
   const host = useHostRoom(code);
   const member = useMembership(code, host.isError);
 
-  if (host.isLoading || (host.isError && member.isLoading)) {
+  if (host.data) return <HostRoom room={host.data} code={code} />;
+  if (member.data) return <ParticipantRoom room={member.data} code={code} />;
+
+  if (host.isLoading || member.isLoading) {
     return (
       <Screen width="xl">
         <SkeletonCard className="h-24" />
@@ -20,9 +28,6 @@ function LiveRoomPage() {
       </Screen>
     );
   }
-
-  if (host.isSuccess) return <HostRoom room={host.data} code={code} />;
-  if (member.isSuccess) return <ParticipantRoom room={member.data} code={code} />;
 
   return (
     <Screen width="md">

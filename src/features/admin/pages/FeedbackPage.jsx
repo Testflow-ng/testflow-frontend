@@ -33,7 +33,7 @@ const formatWhen = (value) =>
  * What students sent from Settings.
  *
  * The other end of `/settings/feedback`: ratings, problems and ideas, with who sent them and
- * where on TestFlow they were. There are three states, and only one of them means done —
+ * where on TestFlow they were. There are three states, and only one of them means done:
  * acknowledged is "we have read this and it is real", resolved is "it is dealt with", and
  * the reply is the part the student actually sees.
  *
@@ -94,7 +94,7 @@ function FeedbackPage() {
             Feedback
           </h1>
           <p className="mt-1 text-sm text-muted">
-            What students sent from Settings, and what they rated us.
+            What students sent from Settings.
           </p>
         </div>
       </div>

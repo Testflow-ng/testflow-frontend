@@ -92,7 +92,7 @@ export function liveRoute(method, path, body) {
   if (action === 'approve-all') { r.people.forEach((p) => { if (p.status === 'pending') p.status = 'approved'; }); return { ok: true }; }
   if (action === 'start') {
     r.status = 'in_progress'; r.startedAt = now(); r.endsAt = now() + r.durationMinutes * 60000;
-    r.people.forEach((p) => { if (p.status === 'approved') p.attemptStatus = 'submitted'; });
+    r.people.forEach((p) => { if (p.status === 'approved') p.attemptStatus = 'in_progress'; });
     return { exam: roomView(r) };
   }
   if (action === 'end') { r.status = 'completed'; return { exam: roomView(r) }; }
@@ -103,7 +103,13 @@ export function liveRoute(method, path, body) {
     return { exam: { shareCode: code, title: r.title, status: r.status, durationMinutes: r.durationMinutes, startedAt: iso(r.startedAt), endsAt: iso(r.endsAt), serverTime: iso(now()), totalQuestions: SAMPLE.length, attemptStatus: 'in_progress', questions: SAMPLE.map(([stem, options], index) => ({ index, stem, options, selectedOption: r.answers[index] ?? null })) } };
   }
   if (action === 'answer' && method === 'PATCH') { r.answers = r.answers ?? {}; r.answers[body.questionIndex] = body.selectedOption; return { answer: body }; }
-  if (action === 'submit') { r.submittedAt = now(); return { result: { attemptStatus: 'submitted' } }; }
+  if (action === 'submit') {
+    // The client hands back anything its autosave never delivered, exactly as the real API does.
+    r.answers = r.answers ?? {};
+    (body?.answers ?? []).forEach(({ questionIndex, selectedOption }) => { r.answers[questionIndex] = selectedOption; });
+    r.submittedAt = now();
+    return { result: { attemptStatus: 'submitted', answersAccepted: body?.answers?.length ?? 0 } };
+  }
   if (action === 'result') {
     const a = r.answers ?? {};
     const correct = SAMPLE.filter(([, , c], i) => a[i] === c).length;

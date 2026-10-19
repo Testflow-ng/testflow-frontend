@@ -112,7 +112,9 @@ export default defineConfig({
         // entry for navigations. API calls stay network-only (server-authoritative).
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff,woff2,ttf}'],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        // `/r/:token` is a server-rendered page (the Open Graph share link), not an app route:
+        // letting the worker answer it would hand a crawler the SPA shell instead of the tags.
+        navigateFallbackDenylist: [/^\/api\//, /^\/r\//],
         cleanupOutdatedCaches: true,
         skipWaiting: true, // a new deploy replaces the old worker immediately
         clientsClaim: true,

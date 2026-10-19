@@ -424,8 +424,8 @@ export function makeQuestions(code, count) {
   return Array.from({ length: count }, (_, i) => ({
     /*
       A stable id, so a question can be bookmarked or reported. It is
-      `<SUBJECT>-q<position>`, which the sample data can render back exactly —
-      the parametric templates vary their numbers with the position, so the id has
+      `<SUBJECT>-q<position>`, which the sample data can render back exactly. The
+      parametric templates vary their numbers with the position, so the id has
       to carry it. Real questions are identified by their id in the bank instead.
     */
     id: `${code}-q${i}`,

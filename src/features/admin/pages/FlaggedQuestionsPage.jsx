@@ -36,8 +36,8 @@ const formatWhen = (value) =>
 /**
  * Reported questions, for review.
  *
- * The queue the students' reports land in. Each row is the whole question as they saw it —
- * stem, options, the marked answer and the explanation .plus what they said was wrong, so a
+ * The queue the students' reports land in. Each row is the whole question as they saw it:
+ * stem, options, the marked answer and the explanation. Plus what they said was wrong, so a
  * decision can be made without opening the bank in another tab. That other tab is one click
  * away for the fix itself.
  *
@@ -101,7 +101,7 @@ function FlaggedQuestionsPage() {
             Reported questions
           </h1>
           <p className="mt-1 text-sm text-muted">
-            What students say is wrong with a question, and the question itself.
+            What students say is wrong with a question.
           </p>
         </div>
       </div>
