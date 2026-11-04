@@ -1,0 +1,51 @@
+> **Note:** this is a fresh repository with clean history, created 2026-11-04. The previous history
+> contained hidden malicious code and is archived privately as `testflow-frontend-DANGER`. Do not use that one.
+
+# TestFlow Frontend
+
+The web application for TestFlow, a mobile-first computer-based testing platform. It provides student and administrator experiences, including authentication, examinations, results, question management, and analytics.
+
+## Stack
+
+- React 19 and Vite
+- Tailwind CSS
+- React Router and TanStack Query
+- Axios, React Hook Form, and Zod
+- Progressive Web App support
+
+## Run locally
+
+Requirements: Node.js 20 or later and npm.
+
+```bash
+git clone https://github.com/Testflow-ng/testflow-frontend.git
+cd testflow-frontend
+npm install
+cp .env.example .env.development
+npm run dev
+```
+
+The development server is normally available at `http://localhost:5173`.
+
+## Configuration
+
+Set `VITE_API_URL` in `.env.development` to the API origin. Production deployments must set the same environment variable in their hosting provider; no Vercel rewrite is required.
+
+```env
+VITE_API_URL=http://localhost:5001
+```
+
+## Useful commands
+
+```bash
+npm run dev      # Start the development server
+npm run build    # Create a production build
+npm run preview  # Preview the production build
+npm run lint     # Run ESLint
+npm run format   # Format source files
+```
+
+## Related repositories
+
+- [Backend API](https://github.com/Testflow-ng/testflow-backend)
+- [Mobile app](https://github.com/Testflow-ng/testflow-mobile)

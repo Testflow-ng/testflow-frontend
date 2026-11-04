@@ -1,0 +1,37 @@
+/* Brand spinner: twelve ticks stepping round, drawn from currentColor so it fits any surface. */
+.tf-spinner {
+  --c: currentColor;
+  width: var(--tf-spinner-size, 28px);
+  aspect-ratio: 1;
+  display: grid;
+  border-radius: 50%;
+  background:
+    linear-gradient(0deg, color-mix(in srgb, var(--c) 50%, transparent) 30%, #0000 0 70%, var(--c) 0) 50% / 8% 100%,
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 25%, transparent) 30%, #0000 0 70%, color-mix(in srgb, var(--c) 75%, transparent) 0) 50% / 100% 8%;
+  background-repeat: no-repeat;
+  animation: tf-spinner 1s infinite steps(12);
+}
+.tf-spinner::before,
+.tf-spinner::after {
+  content: '';
+  grid-area: 1 / 1;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.915;
+  transform: rotate(30deg);
+}
+.tf-spinner::after {
+  opacity: 0.83;
+  transform: rotate(60deg);
+}
+@keyframes tf-spinner {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+/* A spinner has to keep moving to say "working", so reduced motion slows it rather than stopping it. */
+@media (prefers-reduced-motion: reduce) {
+  .tf-spinner {
+    animation-duration: 3s;
+  }
+}

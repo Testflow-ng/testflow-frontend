@@ -1,0 +1,107 @@
+import apiClient from '../../api/client.js';
+
+export const adminApi = {
+  // Stats
+  getStats: () => apiClient.get('/api/admin/stats').then((res) => res.data),
+  exportResults: () =>
+    apiClient.get('/api/admin/export-results', { responseType: 'blob' }).then((res) => res.data),
+
+  // Students
+  listStudents: (params) => apiClient.get('/api/admin/students', { params }).then((res) => res.data),
+  createStudent: (payload) => apiClient.post('/api/admin/students', payload).then((res) => res.data.user),
+  resetStudentPassword: (id, password) =>
+    apiClient.patch(`/api/admin/students/${id}/reset-password`, { password }).then((res) => res.data),
+  toggleStudentStatus: (id) =>
+    apiClient.patch(`/api/admin/students/${id}/toggle-status`).then((res) => res.data.user),
+
+  // Admin Roster (Super Admin)
+  listAdmins: () => apiClient.get('/api/admin/roster').then((res) => res.data.admins),
+  createAdmin: (payload) => apiClient.post('/api/admin/create', payload).then((res) => res.data.user),
+  promoteAdmin: (email) => apiClient.post('/api/admin/promote', { email }).then((res) => res.data.user),
+  demoteAdmin: (id) => apiClient.patch(`/api/admin/demote/${id}`).then((res) => res.data.user),
+  deleteUser: (id) => apiClient.delete(`/api/admin/users/${id}`).then((res) => res.data),
+
+  // Questions
+  listQuestions: (params) => apiClient.get('/api/questions', { params }).then((res) => res.data),
+  getQuestion: (id) => apiClient.get(`/api/questions/${id}`).then((res) => res.data.question),
+  createQuestion: (data) => apiClient.post('/api/questions', data).then((res) => res.data.question),
+  bulkCreateQuestions: (data) => apiClient.post('/api/questions/bulk', data).then((res) => res.data),
+  updateQuestion: (id, data) =>
+    apiClient.patch(`/api/questions/${id}`, data).then((res) => res.data.question),
+  deleteQuestion: (id) => apiClient.delete(`/api/questions/${id}`).then((res) => res.data),
+
+  // Subjects
+  createSubject: (data) => apiClient.post('/api/subjects', data).then((res) => res.data.subject),
+  updateSubject: (id, data) =>
+    apiClient.patch(`/api/subjects/${id}`, data).then((res) => res.data.subject),
+  deleteSubject: (id) => apiClient.delete(`/api/subjects/${id}`).then((res) => res.data),
+
+  // Post-UTME Rankings
+  getPostUtmeRankings: () => apiClient.get('/api/admin/post-utme/rankings').then((res) => res.data.rankings),
+
+  // Global Settings
+  getSettings: () => apiClient.get('/api/admin/settings').then((res) => res.data.settings),
+  updateSettings: (payload) => apiClient.patch('/api/admin/settings', payload).then((res) => res.data.settings),
+
+  // Activity Feed
+  getActivityFeed: (params) => apiClient.get('/api/admin/activity', { params }).then((res) => res.data),
+
+  // Bulk Questions Actions
+  bulkDeleteQuestions: (ids) => apiClient.post('/api/admin/questions/bulk-delete', { ids }).then((res) => res.data),
+  bulkToggleQuestions: (ids, isActive) => apiClient.post('/api/admin/questions/bulk-toggle', { ids, isActive }).then((res) => res.data),
+  getQuestionAnalytics: (id) => apiClient.get(`/api/admin/questions/${id}/analytics`).then((res) => res.data),
+
+  /*
+    Reported questions.
+
+    A student who thinks a question is broken reports it from the paper or the corrections
+    review; these are the endpoints the review queue reads. `listQuestionFlags` returns the
+    reports *and* the per-status counts, so the queue can label its own filter without a
+    second request.
+  */
+  listQuestionFlags: (params) =>
+    apiClient.get('/api/admin/question-flags', { params }).then((res) => res.data),
+  resolveQuestionFlag: (id, payload) =>
+    apiClient.patch(`/api/admin/question-flags/${id}`, payload).then((res) => res.data.flag),
+
+  /*
+    Student feedback.
+
+    The other queue: what students sent from Settings .ratings, problems and ideas .rather
+    than what they said about a question. One request returns the entries and the counts, so
+    the filter labels need no second call.
+  */
+  listFeedback: (params) =>
+    apiClient.get('/api/admin/feedback', { params }).then((res) => res.data),
+  updateFeedback: (id, payload) =>
+    apiClient.patch(`/api/admin/feedback/${id}`, payload).then((res) => res.data.feedback),
+
+  // Post-UTME verification requests (a Student uploads a receipt, an admin approves or rejects it)
+  listVerifications: (params) => apiClient.get('/api/verifications/queue', { params }).then((res) => res.data.requests),
+  processVerification: (id, payload) => apiClient.patch(`/api/verifications/${id}/process`, payload).then((res) => res.data),
+
+  // Student pass (ad-free, Library, Live CBT hosting): support tools
+  grantEntitlement: (userId, payload) => apiClient.post(`/api/billing/ad-free/entitlements/${userId}/grant`, payload).then((res) => res.data),
+  revokeEntitlement: (userId, payload) => apiClient.post(`/api/billing/ad-free/entitlements/${userId}/revoke`, payload).then((res) => res.data),
+
+  // Advertising (Testflow Ads marketplace + Google AdSense health)
+  adsOverview: () => apiClient.get('/api/admin/ads/overview').then((res) => res.data),
+  adsCampaigns: (params) => apiClient.get('/api/admin/ads/campaigns', { params }).then((res) => res.data),
+  adsCampaignAction: (id, action, payload) => apiClient.post(`/api/admin/ads/campaigns/${id}/${action}`, payload ?? {}).then((res) => res.data.campaign),
+  adsPayments: (params) => apiClient.get('/api/admin/ads/payments', { params }).then((res) => res.data),
+  adsRefund: (id, payload) => apiClient.post(`/api/admin/ads/payments/${id}/refund`, payload).then((res) => res.data.payment),
+  adsSettings: () => apiClient.get('/api/admin/ads/settings').then((res) => res.data.settings),
+  updateAdsSettings: (payload) => apiClient.patch('/api/admin/ads/settings', payload).then((res) => res.data.settings),
+  adsJobs: () => apiClient.get('/api/admin/ads/jobs').then((res) => res.data.runs),
+  advertisingHealth: () => apiClient.get('/api/advertising/admin/health').then((res) => res.data.health),
+
+  // House Ads (Internal promos created and managed by admins)
+  listHouseAds: () => apiClient.get('/api/admin/ads/house-ads').then((res) => res.data.houseAds),
+  createHouseAd: (payload) => apiClient.post('/api/admin/ads/house-ads', payload).then((res) => res.data.houseAd),
+  updateHouseAd: (id, payload) => apiClient.patch(`/api/admin/ads/house-ads/${id}`, payload).then((res) => res.data.houseAd),
+  deleteHouseAd: (id, payload) => apiClient.delete(`/api/admin/ads/house-ads/${id}`, { data: payload }).then((res) => res.data),
+
+  // Data Retention
+  retentionOverview: () => apiClient.get('/api/admin/retention/overview').then((res) => res.data),
+  triggerRetentionSweep: () => apiClient.post('/api/admin/retention/sweep').then((res) => res.data.sweep),
+};

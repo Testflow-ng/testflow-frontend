@@ -1,0 +1,21 @@
+import apiClient from '../../api/client.js';
+
+export const authApi = {
+  me: () => apiClient.get('/api/auth/me').then((res) => res.data.user),
+  login: (payload) => apiClient.post('/api/auth/login', payload).then((res) => res.data.user),
+  register: (payload) => apiClient.post('/api/auth/register', payload).then((res) => res.data.user),
+  forgotPassword: ({ email }) => apiClient.post('/api/auth/forgot-password', { email }).then((res) => res.data),
+  resetPassword: ({ token, password }) =>
+    apiClient.post('/api/auth/reset-password', { token, password }).then((res) => res.data),
+  verifyEmail: (token) => apiClient.post('/api/auth/verify-email', { token }).then((res) => res.data),
+  logout: () => apiClient.post('/api/auth/logout'),
+  /** Add a product to the signed-in account (no new password). Needs `profile.organizationName` for `everybody`. */
+  addMembership: (payload) => apiClient.post('/api/auth/memberships', payload).then((res) => res.data.user),
+  switchProduct: (product) => apiClient.post('/api/auth/switch-product', { product }).then((res) => res.data.user),
+  setUsername: (username) =>
+    apiClient.patch('/api/auth/username', { username }).then((res) => res.data.user),
+  updateProfile: (payload) =>
+    apiClient.patch('/api/auth/profile', payload).then((res) => res.data.user),
+  changePassword: (payload) =>
+    apiClient.post('/api/auth/change-password', payload).then((res) => res.data),
+};

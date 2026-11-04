@@ -1,0 +1,1259 @@
+@import 'tailwindcss';
+
+/* Flo's motion library. Imported here rather than from the component so the
+   cascade order is predictable and the reduced-motion overrides always land
+   after the base animations. */
+@import './components/brand/mascotMotion.css';
+
+/*
+  Tailwind v4 token bridge.
+  Maps TestFlow's runtime CSS variables (defined in :root and
+  :root[data-theme='dark'] below) onto Tailwind's semantic utility scale.
+  `inline` keeps the utilities referencing the live variables, so every
+  utility stays theme-reactive (bg-primary, text-muted, etc. flip with the
+  active theme without regenerating classes).
+*/
+@theme inline {
+  /* Surfaces & text */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-foreground: var(--text);
+  --color-foreground-strong: var(--text-strong);
+  --color-muted: var(--text-muted);
+
+  /* Brand & status (each color exposes base / foreground / hover / active) */
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-secondary-hover: var(--color-secondary-hover);
+  --color-secondary-active: var(--color-secondary-active);
+  --color-success: var(--color-success);
+  --color-success-foreground: var(--color-success-foreground);
+  --color-success-hover: var(--color-success-hover);
+  --color-success-active: var(--color-success-active);
+  --color-warning: var(--color-warning);
+  --color-warning-foreground: var(--color-warning-foreground);
+  --color-warning-hover: var(--color-warning-hover);
+  --color-warning-active: var(--color-warning-active);
+  --color-danger: var(--color-danger);
+  --color-danger-foreground: var(--color-danger-foreground);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-danger-active: var(--color-danger-active);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-active: var(--color-accent-active);
+  --color-info: var(--color-info);
+  --color-info-foreground: var(--color-info-foreground);
+  --color-info-hover: var(--color-info-hover);
+  --color-info-active: var(--color-info-active);
+  --color-neutral: var(--color-neutral);
+  --color-neutral-foreground: var(--color-neutral-foreground);
+  --color-neutral-hover: var(--color-neutral-hover);
+  --color-neutral-active: var(--color-neutral-active);
+
+  /* AA-safe text roles: `text-link`, `text-score-good` / `-mid` / `-low`. */
+  --color-link: var(--color-link);
+  --color-score-good: var(--score-good);
+  --color-score-mid: var(--score-mid);
+  --color-score-low: var(--score-low);
+
+  /* Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  /* Elevation */
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  /* Typography */
+  --font-sans: var(--font-family-base);
+  --font-heading: var(--font-family-heading);
+  --font-mono: var(--font-family-mono);
+
+  /*
+    Small-phone breakpoint. Tailwind's smallest default is `sm` at 640px, which
+    is no help for the 320-360px band where iPhone SE and older Androids live.
+    Anything gated on `xs` is a nicety that a 320px screen genuinely cannot fit.
+  */
+  --breakpoint-xs: 22.5rem; /* 360px */
+}
+
+/*
+  Global foundation styles for TestFlow
+  - Modern reset and box-sizing
+  - Fluid typography and responsive defaults
+  - Accessible focus, selection, and motion handling
+  - Light and dark system/theme variables
+  - Design tokens for transitions, radius, shadows, z-index, and animation
+  - Progressive loading and high contrast support
+*/
+
+:root {
+  /* Brand tokens from the landing pages. */
+  --brand-ink: #1b4332;
+  --brand-indigo: #4a35f0;
+  --brand-lime: #d6e87c;
+  --brand-lavender: #e9e5fb;
+  --brand-sage: #e4ebdd;
+  --brand-cream: #f6f4ee;
+  --sidebar-w: 276px; /* desktop sidebar + gutters; updated by useSidebar */
+
+  color-scheme: light dark;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-size-adjust: 100%;
+
+  /* Font families */
+  --font-family-base:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-heading:
+    'Bricolage Grotesque', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+  /* Typography scale */
+  --type-display: clamp(3.25rem, 5vw, 4.75rem);
+  --type-heading: clamp(2.25rem, 3vw, 3rem);
+  --type-subheading: clamp(1.375rem, 2vw, 1.75rem);
+  --type-body: 1rem;
+  --type-body-lg: 1.125rem;
+  --type-caption: 0.875rem;
+  --type-small: 0.75rem;
+  --leading-display: 1.05;
+  --leading-heading: 1.12;
+  --leading-subheading: 1.35;
+  --leading-body: 1.75;
+  --leading-caption: 1.4;
+  --leading-small: 1.5;
+  --tracking-display: -0.03em;
+  --tracking-heading: -0.02em;
+  --tracking-subheading: -0.01em;
+  --tracking-body: 0;
+  --tracking-caption: 0.01em;
+  --tracking-small: 0.02em;
+  --font-weight-display: 800;
+  --font-weight-heading: 700;
+  --font-weight-subheading: 600;
+  --font-weight-body: 400;
+  --font-weight-caption: 500;
+  --font-weight-small: 400;
+
+  /*
+    Mobile chrome metrics.
+    The bottom nav is `position: fixed`, so every scrollable screen has to
+    reserve its height plus the home-indicator inset itself. Centralising the
+    numbers here keeps the nav and the screen padding from drifting apart.
+  */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --nav-height: 4.25rem; /* 68px bar; clears floating mobile bottom pill */
+  --screen-gutter: 1rem; /* 16px on phones, matching native edge margins */
+
+  /* Spacing scale */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+  --space-9: 4rem;
+
+  /* Breakpoints */
+  --breakpoint-xs: 20rem; /* 320px */
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 48rem; /* 768px */
+  --breakpoint-lg: 64rem; /* 1024px */
+  --breakpoint-xl: 80rem; /* 1280px */
+  --breakpoint-2xl: 90rem; /* 1440px */
+
+  /* Containers */
+  --container-xs: 20rem;
+  --container-sm: 44rem;
+  --container-md: 60rem;
+  --container-lg: 72rem;
+  --container-xl: 88rem;
+  --container-2xl: 108rem;
+
+  /* Radius scale */
+  --radius-none: 0;
+  --radius-sm: 0.375rem;
+  --radius: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 24px 80px rgba(15, 23, 42, 0.16);
+
+  /*
+    Easing.
+    The built-in CSS curves are too weak to read as intentional, and
+    `cubic-bezier(0.4, 0, 0.2, 1)` (what this file used to carry) is the
+    generic Material curve nobody chose. These three are the standard strong
+    UI curves: enter/exit, on-screen movement, and the iOS drawer curve used
+    by the bottom sheet. There is deliberately no ease-in token .ease-in on
+    UI starts slow at exactly the moment the user is watching.
+  */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Transitions */
+  --transition-ease: var(--ease-out);
+  --transition-in-out: 250ms var(--transition-ease);
+  --transition-fast: 150ms var(--transition-ease);
+  --transition-slow: 400ms var(--transition-ease);
+  --transition-shadow: box-shadow var(--transition-in-out);
+  --transition-color:
+    background-color var(--transition-in-out), border-color var(--transition-in-out),
+    color var(--transition-in-out);
+
+  /* Animation durations */
+  --duration-xxs: 100ms;
+  --duration-xs: 120ms;
+  --duration-sm: 180ms;
+  --duration-md: 240ms;
+  --duration: 300ms;
+  --duration-lg: 420ms;
+  --duration-xl: 600ms;
+  --duration-xxl: 900ms;
+
+  /* Z-index */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-spotlight: 700;
+  --z-fullscreen: 999;
+
+  /* Opacity tokens */
+  --opacity-0: 0;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-100: 1;
+
+  /* TestFlow official color system */
+  --color-primary: #4a35f0;
+  --color-primary-foreground: #ffffff;
+  --color-primary-hover: #3b27d6;
+  --color-primary-active: #2f1fb5;
+  --color-secondary: #1b4332;
+  --color-secondary-foreground: #ffffff;
+  --color-secondary-hover: #153a2a;
+  --color-secondary-active: #102e22;
+  --color-success: #1f8a4c;
+  --color-success-foreground: #ffffff;
+  --color-success-hover: #197340;
+  --color-success-active: #145c33;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #0f172a;
+  --color-warning-hover: #d97706;
+  --color-warning-active: #b45309;
+  --color-danger: #d4382c;
+  --color-danger-foreground: #ffffff;
+  --color-danger-hover: #b72d23;
+  --color-danger-active: #96241c;
+  --color-accent: #d6e87c;
+  --color-accent-foreground: #16301f;
+  --color-accent-hover: #c9dd66;
+  --color-accent-active: #b9ce52;
+  --color-info: #0ea5e9;
+  --color-info-foreground: #ffffff;
+  --color-info-hover: #0284c7;
+  --color-info-active: #0369a1;
+  --color-neutral: #6f7a73;
+  --color-neutral-foreground: #ffffff;
+  --color-neutral-hover: #565f59;
+  --color-neutral-active: #3d4a43;
+
+  /*
+    Text-safe variants.
+
+    The base brand colours are tuned for fills .`bg-primary` with white on it,
+    an amber streak pip, a green success chip. As *text on a light surface* three
+    of them fail WCAG AA: success #16a34a is 3.3:1, warning #f59e0b is 2.15:1,
+    and primary #0f6fec is 4.46:1, all under the 4.5:1 floor for normal text.
+
+    That mattered less when scores were small labels. This interface leads with
+    a colour-coded figure and colour-coded score columns, so these are the
+    values those roles use. Each one is an existing brand step (the hover/active
+    shades), not a new hue, so the palette does not grow.
+
+    Dark mode needs no correction: every base colour clears 6.5:1 on the dark
+    surfaces, so the text tokens simply alias the base there.
+  */
+  --color-link: #3b27d6; /* 6.23:1 on white */
+  --score-good: #15803d; /* 5.02:1 */
+  --score-mid: #b45309; /* 5.02:1 */
+  --score-low: #dc2626; /* 4.83:1 */
+
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f0eee7;
+  --color-surface-3: #e4e2d8;
+  --color-background: #f6f4ee;
+  --color-background-strong: #ffffff;
+  --color-border: #e3e1d8;
+  --color-border-strong: #cfcdc2;
+  --color-text-primary: #1b4332;
+  --color-text-secondary: #3d4a43;
+  --color-text-muted: #6f7a73;
+  --color-text-inverse: #ffffff;
+  --color-hover: #ebe9e0;
+  --color-active: #dedcd2;
+  --color-disabled: #dcdad0;
+  --color-disabled-foreground: #9aa39d;
+
+  /*
+    These five were declared only inside the dark-theme block, so in light mode
+    they resolved to nothing. That is not cosmetic: `:focus-visible` sets
+    `outline: ... solid var(--focus)`, and an empty var() makes the whole
+    shorthand invalid, which meant light mode had NO focus ring anywhere in the
+    app. Keyboard users had nothing to follow.
+
+    The ring is a solid brand colour rather than a translucent wash, because a
+    translucent outline changes contrast depending on what it happens to sit
+    over and can disappear against a tinted row.
+  */
+  --color-focus: #4a35f0;
+  --color-selection: rgba(74, 53, 240, 0.18);
+  --color-selection-foreground: #1b4332;
+  --color-placeholder: #8b958f;
+  --color-scrollbar-track: rgba(100, 116, 139, 0.1);
+  --color-scrollbar-thumb: rgba(100, 116, 139, 0.35);
+  --color-scrollbar-thumb-hover: rgba(100, 116, 139, 0.55);
+
+  /* Theme aliases */
+  --background: var(--color-background);
+  --surface: var(--color-surface-1);
+  --surface-strong: var(--color-surface-2);
+  --border: var(--color-border);
+  --border-strong: var(--color-border-strong);
+  --text: var(--color-text-primary);
+  --text-strong: var(--color-text-primary);
+  --text-muted: var(--color-text-muted);
+  --placeholder: var(--color-placeholder);
+  --muted: var(--color-neutral);
+  --selection: var(--color-selection);
+  --selection-foreground: var(--color-selection-foreground);
+  --focus: var(--color-focus);
+  --scrollbar-track: var(--color-scrollbar-track);
+  --scrollbar-thumb: var(--color-scrollbar-thumb);
+  --scrollbar-thumb-hover: var(--color-scrollbar-thumb-hover);
+}
+
+:root[data-theme='dark'] {
+  --color-primary: #5ba3f5;
+  --color-primary-foreground: #000000;
+  --color-primary-hover: #3b8ef0;
+  --color-primary-active: #0f6fec;
+  --color-secondary: #a3a3a3;
+  --color-secondary-foreground: #000000;
+  --color-secondary-hover: #d4d4d4;
+  --color-secondary-active: #e5e5e5;
+  --color-success: #4ade80;
+  --color-success-foreground: #000000;
+  --color-success-hover: #22c55e;
+  --color-success-active: #16a34a;
+  --color-warning: #fbbf24;
+  --color-warning-foreground: #000000;
+  --color-warning-hover: #f59e0b;
+  --color-warning-active: #d97706;
+  --color-danger: #f87171;
+  --color-danger-foreground: #000000;
+  --color-danger-hover: #ef4444;
+  --color-danger-active: #dc2626;
+  --color-info: #60a5fa;
+  --color-info-foreground: #000000;
+  --color-info-hover: #38bdf8;
+  --color-info-active: #0ea5e9;
+  --color-neutral: #a3a3a3;
+  --color-neutral-foreground: #000000;
+  --color-neutral-hover: #d4d4d4;
+  --color-neutral-active: #e5e5e5;
+
+  /* Dark surfaces need no correction; the base colours already clear 6.5:1. */
+  --color-link: var(--color-primary);
+  --score-good: var(--color-success);
+  --score-mid: var(--color-warning);
+  --score-low: var(--color-danger);
+
+  --gray-50: #0a0a0a;
+  --gray-100: #141414;
+  --gray-200: #1c1c1c;
+  --gray-300: #262626;
+  --gray-400: #333333;
+  --gray-500: #525252;
+  --gray-600: #737373;
+  --gray-700: #a3a3a3;
+  --gray-800: #d4d4d4;
+  --gray-900: #fafafa;
+
+  --color-surface-1: #161616;
+  --color-surface-2: #1e1e1e;
+  --color-surface-3: #282828;
+  --color-background: #0c0c0c;
+  --color-background-strong: #161616;
+  --color-border: #262626;
+  --color-border-strong: #3a3a3a;
+  --color-text-primary: #e5e5e5;
+  --color-text-secondary: #d4d4d4;
+  --color-text-muted: #a3a3a3;
+  --color-text-inverse: #000000;
+  --color-hover: #1a1a1a;
+  --color-active: #242424;
+  --color-disabled: #262626;
+  --color-disabled-foreground: #525252;
+  --color-selection: rgba(96, 165, 250, 0.18);
+  --color-selection-foreground: #fafafa;
+  --color-placeholder: #a3a3a3;
+  /* Solid, for the same reason as light: a 32%-alpha ring was close to
+     invisible against the tinted rows it most often lands on. */
+  --color-focus: #60a5fa;
+  --color-scrollbar-track: rgba(148, 163, 184, 0.16);
+  --color-scrollbar-thumb: rgba(148, 163, 184, 0.35);
+  --color-scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
+
+  --background: var(--color-background);
+  --surface: var(--color-surface-1);
+  --surface-strong: var(--color-surface-2);
+  --border: var(--color-border);
+  --border-strong: var(--color-border-strong);
+  --text: var(--color-text-primary);
+  --text-strong: var(--color-text-primary);
+  --text-muted: var(--color-text-muted);
+  --placeholder: var(--color-placeholder);
+  --muted: var(--color-neutral);
+  --selection: var(--color-selection);
+  --selection-foreground: var(--color-selection-foreground);
+  --focus: var(--color-focus);
+  --scrollbar-track: var(--color-scrollbar-track);
+  --scrollbar-thumb: var(--color-scrollbar-thumb);
+  --scrollbar-thumb-hover: var(--color-scrollbar-thumb-hover);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-background: #0c0c0c;
+    --color-surface: #161616;
+    --color-surface-strong: #1e1e1e;
+    --color-border: #262626;
+    --color-border-strong: #3a3a3a;
+    --color-text: #e5e5e5;
+    --color-text-strong: #fafafa;
+    --color-text-muted: #a3a3a3;
+    --color-placeholder: #a3a3a3;
+    --color-muted: #d4d4d4;
+    --color-primary: #60a5fa;
+    --color-primary-muted: #1d4ed8;
+    --color-accent: #38bdf8;
+    --color-accent-strong: #0ea5e9;
+    --color-selection: rgba(96, 165, 250, 0.18);
+    --color-selection-foreground: #fafafa;
+    --color-focus: rgba(96, 165, 250, 0.32);
+    --color-scrollbar-track: rgba(148, 163, 184, 0.16);
+    --color-scrollbar-thumb: rgba(148, 163, 184, 0.35);
+    --color-scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
+  }
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+  Reset and base element styles live in Tailwind's `base` layer so that utility
+  classes (which live in the higher-priority `utilities` layer) can always
+  override them. Without this, the unlayered reset would beat utilities like
+  `bg-surface` or `text-2xl` regardless of specificity.
+*/
+@layer base {
+
+/* Modern CSS reset */
+:where(
+  html,
+  body,
+  div,
+  span,
+  applet,
+  object,
+  iframe,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  blockquote,
+  pre,
+  a,
+  abbr,
+  acronym,
+  address,
+  big,
+  cite,
+  code,
+  del,
+  dfn,
+  em,
+  img,
+  ins,
+  kbd,
+  q,
+  s,
+  samp,
+  small,
+  strike,
+  strong,
+  sub,
+  sup,
+  tt,
+  var,
+  b,
+  u,
+  i,
+  center,
+  dl,
+  dt,
+  dd,
+  ol,
+  ul,
+  li,
+  fieldset,
+  form,
+  label,
+  legend,
+  table,
+  caption,
+  tbody,
+  tfoot,
+  thead,
+  tr,
+  th,
+  td,
+  article,
+  aside,
+  canvas,
+  details,
+  embed,
+  figure,
+  figcaption,
+  footer,
+  header,
+  hgroup,
+  menu,
+  nav,
+  output,
+  ruby,
+  section,
+  summary,
+  time,
+  mark,
+  audio,
+  video
+) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  background: transparent;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: '';
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Core layout and typography */
+html {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  font-size: clamp(0.95rem, calc(0.92rem + 0.3vw), 1.05rem);
+  min-height: 100%;
+
+  /*
+    Native-feel touch defaults.
+    - No grey flash on tap; we express press state ourselves via :active.
+    - `overscroll-behavior-y: none` kills the rubber-band / pull-to-refresh
+      bounce that makes an installed PWA read as a web page.
+  */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  font-family: var(--font-family-base);
+  font-size: var(--type-body);
+  line-height: var(--leading-body);
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--tracking-body);
+  background: var(--background);
+  color: var(--text);
+  text-rendering: optimizeLegibility;
+  word-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+#root {
+  isolation: isolate;
+  min-height: 100svh;
+}
+
+img,
+picture,
+svg,
+video,
+canvas,
+iframe {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+/*
+  `touch-action: manipulation` removes the ~300ms click delay browsers keep
+  around to detect a double-tap-to-zoom. Applied to interactive elements only,
+  so pinch-zoom still works on content.
+*/
+a,
+button,
+label,
+select,
+summary,
+[role='button'],
+[role='tab'] {
+  touch-action: manipulation;
+}
+
+button:disabled,
+[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Accessible focus styles */
+:focus-visible {
+  outline: max(2px, 0.12rem) solid var(--focus);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Selection and text defaults */
+::selection {
+  background: var(--selection);
+  color: var(--selection-foreground);
+}
+
+::marker {
+  color: var(--text-muted);
+}
+
+body > * {
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-heading);
+  color: var(--text-strong);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--type-display);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--font-weight-display);
+}
+
+h2 {
+  font-size: var(--type-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  font-weight: var(--font-weight-heading);
+}
+
+h3 {
+  font-size: var(--type-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+  font-weight: var(--font-weight-subheading);
+}
+
+p,
+li,
+dd,
+dt {
+  color: var(--text);
+  margin: 0;
+}
+
+small {
+  font-size: var(--type-small);
+  line-height: var(--leading-small);
+  letter-spacing: var(--tracking-small);
+  font-weight: var(--font-weight-small);
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+}
+
+/* Form and control defaults */
+input,
+textarea,
+select {
+  min-width: 0;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  line-height: 1.4;
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+/*
+  iOS Safari zooms the viewport whenever a focused control's text is smaller
+  than 16px, and never zooms back out. Every control therefore renders at 16px
+  on phones and drops to the design size from `sm` up (components that set an
+  explicit size do the same via `text-base sm:text-sm`).
+*/
+@media (max-width: 639px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+button,
+input,
+textarea,
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/*
+  `appearance: none` on the input does not remove WebKit's search cancel
+  button .the pseudo-element keeps its own inline box, so a search field
+  showed our clear button and the browser's side by side. We always ship our
+  own, so the native pair is removed outright.
+*/
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive media defaults */
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+  vertical-align: middle;
+}
+
+table {
+  width: 100%;
+}
+
+/* Scrollbar styling */
+:root {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+* {
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  body {
+    background: var(--background);
+    color: var(--text);
+  }
+
+  * {
+    color-adjust: exact;
+    forced-color-adjust: none;
+  }
+
+  *::selection {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+
+  body {
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    forced-color-adjust: none;
+  }
+}
+
+}
+/* end @layer base */
+
+/*
+  Mobile shell utilities.
+  These live outside @layer base so they win over the reset, but they are plain
+  classes (not utilities) so a Tailwind class on the same element still wins.
+*/
+@media (min-width: 640px) {
+  :root {
+    --screen-gutter: 1.25rem;
+  }
+}
+
+/* Horizontal gutter that also clears landscape notches. */
+.tf-gutter {
+  padding-left: calc(var(--screen-gutter) + var(--safe-left));
+  padding-right: calc(var(--screen-gutter) + var(--safe-right));
+}
+
+/*
+  Bottom clearance for screens that sit behind the fixed bottom nav: bar
+  height + home indicator + a breathing gap, so the last card is never
+  half-hidden or flush against the nav.
+*/
+.tf-nav-clearance {
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 1.25rem);
+}
+
+@media (min-width: 1024px) {
+  .tf-nav-clearance {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Bottom inset only, for elements that dock to the bottom edge themselves. */
+.tf-safe-bottom {
+  padding-bottom: var(--safe-bottom);
+}
+
+/*
+  Touch feedback. Press states must be instant on the way down and settle on
+  the way up, so the scale-down is near-immediate and the release eases out.
+  Pointer devices keep hover; coarse pointers get the scale.
+*/
+.tf-pressable {
+  -webkit-user-select: none;
+  user-select: none;
+  /* Named properties, never `all`. Press feedback sits in the 100-160ms band. */
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+
+.tf-pressable:active {
+  transform: scale(0.975);
+  transition-duration: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-pressable,
+  .tf-pressable:active {
+    transform: none;
+    transition: none;
+  }
+}
+
+/*
+  One-shot entrance for a single element that the eye should land on after the
+  figure it belongs to. A CSS animation rather than a JS one: it is
+  predetermined motion, so it runs off the main thread and still plays cleanly
+  while the dashboard's queries are resolving.
+
+  Transform and opacity only, 260ms, strong ease-out. Under reduced motion the
+  element still fades (comprehension is preserved) but does not travel.
+*/
+@keyframes tf-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tf-rise-in {
+  animation: tf-rise-in 260ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tf-rise-in {
+    animation: tf-fade-in 200ms ease both;
+  }
+}
+
+@keyframes tf-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+  Horizontal chip/filter rails: snap to each chip and let the row bleed into
+  the screen gutter so the first and last chips align with page content while
+  still scrolling edge to edge.
+*/
+.tf-rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-left: calc(var(--screen-gutter) * -1);
+  margin-right: calc(var(--screen-gutter) * -1);
+  padding-left: var(--screen-gutter);
+  padding-right: var(--screen-gutter);
+  /*
+    `scroll-padding` is what makes the snap respect the gutter, and it is not
+    the same thing as `padding`.
+
+    Padding positions the content; scroll-padding insets the *snapport*, the
+    box snap positions align against. Without it, `scroll-snap-align: start` on
+    the first chip snapped it flush to the scroll container's edge .scrolling
+    straight past the 16px padding .so the first chip sat hard against the
+    screen edge while everything above it lined up on the margin.
+  */
+  scroll-padding-left: var(--screen-gutter);
+  scroll-padding-right: var(--screen-gutter);
+}
+
+.tf-rail > * {
+  scroll-snap-align: start;
+}
+
+
+
+/* Toast entrance: a short rise, skipped for reduced motion. */
+@keyframes tf-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tf-toast {
+  animation: tf-toast-in 220ms var(--ease-out, ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-toast {
+    animation: none;
+  }
+}
+
+/* Skeleton shimmer: a soft brand-tinted sweep; static for reduced motion. */
+.tf-shimmer {
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--brand-lavender, #e9e5fb) 70%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: tf-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes tf-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tf-shimmer { animation: none; background-image: none; }
+}
+
+/* The italic serif accent used in headings: <em class="tf-accent">actually study.</em> */
+.tf-accent {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-size: 1.12em;
+  color: var(--color-primary);
+}
+
+/* Range slider in the brand style (used by <Slider>). */
+.tf-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tf-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--color-primary) var(--fill), var(--color-border-strong) var(--fill));
+}
+.tf-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--color-primary) var(--fill), var(--color-border-strong) var(--fill));
+}
+.tf-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-primary);
+  box-shadow: 0 4px 12px rgba(74, 53, 240, 0.35);
+}
+.tf-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--color-primary);
+}
+.tf-slider:focus-visible {
+  outline: none;
+}
+.tf-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(74, 53, 240, 0.25);
+}
+
+/* --- Print ---------------------------------------------------------------
+   The performance report is the one screen meant to end up on paper, so it
+   gets real page geometry. Its own toolbar carries `print:hidden`, and the
+   sheet drops its on-screen card treatment (radius, border, shadow) so the
+   printed page is ink on paper rather than a screenshot of a web page. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  .tf-print-sheet {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .tf-print-sheet .tf-print-flat {
+    border-color: #d7d7d7 !important;
+    box-shadow: none !important;
+  }
+
+  /* Keep a question and its answer on the same sheet of paper. */
+  .tf-print-sheet li {
+    break-inside: avoid;
+  }
+}
