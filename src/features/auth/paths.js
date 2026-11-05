@@ -1,11 +1,9 @@
 /**
- * Auth is built but gated. While `VITE_AUTH_ENABLED` is not "true", every
- * sign-in / sign-up entry point resolves to the waitlist page instead, so the
- * redesigned auth screens exist "under the hood" without being reachable.
+ * Auth is live by default. Set VITE_AUTH_ENABLED=false only if you want to gate it behind a waitlist.
  */
-export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
+export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false';
 
-export const WAITLIST_PATH = '/coming-soon';
+export const WAITLIST_PATH = '/register';
 export const LOGIN_PATH = AUTH_ENABLED ? '/login' : WAITLIST_PATH;
 export const REGISTER_PATH = AUTH_ENABLED ? '/register' : WAITLIST_PATH;
 export const REGISTER_CTA_LABEL = AUTH_ENABLED ? 'Create account' : 'Join the waitlist';

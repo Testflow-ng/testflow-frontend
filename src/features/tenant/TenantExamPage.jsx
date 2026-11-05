@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { CreditCard, Lock } from 'lucide-react';
+import { CheckCircle2, CreditCard, Lock } from 'lucide-react';
 import { Banner, Button, Card, Field, Input, ProgressBar, Spinner } from '../../components/ui/index.js';
 import OptionRow from '../../components/exam/OptionRow.jsx';
 import QuestionCard from '../../components/exam/QuestionCard.jsx';
@@ -39,6 +39,7 @@ function TenantExamPage() {
       const c = e.code;
       if (c === 'PAYMENT_REQUIRED') { setInfo(e.data?.error?.details ?? {}); setPhase('pay'); }
       else if (c === 'INVALID_ACCESS_CODE') { setInfo(code ? 'That code is not correct.' : null); setPhase('code'); }
+      else if (c === 'ATTEMPTS_EXHAUSTED') { setInfo(e.message || 'You have already submitted this exam.'); setPhase('completed'); }
       else { setInfo(e.message || 'Could not start this exam.'); setPhase('error'); }
     }
   }, [id, code]);
@@ -94,6 +95,29 @@ function TenantExamPage() {
   };
 
   if (phase === 'starting') return <TenantShell><div className="flex justify-center py-20"><Spinner size="xl" className="text-primary" /></div></TenantShell>;
+  if (phase === 'completed') {
+    return (
+      <TenantShell back="/">
+        <Card padding="lg" className="mx-auto max-w-[28rem] space-y-4 text-center">
+          <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-success/10 text-score-good">
+            <CheckCircle2 size={28} strokeWidth={2.2} aria-hidden="true" />
+          </span>
+          <h1 className="font-heading text-2xl font-extrabold text-foreground-strong">Exam Completed</h1>
+          <p className="text-sm leading-relaxed text-muted">
+            Your answers have been submitted and recorded. You have completed your session for this CBT exam.
+          </p>
+          <div className="pt-2 flex flex-col gap-2.5">
+            <Button size="lg" className="w-full" onClick={() => navigate('/results')}>
+              View My Results
+            </Button>
+            <Button variant="ghost" size="lg" className="w-full" onClick={() => navigate('/')}>
+              Back to Exam Portal
+            </Button>
+          </div>
+        </Card>
+      </TenantShell>
+    );
+  }
   if (phase === 'error') return <TenantShell back="/"><Banner variant="danger">{info}</Banner></TenantShell>;
 
   if (phase === 'pay') {

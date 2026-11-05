@@ -19,7 +19,7 @@ function TenantShell({ title, back, children, wide }) {
             <NavLink to="/" end className={link}>Exams</NavLink>
             {site?.pages?.results !== false && <NavLink to="/results" className={link}>My results</NavLink>}
           </nav>
-          <DropdownMenu placement="bottom-end" trigger={(p) => <IconButton aria-label="Account" variant="ghost" {...p}><Avatar name={user.fullName} size="sm" /></IconButton>} items={[{ label: user.fullName, disabled: true }, { separator: true }, { label: 'Sign out', icon: LogOut, danger: true, onSelect: logout }]} />
+          <DropdownMenu placement="bottom-end" trigger={(p) => <IconButton aria-label="Account" variant="ghost" {...p}><Avatar name={user.fullName} src={user.avatarUrl} size="sm" /></IconButton>} items={[{ label: user.fullName, disabled: true }, { separator: true }, { label: 'Sign out', icon: LogOut, danger: true, onSelect: logout }]} />
         </div>
       </header>
       <main className={cn('mx-auto w-full flex-1 px-5 py-8', wide ? 'max-w-[64rem]' : 'max-w-[48rem]')}>

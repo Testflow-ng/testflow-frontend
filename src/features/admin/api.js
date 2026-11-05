@@ -98,6 +98,15 @@ export const adminApi = {
   // House Ads (Internal promos created and managed by admins)
   listHouseAds: () => apiClient.get('/api/admin/ads/house-ads').then((res) => res.data.houseAds),
   createHouseAd: (payload) => apiClient.post('/api/admin/ads/house-ads', payload).then((res) => res.data.houseAd),
+  uploadHouseAdImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient
+      .post('/api/admin/ads/house-ads/image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data.asset);
+  },
   updateHouseAd: (id, payload) => apiClient.patch(`/api/admin/ads/house-ads/${id}`, payload).then((res) => res.data.houseAd),
   deleteHouseAd: (id, payload) => apiClient.delete(`/api/admin/ads/house-ads/${id}`, { data: payload }).then((res) => res.data),
 

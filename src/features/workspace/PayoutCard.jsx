@@ -30,7 +30,7 @@ function PayoutCard({ org, bare = false }) {
     }
   };
   const ready = form.bankCode && /^\d{10}$/.test(form.accountNumber);
-  const pct = p.platformPercent ?? 10;
+  const pct = p.platformPercent ?? 5;
 
   const Wrap = bare ? 'div' : Card;
   return (
@@ -40,7 +40,16 @@ function PayoutCard({ org, bare = false }) {
         <Badge variant={p.status === 'active' ? 'success' : 'outline'}>{p.status === 'active' ? 'Active' : 'Not set up'}</Badge>
       </div>
       {error && <Banner variant="danger">{error}</Banner>}
-      <Field label="Bank"><Select value={form.bankCode} onValueChange={set('bankCode')} options={(Array.isArray(banks) ? banks : []).map((b) => ({ value: b.code, label: b.name }))} placeholder="Choose your bank" /></Field>
+      <Field label="Bank">
+        <Select
+          searchable
+          searchPlaceholder="Search bank (e.g. OPay, GTBank, Kuda, Zenith)..."
+          value={form.bankCode}
+          onValueChange={set('bankCode')}
+          options={(Array.isArray(banks) ? banks : []).map((b) => ({ value: b.code, label: b.name }))}
+          placeholder="Choose your bank"
+        />
+      </Field>
       <Field label="Account number"><Input inputMode="numeric" maxLength={10} value={form.accountNumber} onChange={(e) => set('accountNumber')(e.target.value.replace(/\D/g, ''))} /></Field>
       {resolved ? <p className="flex items-center gap-2 rounded-xl bg-success/10 p-3 text-sm font-semibold text-score-good"><CheckCircle2 size={16} aria-hidden="true" />{resolved}</p> : <Button variant="outline" loading={checking} disabled={!ready} onClick={check}>Check account name</Button>}
       <Field label="Business name"><Input value={form.businessName} onChange={(e) => set('businessName')(e.target.value)} /></Field>

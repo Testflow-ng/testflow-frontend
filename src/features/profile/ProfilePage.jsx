@@ -1,12 +1,15 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Award,
   Bookmark,
   BookOpen,
+  Building2,
+  Camera,
   ChevronRight,
   History,
   KeyRound,
+  Loader2,
   LogOut,
   MessageSquare,
   Pencil,
@@ -18,8 +21,10 @@ import {
   ShieldAlert,
   Sparkles,
   Target,
+  Trash2,
   TrendingUp,
   Trophy,
+  Upload,
   X,
 } from 'lucide-react';
 import {
@@ -44,6 +49,7 @@ import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import { useSubjects, useTogglePin } from '../subjects/useSubjects.js';
+import { useOrganizations } from '../workspace/useWorkspace.js';
 
 const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : null;
@@ -53,6 +59,8 @@ const EMPTY_PASSWORD_FORM = { currentPassword: '', newPassword: '', confirmPassw
 function ProfilePage() {
   const { user, logout, refreshUser } = useAuth();
   const { data: subjects } = useSubjects();
+  const { data: orgs } = useOrganizations();
+  const org = Array.isArray(orgs) && orgs.length > 0 ? orgs[0] : null;
   const togglePin = useTogglePin();
   const toast = useToast();
   const location = useLocation();
@@ -71,6 +79,46 @@ function ProfilePage() {
   const [passwordForm, setPasswordForm] = useState(EMPTY_PASSWORD_FORM);
   const [passwordError, setPasswordError] = useState(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  const fileInputRef = useRef(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Only JPG, PNG or WebP images are supported');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5 MB');
+      return;
+    }
+    setIsUploadingAvatar(true);
+    try {
+      await authApi.uploadAvatar(file);
+      await refreshUser();
+      toast.success('Profile picture updated!');
+    } catch (err) {
+      toast.error('Failed to update picture', err.message);
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setIsUploadingAvatar(true);
+    try {
+      await authApi.deleteAvatar();
+      await refreshUser();
+      toast.success('Profile picture removed');
+    } catch (err) {
+      toast.error('Failed to remove picture', err.message);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   // Reseed the draft every time the editor opens so Cancel really cancels.
   const openEditor = useCallback(() => {
@@ -154,7 +202,30 @@ function ProfilePage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
         <Card padding="lg" className="flex flex-col items-center text-center lg:sticky lg:top-6">
-          <Avatar name={user.fullName} className="size-24 text-3xl" />
+          <div className="relative group">
+            <Avatar name={user.fullName} src={user.avatarUrl} className="size-24 text-3xl shadow-sm" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={handleAvatarFile}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              aria-label="Change profile photo"
+              title="Change profile photo"
+              className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-md ring-2 ring-background transition-transform hover:scale-110 active:scale-95 disabled:opacity-50"
+            >
+              {isUploadingAvatar ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Camera size={14} />
+              )}
+            </button>
+          </div>
           <h2 className="mt-4 min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
             {user.fullName}
           </h2>
@@ -221,6 +292,11 @@ function ProfilePage() {
           <section aria-labelledby="prefs-support" className="lg:hidden">
             <h2 id="prefs-support" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Preferences &amp; Support</h2>
             <div className="grid gap-3 sm:grid-cols-2">
+              {org ? (
+                <QuickLink to="/workspace" icon={Building2} title={`${org.name} Workspace`} hint="Manage exams, questions and students" />
+              ) : (
+                <QuickLink to="/everybody" icon={Building2} title="Testflow for Everyone" hint="Create your branded CBT platform" />
+              )}
               <QuickLink to="/billing/invoices" icon={Receipt} title="Invoices &amp; Receipts" hint="View your past payments" />
               <QuickLink to="/settings" icon={Settings} title="Settings" hint="Account, notifications and theme" />
               <QuickLink to="/settings/feedback" icon={MessageSquare} title="Feedback" hint="Share your thoughts with the team" />
@@ -228,6 +304,35 @@ function ProfilePage() {
                 <QuickLink to="/admin" icon={ShieldAlert} title="Admin Portal" hint="Manage questions, exams and students" />
               )}
             </div>
+          </section>
+
+          <section aria-labelledby="everybody-workspace">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 id="everybody-workspace" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Testflow for Everyone</h2>
+              <Link to={org ? '/workspace' : '/everybody'} className="text-xs font-semibold text-primary hover:underline">
+                {org ? 'Open workspace' : 'Learn more'}
+              </Link>
+            </div>
+            <Card className="flex flex-wrap items-center justify-between gap-4 p-4 border-primary/20 bg-primary/[0.02]">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Building2 size={18} aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-semibold text-foreground-strong">
+                    {org ? org.name : 'Run your own CBT Platform'}
+                  </p>
+                  <p className="text-sm text-muted">
+                    {org ? 'Manage your exams, questions, students and payments.' : 'Create branded CBT exams for your school or tutorial center.'}
+                  </p>
+                </div>
+              </div>
+              <Link to={org ? '/workspace' : '/everybody/start'}>
+                <Button variant="primary" size="sm">
+                  {org ? 'Switch to Workspace' : 'Launch Platform'}
+                </Button>
+              </Link>
+            </Card>
           </section>
 
           <section aria-labelledby="billing-invoices">
@@ -303,6 +408,39 @@ function ProfilePage() {
       >
         <div className="space-y-4 py-1">
           {editError && <Alert variant="danger">{editError}</Alert>}
+
+          {/* Avatar Manager */}
+          <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface-subtle/50 p-4">
+            <Avatar name={user.fullName} src={user.avatarUrl} className="size-16 text-xl shadow-xs shrink-0" />
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-sm font-semibold text-foreground-strong">Profile Picture</p>
+              <p className="text-xs text-muted">JPEG, PNG or WebP under 5 MB</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  loading={isUploadingAvatar}
+                  onClick={() => fileInputRef.current?.click()}
+                  leadingIcon={<Upload size={14} />}
+                >
+                  {user.avatarUrl ? 'Change picture' : 'Upload picture'}
+                </Button>
+                {user.avatarUrl && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-danger hover:bg-danger/10"
+                    loading={isUploadingAvatar}
+                    onClick={handleRemoveAvatar}
+                    leadingIcon={<Trash2 size={14} />}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <Field label="Full name">
             <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" autoComplete="name" />
           </Field>

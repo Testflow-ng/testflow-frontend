@@ -69,6 +69,11 @@ function TenantAuthPage({ mode = 'login' }) {
             <Field label="Email"><Input type="email" value={f.email} onChange={set('email')} autoComplete="email" /></Field>
             <Field label="Password"><PasswordInput value={f.password} onChange={set('password')} autoComplete={signup ? 'new-password' : 'current-password'} /></Field>
             <Button type="submit" size="lg" className="w-full" loading={busy} disabled={!ready}>{signup ? 'Create account' : 'Sign in'}</Button>
+            {signup && (
+              <p className="mt-2 text-center text-xs text-muted">
+                By creating an account, you agree to our <a href="https://testflow.com.ng/terms" target="_blank" rel="noopener noreferrer" className="underline">Terms</a> and <a href="https://testflow.com.ng/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacy Policy</a>.
+              </p>
+            )}
           </form>
 
           <p className="mt-6 text-center text-sm text-muted">

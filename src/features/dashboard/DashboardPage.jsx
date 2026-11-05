@@ -99,7 +99,7 @@ function DashboardPage() {
         <div className="mt-0.5 flex shrink-0 items-center gap-2.5">
           <GoAdFreeButton />
           <Link to="/profile" aria-label="Your profile" className="tf-pressable rounded-full">
-            <Avatar name={user.fullName} size="sm" />
+            <Avatar name={user.fullName} src={user.avatarUrl} size="sm" />
           </Link>
         </div>
       </header>
@@ -207,6 +207,9 @@ function DashboardPage() {
         </Section>
       )}
 
+      {/* Sponsored house ad / promo placement before More */}
+      <AdSlot placement="dashboard" className="my-8" />
+
       {/*
         The rest of the app, as three ruled rows rather than four decorative
         tiles. Same destinations, a third of the height, and the unbuilt one is
@@ -219,8 +222,6 @@ function DashboardPage() {
           <MoreRow to="/ai-study" label="AI study tools" note="Not ready yet" muted />
         </div>
       </Section>
-      {/* The only ad on Home: one quiet slot at the very bottom, never between actions. */}
-      <AdSlot placement="content_feed" className="mt-8" />
     </Screen>
   );
 }

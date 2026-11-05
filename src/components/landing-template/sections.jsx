@@ -5,6 +5,8 @@ import { ICONS } from './icons.js';
 import { BrowserFrame } from './visuals.jsx';
 import { VISUALS } from './visualMap.js';
 import { formatMoney } from '../../features/landing/format.js';
+import { useAuth } from '../../features/auth/useAuth.js';
+import { useOrganizations } from '../../features/workspace/useWorkspace.js';
 
 const Heading = ({ eyebrow, title, accent, side, as: Tag = 'h2' }) => (
   <div className="split-head">
@@ -18,9 +20,25 @@ const Heading = ({ eyebrow, title, accent, side, as: Tag = 'h2' }) => (
   </div>
 );
 
-export function Hero({ section }) {
+export function Hero({ section, plans }) {
+  const { isAuthenticated } = useAuth();
+  const { data: orgs } = useOrganizations();
+  const hasOrg = Boolean(Array.isArray(orgs) && orgs.length > 0);
   const Visual = VISUALS[section.visual];
   const img = section.image;
+
+  let primary = section.primary;
+  if (isAuthenticated && primary?.to?.includes('/everybody')) {
+    primary = hasOrg
+      ? { label: 'Open Workspace', to: '/workspace' }
+      : { label: 'Launch your CBT', to: '/everybody/start' };
+  }
+
+  const proPlan = plans?.find((p) => p.key === 'pro');
+  const heroNote = proPlan?.priceMinor
+    ? `Pro from ${formatMoney(proPlan.priceMinor, proPlan.currency)} a month. Studio is ad-free.`
+    : section.note;
+
   return (
     <section className="container hero">
       <div className="hero-copy">
@@ -30,8 +48,8 @@ export function Hero({ section }) {
         </h1>
         <p className="lead">{section.lead}</p>
         <div className="btn-row">
-          <Link to={section.primary.to} className="btn btn-primary">
-            {section.primary.label} <ArrowUpRight size={14} aria-hidden="true" />
+          <Link to={primary.to} className="btn btn-primary">
+            {primary.label} <ArrowUpRight size={14} aria-hidden="true" />
           </Link>
           {section.secondary && (
             <Link to={section.secondary.to} className="btn btn-ghost">
@@ -39,9 +57,9 @@ export function Hero({ section }) {
             </Link>
           )}
         </div>
-        {section.note && (
+        {heroNote && (
           <p className="note">
-            <Check size={12} aria-hidden="true" style={{ display: 'inline', verticalAlign: '-1px' }} /> {section.note}
+            <Check size={12} aria-hidden="true" style={{ display: 'inline', verticalAlign: '-1px' }} /> {heroNote}
           </p>
         )}
       </div>
@@ -283,6 +301,17 @@ export function Faq({ section }) {
 }
 
 export function FinalCta({ section }) {
+  const { isAuthenticated } = useAuth();
+  const { data: orgs } = useOrganizations();
+  const hasOrg = Boolean(Array.isArray(orgs) && orgs.length > 0);
+
+  let cta = section.cta;
+  if (isAuthenticated && cta?.to?.includes('/everybody')) {
+    cta = hasOrg
+      ? { label: 'Open Your Workspace', to: '/workspace' }
+      : { label: 'Create Your Platform', to: '/everybody/start' };
+  }
+
   return (
     <section id={section.id} className="container cta-wrap">
       <div className="cta">
@@ -294,13 +323,13 @@ export function FinalCta({ section }) {
           {section.text && <p>{section.text}</p>}
         </div>
         <div className="cta-action">
-          {section.cta.href ? (
-            <a href={section.cta.href} className="btn btn-lime" target="_blank" rel="noopener noreferrer">
-              {section.cta.label} <ArrowUpRight size={14} aria-hidden="true" />
+          {cta.href ? (
+            <a href={cta.href} className="btn btn-lime" target="_blank" rel="noopener noreferrer">
+              {cta.label} <ArrowUpRight size={14} aria-hidden="true" />
             </a>
           ) : (
-            <Link to={section.cta.to} className="btn btn-lime">
-              {section.cta.label} <ArrowUpRight size={14} aria-hidden="true" />
+            <Link to={cta.to} className="btn btn-lime">
+              {cta.label} <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
           )}
           {section.small && <small>{section.small}</small>}

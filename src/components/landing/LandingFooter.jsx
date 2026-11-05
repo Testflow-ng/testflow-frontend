@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ORG_NAME, ORG_PATH, PRODUCT_NAME_PUBLIC, PRODUCT_PATH } from '../../constants/products.js';
 import Logo from '../Logo.jsx';
-import { COMING_SOON_PATH, WAITLIST_EMAIL } from '../../features/waitlist/waitlist.js';
+import { WAITLIST_EMAIL } from '../../features/waitlist/waitlist.js';
 import { WHATSAPP_CHANNEL_URL } from '../../constants/social.js';
 import { LOGIN_PATH, REGISTER_PATH } from '../../features/auth/paths.js';
 import '../../pages/landing.css';
@@ -29,7 +29,6 @@ function LandingFooter() {
             <h4>Account</h4>
             <Link to={REGISTER_PATH}>Get started</Link>
             <Link to={LOGIN_PATH}>Log in</Link>
-            <Link to={COMING_SOON_PATH}>Join the waitlist</Link>
           </div>
           <div>
             <h4>Products</h4>

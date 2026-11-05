@@ -26,6 +26,16 @@ function PrivacyPage() {
       <p>Where the Nigeria Data Protection Act 2023 applies, we process personal data to provide the service you request, meet legal obligations, protect TestFlow and its users, or where you have given consent. We apply reasonable technical and organisational safeguards, but no online service can guarantee absolute security.</p>
     </LegalSection>
 
+    <LegalSection title="TestFlow for Everyone: Platform fees and payouts">
+      <p>For organisations running paid examinations and CBT sessions on TestFlow (available on the Studio plan), student payments are securely handled via our licensed payment infrastructure (Paystack) with automated revenue splits:</p>
+      <ul>
+        <li><strong>Platform Percentage Set to 5%:</strong> TestFlow retains 5%.</li>
+        <li><strong>Organization keeps 95%:</strong> The organization receives 95% of each transaction deposited directly to their verified bank payout account.</li>
+        <li><strong>Transparent Breakdown:</strong> In <code>/workspace/payments</code>, the payout card clearly shows: &ldquo;On a ₦1,000 payment: You receive ₦950.00 (TestFlow keeps 5%)&rdquo;.</li>
+      </ul>
+      <p>Bank verification data and payout accounts entered by organisation administrators are processed securely and shared solely with licensed payment settlement providers to execute automatic subaccount transfers.</p>
+    </LegalSection>
+
     <LegalSection title="Sharing and service providers">
       <p>We do not sell personal data. We may share only the information necessary with providers that help us host TestFlow, deliver emails, process or verify payments, store user-uploaded receipts, and protect the service. We may also disclose information where required by law or to protect users, TestFlow, or the public.</p>
     </LegalSection>

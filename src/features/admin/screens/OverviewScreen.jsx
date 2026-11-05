@@ -117,7 +117,7 @@ function OverviewScreen() {
                 <ul className="divide-y divide-border">
                   {(stats.data.recentUsers ?? []).map((u) => (
                     <li key={u.id ?? u._id} className="flex items-center gap-3 py-3">
-                      <Avatar name={u.fullName} size="sm" />
+                      <Avatar name={u.fullName} src={u.avatarUrl} size="sm" />
                       <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-foreground-strong">{u.fullName}</p><p className="truncate text-xs text-muted">{u.email}</p></div>
                       <span className="shrink-0 text-xs text-muted">{timeAgo(u.createdAt)}</span>
                     </li>

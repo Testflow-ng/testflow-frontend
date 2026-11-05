@@ -6,11 +6,11 @@ import GoogleAdUnit from './GoogleAdUnit.jsx';
 import SponsoredCard from '../../components/ads/SponsoredCard.jsx';
 import { useAdPlacement } from './useAdPlacement.js';
 
-const SECONDS = 5;
+const SECONDS = 3;
 
 /**
- * The one ad a student sees per finished paper: a calm five-second card between "submitted" and the
- * corrections. It only appears when the backend allows the post_activity placement (no ad-free pass).
+ * The ad a student sees per finished paper: a 3-second countdown card with 3, 2, 1 ticker
+ * before the Skip button is revealed. It only appears when the backend allows the post_activity placement (no ad-free pass).
  * If ads are off, slow or blocked it steps aside at once, so the result is never held back for nothing.
  */
 function PostExamAdGate({ onDone }) {
@@ -51,10 +51,10 @@ function PostExamAdGate({ onDone }) {
       <div className="flex flex-col items-center gap-2 text-center">
         <Mascot mood="excited" animation="bounce" size={84} />
         <h1 className="font-heading text-2xl font-extrabold tracking-tight text-foreground-strong">Your result is ready</h1>
-        <p className="text-sm text-muted">One moment while we line up your corrections.</p>
+        <p className="text-sm text-muted">Reviewing your performance & loading corrections...</p>
       </div>
 
-      <Card padding="md" className="space-y-3">
+      <Card padding="md" className="space-y-3 shadow-md border-border">
         <div className="flex items-center justify-between px-1 text-[11px]">
           <span className="font-semibold uppercase tracking-[0.14em] text-muted">
             {ad.isHouseAd ? 'Sponsored' : 'Advertisement'}
@@ -70,9 +70,27 @@ function PostExamAdGate({ onDone }) {
 
       <div className="space-y-3">
         <ProgressBar value={SECONDS - left} max={SECONDS} size="sm" tone="accent" label={undefined} />
-        <Button size="lg" className="w-full" disabled={!ready} onClick={onDone} aria-live="polite">
-          {ready ? 'View my result' : `View my result in ${left}s`}
-        </Button>
+        {ready ? (
+          <Button
+            size="lg"
+            variant="primary"
+            className="w-full font-bold text-base shadow-sm hover:shadow-md transition-all"
+            onClick={onDone}
+            aria-live="polite"
+          >
+            Skip Ad & View Results →
+          </Button>
+        ) : (
+          <div
+            className="flex w-full items-center justify-center gap-2.5 rounded-full border border-border bg-surface-subtle py-3 text-sm font-semibold text-muted shadow-2xs"
+            aria-live="polite"
+          >
+            <span>Skip available in</span>
+            <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary font-bold text-sm text-primary-foreground shadow-xs animate-pulse">
+              {left}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

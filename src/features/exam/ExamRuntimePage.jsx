@@ -129,7 +129,7 @@ function ExamRuntime({ session }) {
     }
 
     // A finished paper earns one short ad before the corrections (the result route reads this flag).
-    if (!isPostUtme) markAdDue(id);
+    markAdDue(id);
     navigate(`/exam/${id}/result${isPostUtme ? '?type=post-utme' : ''}`, { replace: true });
   }, [id, navigate, isPostUtme]);
 

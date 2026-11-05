@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowUpRight, Building2, Menu, X } from 'lucide-react';
 import Logo from '../Logo.jsx';
 import { useAuth } from '../../features/auth/useAuth.js';
+import { useOrganizations } from '../../features/workspace/useWorkspace.js';
 import { LOGIN_PATH, REGISTER_PATH } from '../../features/auth/paths.js';
 
 const DEFAULT_LINKS = [
@@ -17,9 +18,17 @@ function LandingNav({
   links = DEFAULT_LINKS,
   loginTo = LOGIN_PATH,
   primary = { to: REGISTER_PATH, label: 'Get started' },
+  dashboardTo = '/dashboard',
+  dashboardLabel = 'Dashboard',
 }) {
   const { isAuthenticated } = useAuth();
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const { data: orgs } = useOrganizations();
+  const hasOrg = Boolean(Array.isArray(orgs) && orgs.length > 0);
+  const org = hasOrg ? orgs[0] : null;
+
+  const isEverybodyPage = pathname.startsWith('/everybody') || dashboardTo === '/workspace';
 
   useEffect(() => {
     if (!open) return undefined;
@@ -29,6 +38,12 @@ function LandingNav({
   }, [open]);
 
   const close = () => setOpen(false);
+
+  const authTarget = isEverybodyPage
+    ? hasOrg
+      ? { to: '/workspace', label: 'Open Workspace' }
+      : { to: '/everybody/start', label: 'Launch your CBT' }
+    : { to: '/dashboard', label: 'Dashboard' };
 
   return (
     <div className="nav-shell">
@@ -43,12 +58,28 @@ function LandingNav({
               {label}
             </Link>
           ))}
+          {isAuthenticated && hasOrg && !isEverybodyPage && (
+            <Link to="/workspace" className="flex items-center gap-1 font-semibold text-primary">
+              <Building2 size={14} /> Workspace
+            </Link>
+          )}
         </nav>
         <div className="nav-actions">
           {isAuthenticated ? (
-            <Link to="/dashboard" className="btn btn-primary">
-              Dashboard <ArrowUpRight size={14} aria-hidden="true" />
-            </Link>
+            <div className="flex items-center gap-3">
+              {isEverybodyPage ? (
+                <Link to="/dashboard" className="login text-xs font-semibold">
+                  Student Dashboard
+                </Link>
+              ) : hasOrg ? (
+                <Link to="/workspace" className="login text-xs font-semibold">
+                  {org.name} Workspace
+                </Link>
+              ) : null}
+              <Link to={authTarget.to} className="btn btn-primary">
+                {authTarget.label} <ArrowUpRight size={14} aria-hidden="true" />
+              </Link>
+            </div>
           ) : (
             <>
               <Link to={loginTo} className="login">
@@ -79,9 +110,20 @@ function LandingNav({
             </Link>
           ))}
           {isAuthenticated ? (
-            <Link to="/dashboard" className="btn btn-primary" onClick={close}>
-              Dashboard
-            </Link>
+            <div className="flex flex-col gap-2 pt-2">
+              <Link to={authTarget.to} className="btn btn-primary" onClick={close}>
+                {authTarget.label} <ArrowUpRight size={14} aria-hidden="true" />
+              </Link>
+              {isEverybodyPage ? (
+                <Link to="/dashboard" onClick={close} className="text-center text-sm font-semibold text-muted">
+                  ← Go to Student Dashboard
+                </Link>
+              ) : hasOrg ? (
+                <Link to="/workspace" onClick={close} className="text-center text-sm font-semibold text-primary">
+                  Go to {org.name} Workspace →
+                </Link>
+              ) : null}
+            </div>
           ) : (
             <>
               <Link to={loginTo} onClick={close}>

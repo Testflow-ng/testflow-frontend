@@ -231,7 +231,7 @@ function LibraryPage({ isGatedPreview = false }) {
         locked={locked}
       />
       {/* One quiet slot under the shelf. The reader itself stays ad-free so reading is never interrupted. */}
-      <AdSlot placement="content_feed" className="mt-10" />
+      <AdSlot placement="library" className="mt-10" />
     </Screen>
   );
 }

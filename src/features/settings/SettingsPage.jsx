@@ -20,7 +20,7 @@ function SettingsPage() {
       <PageHeader back="/profile" title="Settings" subtitle="Your account and preferences." />
 
       <Link to="/profile" className={listRowClasses({ className: 'mt-6 gap-3.5 p-4' })}>
-        <Avatar name={user.fullName} size="md" />
+        <Avatar name={user.fullName} src={user.avatarUrl} size="md" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-semibold leading-snug text-foreground-strong">{user.fullName}</p>
           <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{user.email}</p>

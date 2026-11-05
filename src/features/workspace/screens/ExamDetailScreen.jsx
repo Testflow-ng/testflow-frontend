@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Check, ChevronDown, CircleAlert, Download, FileUp, ListPlus, MoreHorizontal, Pencil, PenLine, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Check, ChevronDown, CircleAlert, Clock, CreditCard, Download, Eye, EyeOff, FileText, FileUp, ListPlus, Lock, MoreHorizontal, Pencil, PenLine, Radio, RotateCcw, Shield, ShieldCheck, Sliders, Sparkles, Trash2, UserCheck, Users } from 'lucide-react';
 import { Badge, Banner, Button, Card, Checkbox, ConfirmDialog, CopyField, DropdownMenu, EmptyState, Field, FileUpload, IconButton, Input, Modal, SegmentedControl, Select, SkeletonCard, StatusBadge, StickyActionBar, Switch, TabPanel, TagInput, Tabs, useToast } from '../../../components/ui/index.js';
+import { cn } from '../../../utils/cn.js';
 import StatCard from '../../../components/data/StatCard.jsx';
 import DataTable from '../../../components/data/DataTable.jsx';
 import MathText from '../../../components/MathText.jsx';
@@ -188,10 +189,65 @@ const CORRECTIONS = [
   { value: 'hidden', label: 'Show nothing. Just record it, only I see the results' },
 ];
 
-function Block({ title, text, children }) {
+function ChoiceCard({ selected, onClick, disabled, badge, title, description, children, className }) {
   return (
-    <Card padding="lg" className="space-y-4">
-      <div><h2 className="font-heading text-base font-bold text-foreground-strong">{title}</h2>{text && <p className="mt-1 text-sm text-muted">{text}</p>}</div>
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        'group relative flex flex-col justify-between rounded-2xl border p-4 sm:p-5 text-left transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        selected
+          ? 'border-primary bg-primary/[0.04] ring-1 ring-primary/25 shadow-sm'
+          : 'border-border/80 bg-surface hover:border-border-strong hover:bg-surface-strong/30',
+        disabled && 'cursor-not-allowed opacity-50 hover:border-border/80 hover:bg-surface',
+        className,
+      )}
+    >
+      <div>
+        <div className="flex items-center justify-between gap-2">
+          {badge ? (
+            <span
+              className={cn(
+                'inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                selected ? 'bg-primary/10 text-primary' : 'bg-surface-strong text-muted',
+              )}
+            >
+              {badge}
+            </span>
+          ) : <span />}
+          {selected && (
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+              <Check size={12} strokeWidth={3} aria-hidden="true" />
+            </span>
+          )}
+        </div>
+        <h4 className="mt-3.5 font-heading text-[15px] font-bold text-foreground-strong">
+          {title}
+        </h4>
+        <p className="mt-1 text-xs leading-relaxed text-muted sm:text-[13px]">
+          {description}
+        </p>
+      </div>
+      {children && <div className="mt-3 pt-3 border-t border-border/60">{children}</div>}
+    </button>
+  );
+}
+
+function SectionBlock({ icon: Icon, title, subtitle, children, className }) {
+  return (
+    <Card padding="lg" className={cn('space-y-5 rounded-[28px] border-border/80 shadow-sm', className)}>
+      <div className="flex items-start gap-3">
+        {Icon && (
+          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-surface-strong text-muted">
+            <Icon size={18} strokeWidth={1.75} aria-hidden="true" />
+          </span>
+        )}
+        <div>
+          <h3 className="font-heading text-base font-bold text-foreground-strong">{title}</h3>
+          {subtitle && <p className="mt-0.5 text-sm text-muted">{subtitle}</p>}
+        </div>
+      </div>
       {children}
     </Card>
   );
@@ -200,72 +256,297 @@ function Block({ title, text, children }) {
 function RulesTab({ exam, paidNeedsPayout, canLive, canCharge }) {
   const { hasStudio, liveCbtPerk } = usePlanFeatures();
   const toast = useToast();
-  const [f, setF] = useState({ mode: 'anytime', access: 'link', showCorrections: 'now', shuffleQuestions: true, shuffleOptions: true, negativeMarking: 0, attemptsAllowed: 1, ...exam });
-  const dirty = JSON.stringify(f) !== JSON.stringify({ mode: 'anytime', access: 'link', showCorrections: 'now', shuffleQuestions: true, shuffleOptions: true, negativeMarking: 0, attemptsAllowed: 1, ...exam });
+  const baseDefaults = {
+    mode: 'anytime',
+    access: 'link',
+    showCorrections: 'now',
+    shuffleQuestions: true,
+    shuffleOptions: true,
+    negativeMarking: 0,
+    attemptsAllowed: 1,
+    paymentPolicy: 'per_session',
+    ...exam,
+  };
+  const [f, setF] = useState(baseDefaults);
+  const dirty = JSON.stringify(f) !== JSON.stringify(baseDefaults);
   const set = (patch) => setF((x) => ({ ...x, ...patch }));
-  const save = useWsMutation((id, body) => wsApi.saveExam(id, body), { onSuccess: () => toast.success('Rules saved'), onError: (e) => toast.error('Could not save', e.message) });
-  const [more, setMore] = useState(false);
+  const save = useWsMutation((id, body) => wsApi.saveExam(id, body), {
+    onSuccess: () => toast.success('Rules saved'),
+    onError: (e) => toast.error('Could not save', e.message),
+  });
+
   const paid = (f.priceMinor ?? 0) > 0;
   const date = f.startsAt ? f.startsAt.slice(0, 10) : '';
   const time = f.startsAt ? f.startsAt.slice(11, 16) : '09:00';
   const setStart = (d, t) => set({ startsAt: d ? `${d}T${t || '09:00'}` : '' });
 
+  // Attempts tier: 1 = strict single, 2-10 = limited, >=20 = unlimited
+  const attempts = f.attemptsAllowed ?? 1;
+  const attemptTier = attempts === 1 ? 'single' : attempts >= 20 ? 'unlimited' : 'limited';
 
   return (
-    <div className="max-w-3xl space-y-5 pb-24">
-      <Block title="Name and instructions">
-        <Field label="Exam name"><Input value={f.title} maxLength={120} onChange={(e) => set({ title: e.target.value })} /></Field>
-        <Field label="Instructions for students" hint="Shown before they start. Optional."><Input value={f.instructions ?? ''} onChange={(e) => set({ instructions: e.target.value })} placeholder="Answer all questions. No calculators." /></Field>
-      </Block>
+    <div className="max-w-4xl space-y-6 pb-24">
+      {/* 1. Basic Exam Info */}
+      <SectionBlock icon={Pencil} title="Exam Identity" subtitle="Title, student instructions, and duration.">
+        <Field label="Exam title">
+          <Input value={f.title} maxLength={120} onChange={(e) => set({ title: e.target.value })} placeholder="e.g. 2026 JAMB CBT Mock Exam" />
+        </Field>
+        <Field label="Instructions for students" hint="Shown on the confirmation screen before students click Start.">
+          <Input value={f.instructions ?? ''} onChange={(e) => set({ instructions: e.target.value })} placeholder="Answer all questions. Submit before time runs out." />
+        </Field>
+        <Field label="Exam duration (minutes)" hint="Students get this countdown timer from when they begin.">
+          <Input type="number" min="1" max="360" value={f.durationMinutes} onChange={(e) => set({ durationMinutes: Number(e.target.value) })} />
+        </Field>
+      </SectionBlock>
 
-      <Block title="When can students take it?">
-        <SegmentedControl label="Type" value={f.mode} onValueChange={(v) => set({ mode: v })} options={[{ value: 'anytime', label: 'Anytime' }, { value: 'live', label: canLive ? 'Live CBT' : 'Live CBT (Studio)', disabled: !canLive && f.mode !== 'live' }]} />
-        {canLive && !hasStudio && liveCbtPerk && <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">Free with your Student Pass: <span className="font-semibold">{liveCbtPerk.remaining} of {liveCbtPerk.limit}</span> live CBTs left. <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio</Link> removes the limit.</p>}
-        {!canLive && <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">Live CBT, where everyone starts together at a set time, is part of the <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio plan</Link>.</p>}
-        {f.mode === 'live' ? (
-          <div className="space-y-3">
-            <p className="text-sm text-muted">Everyone starts together. Students can open the page a few minutes early and wait for the start.</p>
-            <div className="grid gap-4 sm:grid-cols-2"><Field label="Date"><Input type="date" value={date} onChange={(e) => setStart(e.target.value, time)} /></Field><Field label="Start time"><Input type="time" value={time} onChange={(e) => setStart(date, e.target.value)} /></Field></div>
-          </div>
-        ) : <p className="text-sm text-muted">Students can start whenever they like, as long as the exam is live.</p>}
-        <Field label="How long do they get? (minutes)"><Input type="number" min="1" max="360" value={f.durationMinutes} onChange={(e) => set({ durationMinutes: Number(e.target.value) })} /></Field>
-      </Block>
+      {/* 2. When Can Students Take It? */}
+      <SectionBlock icon={Calendar} title="Delivery Mode" subtitle="Choose how and when students sit this exam.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ChoiceCard
+            badge="FLEXIBLE"
+            title="Anytime Practice"
+            description="Students can start and take the exam at their own convenience. Available 24/7 while published."
+            selected={f.mode === 'anytime'}
+            onClick={() => set({ mode: 'anytime' })}
+          />
+          <ChoiceCard
+            badge={canLive ? 'SCHEDULED' : 'STUDIO'}
+            title="Live CBT Session"
+            description="Everyone starts together at a set date and time with a live synchronized countdown."
+            selected={f.mode === 'live'}
+            disabled={!canLive && f.mode !== 'live'}
+            onClick={() => set({ mode: 'live' })}
+          />
+        </div>
 
-      <Block title="Is it free?" text="This is the only thing students ever pay for.">
-        <SegmentedControl label="Price" value={paid ? 'paid' : 'free'} onValueChange={(v) => set({ priceMinor: v === 'free' ? 0 : Math.max(f.priceMinor || 0, 100000) })} options={[{ value: 'free', label: 'Free' }, { value: 'paid', label: canCharge ? 'Paid' : 'Paid (Studio)', disabled: !canCharge && !paid }]} />
-        {!canCharge && <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">Charging students for an exam, paid to your account, is part of the <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio plan</Link>.</p>}
-        {paid && <Field label="Fee per student (₦)" hint="Testflow takes a small share of each payment automatically; the rest goes to your payout account."><Input type="number" min="100" value={(f.priceMinor ?? 0) / 100} onChange={(e) => set({ priceMinor: Math.round(Number(e.target.value || 0) * 100) })} /></Field>}
-        {paid && paidNeedsPayout && <Banner variant="warning" action={<Link to="/workspace/payments"><Button size="sm" variant="secondary">Add payout account</Button></Link>}>Add where your money should go before you make a paid exam live.</Banner>}
-      </Block>
+        {canLive && !hasStudio && liveCbtPerk && (
+          <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">
+            Free with your Student Pass: <span className="font-semibold">{liveCbtPerk.remaining} of {liveCbtPerk.limit}</span> live CBTs left. <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio</Link> removes the limit.
+          </p>
+        )}
+        {!canLive && (
+          <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">
+            Live CBT, where everyone starts together at a set time, is part of the <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio plan</Link>.
+          </p>
+        )}
 
-      <Block title="Who can take it?">
-        <SegmentedControl label="Access" value={f.access} onValueChange={(v) => set({ access: v })} options={[{ value: 'link', label: 'Anyone with the link' }, { value: 'invited', label: 'Students I invited' }, { value: 'code', label: 'Needs a code' }]} />
-        {f.access === 'invited' && <InvitedList value={f.allowedEmails ?? []} onChange={(allowedEmails) => set({ allowedEmails })} />}
-        {f.access === 'code' && <Field label="Access code" hint="Give this to the students you want."><Input value={f.accessCode ?? ''} onChange={(e) => set({ accessCode: e.target.value })} /></Field>}
-      </Block>
-
-      <Block title="After they finish" text="What students see once they submit.">
-        <Select aria-label="After they finish" value={f.showCorrections === 'never' ? 'score_only' : f.showCorrections} onValueChange={(v) => set({ showCorrections: v })} options={CORRECTIONS} />
-        {f.showCorrections === 'hidden' && <p className="rounded-xl bg-surface-strong p-3 text-sm text-foreground">Students only see "Submitted. Your result has been recorded." Scores stay visible to you in Results.</p>}
-      </Block>
-
-      <Card padding="lg" className="space-y-0">
-        <button type="button" onClick={() => setMore((m) => !m)} aria-expanded={more} className="flex w-full items-center justify-between gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-          <span><span className="block font-heading text-base font-bold text-foreground-strong">More options</span><span className="block text-sm text-muted">Mixing, marking and attempts.</span></span>
-          <ChevronDown size={20} className={`shrink-0 text-muted transition-transform ${more ? 'rotate-180' : ''}`} aria-hidden="true" />
-        </button>
-        {more && (
-          <div className="mt-6 space-y-5 border-t border-border pt-6">
-            <div className="flex items-center justify-between gap-4"><div><p className="text-sm font-semibold text-foreground-strong">Mix up the questions</p><p className="text-xs text-muted">Each student gets a different order.</p></div><Switch checked={f.shuffleQuestions} onCheckedChange={(v) => set({ shuffleQuestions: v })} aria-label="Mix up the questions" /></div>
-            <div className="flex items-center justify-between gap-4"><div><p className="text-sm font-semibold text-foreground-strong">Mix up the answer options</p><p className="text-xs text-muted">A, B, C, D appear in a different order.</p></div><Switch checked={f.shuffleOptions} onCheckedChange={(v) => set({ shuffleOptions: v })} aria-label="Mix up the answer options" /></div>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Marks lost for a wrong answer" hint="0 means none." className="min-w-0"><Input type="number" min="0" step="0.25" value={f.negativeMarking} onChange={(e) => set({ negativeMarking: Number(e.target.value) })} /></Field>
-              <Field label="Attempts allowed" hint="How many times a student can take it." className="min-w-0"><Input type="number" min="1" value={f.attemptsAllowed} onChange={(e) => set({ attemptsAllowed: Number(e.target.value) })} /></Field>
+        {f.mode === 'live' && (
+          <div className="rounded-2xl border border-border/80 bg-surface-strong/30 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">Set Live Schedule</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Date"><Input type="date" value={date} onChange={(e) => setStart(e.target.value, time)} /></Field>
+              <Field label="Start time"><Input type="time" value={time} onChange={(e) => setStart(date, e.target.value)} /></Field>
             </div>
           </div>
         )}
-      </Card>
-      <StickyActionBar dirty={dirty} onDiscard={() => setF({ mode: 'anytime', access: 'link', showCorrections: 'now', shuffleQuestions: true, shuffleOptions: true, negativeMarking: 0, attemptsAllowed: 1, ...exam })} onSave={() => save.mutate(f)} />
+      </SectionBlock>
+
+      {/* 3. Monetization & Payment Policy */}
+      <SectionBlock icon={CreditCard} title="Pricing & Payment Policy" subtitle="Choose if students pay and how retakes are charged.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ChoiceCard
+            badge="FREE"
+            title="Free for Students"
+            description="All eligible students can sit this exam without paying."
+            selected={!paid}
+            onClick={() => set({ priceMinor: 0 })}
+          />
+          <ChoiceCard
+            badge={canCharge ? 'MONETIZED' : 'STUDIO'}
+            title="Paid Exam Access"
+            description="Students pay via Paystack before sitting. TestFlow splits 95% straight to your payout bank."
+            selected={paid}
+            disabled={!canCharge && !paid}
+            onClick={() => set({ priceMinor: Math.max(f.priceMinor || 0, 100000) })}
+          />
+        </div>
+
+        {!canCharge && (
+          <p className="rounded-xl bg-[var(--brand-lavender)] p-3 text-sm text-foreground">
+            Charging students for an exam, paid to your account, is part of the <Link to="/workspace/billing" className="font-semibold text-primary underline">Studio plan</Link>.
+          </p>
+        )}
+
+        {paid && (
+          <div className="space-y-5 rounded-2xl border border-border/80 bg-surface-strong/20 p-5">
+            <Field label="Fee per student (₦)" hint="On a ₦1,000 payment: You receive ₦950 (TestFlow keeps 5%).">
+              <Input type="number" min="100" value={(f.priceMinor ?? 0) / 100} onChange={(e) => set({ priceMinor: Math.round(Number(e.target.value || 0) * 100) })} />
+            </Field>
+
+            {paidNeedsPayout && (
+              <Banner variant="warning" action={<Link to="/workspace/payments"><Button size="sm" variant="secondary">Add payout account</Button></Link>}>
+                Add where your money should go in Payments before making this paid exam live.
+              </Banner>
+            )}
+
+            <div>
+              <p className="mb-2 text-sm font-semibold text-foreground-strong">Retake Payment Model</p>
+              <p className="mb-3 text-xs text-muted">Choose whether each attempt requires a new payment or if one payment covers all attempts.</p>
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                <ChoiceCard
+                  badge="RECOMMENDED"
+                  title="Pay Per Sitting"
+                  description="Each exam session requires a payment. If a student wants to redo or retake, they must pay again for that session."
+                  selected={(f.paymentPolicy ?? 'per_session') === 'per_session'}
+                  onClick={() => set({ paymentPolicy: 'per_session' })}
+                />
+                <ChoiceCard
+                  badge="BUNDLE"
+                  title="Pay Once For All Tries"
+                  description="One payment unlocks the exam and covers all allowed attempts without charging again."
+                  selected={f.paymentPolicy === 'once'}
+                  onClick={() => set({ paymentPolicy: 'once' })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </SectionBlock>
+
+      {/* 4. Attempts Allowed (How Many Times Can A Student Take This?) */}
+      <SectionBlock icon={RotateCcw} title="Attempts & Redo Policy" subtitle="Choose how many sessions a student can take.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <ChoiceCard
+            badge="RECOMMENDED"
+            title="Single Attempt (1 Sitting)"
+            description="Student takes it once. Once submitted, they cannot retake. Anytime they click it again, it says 'Submitted'."
+            selected={attemptTier === 'single'}
+            onClick={() => set({ attemptsAllowed: 1 })}
+          />
+          <ChoiceCard
+            badge="LIMITED"
+            title="Limited Retakes"
+            description="Allow a set number of attempts (e.g. 2, 3, or 5 attempts per student)."
+            selected={attemptTier === 'limited'}
+            onClick={() => set({ attemptsAllowed: Math.max(2, Math.min(10, f.attemptsAllowed || 2)) })}
+          />
+          <ChoiceCard
+            badge="PRACTICE"
+            title="Unlimited Practice"
+            description="Students can redo and practice this exam as many times as they want."
+            selected={attemptTier === 'unlimited'}
+            onClick={() => set({ attemptsAllowed: 50 })}
+          />
+        </div>
+
+        {attemptTier === 'limited' && (
+          <div className="max-w-xs pt-1">
+            <Field label="Maximum attempts per student" hint="Between 2 and 10 attempts.">
+              <Input
+                type="number"
+                min="2"
+                max="10"
+                value={f.attemptsAllowed}
+                onChange={(e) => set({ attemptsAllowed: Math.max(2, Math.min(10, Number(e.target.value || 2))) })}
+              />
+            </Field>
+          </div>
+        )}
+      </SectionBlock>
+
+      {/* 5. After Submission & Result Visibility */}
+      <SectionBlock icon={Eye} title="After They Submit" subtitle="Choose what students see once they click submit.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <ChoiceCard
+            badge="RECOMMENDED"
+            title="Strict (Result Recorded Only)"
+            description="Student only sees 'Submitted. Result recorded.' No score, answers, or corrections are leaked. Anytime they re-open, it stays locked as Submitted."
+            selected={f.showCorrections === 'hidden'}
+            onClick={() => set({ showCorrections: 'hidden' })}
+          />
+          <ChoiceCard
+            badge="EVALUATION"
+            title="Score Only"
+            description="Students see their overall score and percentage, but all question corrections and answers remain hidden."
+            selected={f.showCorrections === 'score_only'}
+            onClick={() => set({ showCorrections: 'score_only' })}
+          />
+          <ChoiceCard
+            badge="STUDY MODE"
+            title="Immediate Corrections"
+            description="Full review. Students see every question, their chosen answer, the correct answer, and full explanations."
+            selected={f.showCorrections === 'now' || f.showCorrections === 'after_exam'}
+            onClick={() => set({ showCorrections: 'now' })}
+          />
+        </div>
+
+        {f.showCorrections === 'hidden' && (
+          <p className="rounded-xl border border-border/80 bg-surface-strong/30 p-3.5 text-xs sm:text-sm text-foreground-strong">
+            💡 <strong>Strict Exam Mode:</strong> Students only see <em>"Submitted. Your result has been recorded."</em> No correct answers or scores are revealed. You review the submissions privately in Results.
+          </p>
+        )}
+      </SectionBlock>
+
+      {/* 6. Who Can Take It? */}
+      <SectionBlock icon={Users} title="Who Can Access This Exam?" subtitle="Control student eligibility and privacy.">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <ChoiceCard
+            badge="PUBLIC"
+            title="Anyone With Link"
+            description="Any student registered on your CBT portal can access and sit this exam."
+            selected={f.access === 'link'}
+            onClick={() => set({ access: 'link' })}
+          />
+          <ChoiceCard
+            badge="PRIVATE"
+            title="Invited Emails Only"
+            description="Only student email addresses explicitly added to your roster can see and take it."
+            selected={f.access === 'invited'}
+            onClick={() => set({ access: 'invited' })}
+          />
+          <ChoiceCard
+            badge="PASSCODE"
+            title="Access Code Required"
+            description="Students must enter a secret access code you provide before they can start."
+            selected={f.access === 'code'}
+            onClick={() => set({ access: 'code' })}
+          />
+        </div>
+
+        {f.access === 'invited' && <InvitedList value={f.allowedEmails ?? []} onChange={(allowedEmails) => set({ allowedEmails })} />}
+        {f.access === 'code' && (
+          <Field label="Secret Access Code" hint="Give this code to the students you want to permit.">
+            <Input value={f.accessCode ?? ''} onChange={(e) => set({ accessCode: e.target.value })} placeholder="e.g. EXAM-2026" />
+          </Field>
+        )}
+      </SectionBlock>
+
+      {/* 7. Marking & Anti-Cheating Settings */}
+      <SectionBlock icon={Sliders} title="Marking & Question Security" subtitle="Randomization, order mixing, and penalties.">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground-strong">Mix up question order</p>
+              <p className="text-xs text-muted">Each student receives questions in a completely different, randomized order.</p>
+            </div>
+            <Switch checked={f.shuffleQuestions} onCheckedChange={(v) => set({ shuffleQuestions: v })} aria-label="Mix up questions" />
+          </div>
+
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 p-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground-strong">Mix up answer options</p>
+              <p className="text-xs text-muted">A, B, C, D options appear in randomized order for each question.</p>
+            </div>
+            <Switch checked={f.shuffleOptions} onCheckedChange={(v) => set({ shuffleOptions: v })} aria-label="Mix up options" />
+          </div>
+
+          <Field label="Marks lost for a wrong answer (Negative marking)" hint="0 means no penalty for guessing.">
+            <Input type="number" min="0" step="0.25" value={f.negativeMarking} onChange={(e) => set({ negativeMarking: Number(e.target.value) })} />
+          </Field>
+        </div>
+      </SectionBlock>
+
+      {/* Security Reassurance Banner */}
+      <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-surface-strong/30 p-4 text-xs text-muted leading-relaxed">
+        <ShieldCheck size={18} className="shrink-0 text-primary" aria-hidden="true" />
+        <span>All exam papers, student submissions, and attempt timestamps are cryptographically sealed upon submit.</span>
+      </div>
+
+      <StickyActionBar
+        dirty={dirty}
+        onDiscard={() => setF(baseDefaults)}
+        onSave={() => save.mutate(f)}
+      />
     </div>
   );
 }

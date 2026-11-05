@@ -25,6 +25,15 @@ function TermsPage() {
       <p>Where TestFlow offers paid features, access may be subject to successful payment and verification. Do not submit altered, misleading, or unauthorised payment receipts. Prices, feature availability, and verification requirements may change with notice. Refunds, where applicable, are handled according to the payment terms presented at the time of purchase and applicable law.</p>
     </LegalSection>
 
+    <LegalSection title="TestFlow for Everyone: Paid exams, fees and payouts">
+      <p>Organisations on the Studio plan may charge fees for their examinations and study materials. By enabling paid examinations, organisations agree to the platform revenue split:</p>
+      <ul>
+        <li><strong>Platform Percentage Set to 5%:</strong> TestFlow retains 5%.</li>
+        <li><strong>Organization keeps 95%:</strong> The organization receives 95% of each student transaction.</li>
+        <li><strong>Clear Financial Reporting:</strong> In <code>/workspace/payments</code>, the payout card clearly shows: &ldquo;On a ₦1,000 payment: You receive ₦950.00 (TestFlow keeps 5%)&rdquo;. Payouts are routed directly to the verified Nigerian bank account connected by the organization.</li>
+      </ul>
+    </LegalSection>
+
     <LegalSection title="Library reading and downloads">
       <p>The Library is one of the most demanding parts of TestFlow. Every book has to be sourced, checked, and prepared for the app, and every page you open and every file you download is served from our own infrastructure.</p>
       <p>We run on modest, low-compute servers. Free and unlimited reading and downloading would let a small number of heavy users slow the Library down or take it offline for everyone else, so reading full books and downloading them are part of the Student Pass. Browsing the shelf, opening a book’s details, saving bookmarks, and keeping your reading progress stay free.</p>

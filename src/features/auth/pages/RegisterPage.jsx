@@ -184,9 +184,23 @@ function RegisterPage({ product = 'student' }) {
             error={errors.confirmPassword?.message}
             {...register('confirmPassword')}
           />
+        {isEverybody && (
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 text-xs text-foreground/90 space-y-1.5">
+            <p className="font-semibold text-primary">Platform Percentage Set to 5% (Studio Plan)</p>
+            <p><strong>TestFlow retains 5% · Organization keeps 95%</strong></p>
+            <p className="text-muted leading-relaxed">
+              In <code>/workspace/payments</code>, the payout card clearly shows: &ldquo;On a ₦1,000 payment: You receive ₦950.00 (TestFlow keeps 5%)&rdquo;.
+            </p>
+          </div>
+        )}
         <button type="submit" className="btn btn-primary auth-submit" disabled={isSubmitting}>
           {isSubmitting ? 'Creating account…' : isAds ? 'Create advertiser account' : isEverybody ? 'Create my platform' : 'Create account'}
         </button>
+        <p className="mt-3 text-center text-xs text-muted">
+          By creating an account, you agree to our{' '}
+          <Link to="/terms" className="text-primary underline">Terms</Link> and{' '}
+          <Link to="/privacy" className="text-primary underline">Privacy Policy</Link>.
+        </p>
       </form>
       {product === 'student' && (
         <div className="auth-form" style={{ marginTop: 16 }}>

@@ -100,7 +100,7 @@ export const router = createBrowserRouter([
       { path: 'terms', element: <TermsPage /> },
       { path: 'help', element: <HelpCenterPage /> },
       { path: 'question/:id', element: <PublicQuestionPage /> },
-      { path: 'coming-soon', element: <ComingSoonPage /> },
+      { path: 'coming-soon', element: <Navigate to="/register" replace /> },
       // The link in an organisation's invitation email. It handles signed-out visitors itself.
       { path: 'invitations/accept', element: <AcceptInvitePage /> },
       // "Log in with Testflow": an organisation's site sends its students here to authorize.

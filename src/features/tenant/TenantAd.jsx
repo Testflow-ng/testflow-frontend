@@ -1,4 +1,5 @@
 import GoogleAdUnit from '../advertising/GoogleAdUnit.jsx';
+import SponsoredCard from '../../components/ads/SponsoredCard.jsx';
 import { cn } from '../../utils/cn.js';
 import { useTenantAds } from './useTenantAds.js';
 
@@ -8,8 +9,14 @@ function TenantAd({ slot, className, minHeight = 100 }) {
   if (!ad.show) return null;
   return (
     <aside aria-label="Advertisement" className={cn('rounded-[20px] border border-border bg-surface p-3', className)}>
-      <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Advertisement</p>
-      <GoogleAdUnit publisherId={ad.publisherId} slotId={ad.slotId} minHeight={minHeight} />
+      <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+        {ad.isHouseAd ? 'Sponsored' : 'Advertisement'}
+      </p>
+      {ad.isHouseAd && ad.houseAd ? (
+        <SponsoredCard ad={ad.houseAd} cta={ad.houseAd.cta} className="mx-auto" />
+      ) : (
+        <GoogleAdUnit publisherId={ad.publisherId} slotId={ad.slotId} minHeight={minHeight} />
+      )}
     </aside>
   );
 }

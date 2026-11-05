@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Banknote, Megaphone, ShieldCheck, Users, Plus, Play, Pause, Trash2, ExternalLink, Sparkles } from 'lucide-react';
-import { Badge, Banner, Button, Card, ConfirmDialog, Field, Input, KeyValueList, Modal, Skeleton, Switch, Tabs, TabPanel, useToast } from '../../../components/ui/index.js';
+import { Banknote, Megaphone, ShieldCheck, Users, Plus, Play, Pause, Trash2, ExternalLink, Sparkles, Check } from 'lucide-react';
+import { Badge, Banner, Button, Card, ConfirmDialog, Field, FileUpload, Input, KeyValueList, Modal, Skeleton, Switch, Tabs, TabPanel, useToast } from '../../../components/ui/index.js';
 import StatCard from '../../../components/data/StatCard.jsx';
 import AdsReviewQueue from '../../../components/ads/AdsReviewQueue.jsx';
 import AdsPaymentsTable from '../../../components/ads/AdsPaymentsTable.jsx';
@@ -151,11 +151,12 @@ function AdsSettings() {
   );
 }
 
-const PRESET_IMAGES = [
-  { label: 'Hero Student', url: '/photos/hero-student.webp' },
-  { label: 'Graduate', url: '/photos/graduate.webp' },
-  { label: 'Study Notes', url: '/photos/study-notes.webp' },
-  { label: 'Student Reading', url: '/photos/student.webp' },
+const AVAILABLE_PLACEMENTS = [
+  { id: 'dashboard', label: 'Student Dashboard', desc: 'Bottom of the student home screen' },
+  { id: 'post_activity', label: 'Result Gate (3s Countdown)', desc: 'Full countdown ad gate right after finishing test' },
+  { id: 'in_result', label: 'In-Between Result Corrections', desc: 'Compact inline strip inside question review' },
+  { id: 'library', label: 'Library Shelf', desc: 'Bottom of subjects and past questions bank' },
+  { id: 'tenant_portal', label: 'TestFlow for Everyone', desc: 'Student portal for organizations & schools' },
 ];
 
 function HouseAds() {
@@ -170,14 +171,47 @@ function HouseAds() {
   const [form, setForm] = useState({
     title: 'Upgrade to TestFlow Plus',
     description: 'Get unlimited CBT practice, in-depth AI explanations, and zero ads for just ₦500/month.',
-    imageUrl: '/photos/hero-student.webp',
+    imageUrl: '',
     ctaType: 'url',
     destinationUrl: '/billing',
     whatsapp: '',
     ctaLabel: 'Get Plus Pass',
     keywords: 'jamb, waec, plus, practice',
     durationDays: 365,
+    placements: ['dashboard', 'post_activity', 'in_result', 'library', 'tenant_portal'],
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState('');
+
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+    setUploadError('');
+    setUploading(true);
+    setUploadProgress(25);
+    setUploadedFileName(file.name);
+    try {
+      setUploadProgress(65);
+      const asset = await adminApi.uploadHouseAdImage(file);
+      setUploadProgress(100);
+      setForm((prev) => ({ ...prev, imageUrl: asset.url }));
+      toast.success('Image uploaded successfully!');
+    } catch (err) {
+      setUploadError(err.message || 'Failed to upload image');
+      toast.error('Upload failed', err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setForm((prev) => ({ ...prev, imageUrl: '' }));
+    setUploadedFileName('');
+    setUploadProgress(0);
+    setUploadError('');
+  };
 
   const createMutation = useAdminMutation(adminApi.createHouseAd, {
     onSuccess: () => {
@@ -231,6 +265,7 @@ function HouseAds() {
         : { type: 'url', url: form.destinationUrl || '/billing' },
       keywords,
       durationDays: Number(form.durationDays) || 365,
+      placements: form.placements.length > 0 ? form.placements : ['all'],
     });
   };
 
@@ -342,6 +377,22 @@ function HouseAds() {
                     </div>
                   </div>
 
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="text-[10px] font-semibold text-muted">Placements:</span>
+                    {(!ad.placements || ad.placements.includes('all') || ad.placements.length === 0) ? (
+                      <Badge variant="outline" className="text-[10px] py-0 px-2">All Screens</Badge>
+                    ) : (
+                      ad.placements.map((p) => {
+                        const match = AVAILABLE_PLACEMENTS.find((opt) => opt.id === p);
+                        return (
+                          <Badge key={p} variant="secondary" className="text-[10px] py-0 px-1.5">
+                            {match?.label ? match.label.split(' ')[0] : p}
+                          </Badge>
+                        );
+                      })
+                    )}
+                  </div>
+
                   {ad.destination?.url && (
                     <a
                       href={ad.destination.url}
@@ -385,10 +436,10 @@ function HouseAds() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         title="Create House Ad"
-        size="lg"
+        size="2xl"
       >
-        <div className="grid gap-6 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-8 p-1 md:grid-cols-[1.25fr_1fr]">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <Field label="Ad Title / Headline" required>
               <Input
                 value={form.title}
@@ -409,35 +460,35 @@ function HouseAds() {
               />
             </Field>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-foreground-strong">Preset Image</label>
-              <div className="flex flex-wrap gap-2">
-                {PRESET_IMAGES.map((img) => (
-                  <button
-                    key={img.url}
-                    type="button"
-                    onClick={() => setForm({ ...form, imageUrl: img.url })}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${
-                      form.imageUrl === img.url
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border text-muted hover:border-foreground/30'
-                    }`}
-                  >
-                    {img.label}
-                  </button>
-                ))}
+            <div className="space-y-3 rounded-2xl border border-border bg-surface-subtle/40 p-4">
+              <FileUpload
+                label="Ad Image / Banner"
+                accept="image/png,image/jpeg,image/webp"
+                maxBytes={5 * 1024 * 1024}
+                hint="Upload a JPEG, PNG, or WebP image (up to 5 MB)."
+                previewUrl={form.imageUrl || undefined}
+                fileName={uploadedFileName || (form.imageUrl ? 'Image ready' : undefined)}
+                progress={uploading ? uploadProgress : form.imageUrl ? 100 : undefined}
+                error={uploadError}
+                onFile={handleFileUpload}
+                onRemove={handleRemoveImage}
+              />
+
+              <div className="pt-1">
+                <Field label="Or paste an image URL directly">
+                  <Input
+                    value={form.imageUrl}
+                    onChange={(e) => {
+                      setForm({ ...form, imageUrl: e.target.value });
+                      if (!e.target.value) setUploadedFileName('');
+                    }}
+                    placeholder="https://cdn.testflow.com.ng/... or https://..."
+                  />
+                </Field>
               </div>
             </div>
 
-            <Field label="Or Custom Image URL">
-              <Input
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="/photos/... or https://..."
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <Field label="Destination Type">
                 <select
                   value={form.ctaType}
@@ -488,26 +539,86 @@ function HouseAds() {
               />
             </Field>
 
+            <div className="space-y-2.5 rounded-2xl border border-border bg-surface-subtle/40 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-foreground-strong">
+                    Target Placements
+                  </span>
+                  <p className="text-[11px] text-muted">
+                    Choose which screens and flows students will see this ad on:
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allIds = AVAILABLE_PLACEMENTS.map((p) => p.id);
+                    const hasAll = form.placements.length === allIds.length;
+                    setForm({ ...form, placements: hasAll ? [] : allIds });
+                  }}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  {form.placements.length === AVAILABLE_PLACEMENTS.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                {AVAILABLE_PLACEMENTS.map((p) => {
+                  const selected = form.placements.includes(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        const next = selected
+                          ? form.placements.filter((id) => id !== p.id)
+                          : [...form.placements, p.id];
+                        setForm({ ...form, placements: next });
+                      }}
+                      className={`flex flex-col items-start rounded-xl border p-2.5 text-left transition ${
+                        selected
+                          ? 'border-primary bg-primary/5 text-foreground-strong ring-1 ring-primary/40'
+                          : 'border-border bg-surface hover:border-border-strong text-muted'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`flex size-4 items-center justify-center rounded border transition ${
+                            selected ? 'border-primary bg-primary text-white' : 'border-border bg-surface'
+                          }`}
+                        >
+                          {selected && <Check size={12} strokeWidth={3} />}
+                        </div>
+                        <span className="text-xs font-bold text-foreground-strong">{p.label}</span>
+                      </div>
+                      <span className="mt-1 text-[10px] text-muted leading-tight">{p.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="flex justify-end gap-3 pt-3">
               <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" loading={createMutation.isPending}>
+              <Button type="submit" variant="primary" loading={createMutation.isPending || uploading}>
                 Publish Ad
               </Button>
             </div>
           </form>
 
           {/* Live Preview */}
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-subtle p-4">
-            <span className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
+          <div className="flex flex-col items-center justify-start rounded-2xl border border-dashed border-border bg-surface-subtle p-6">
+            <span className="mb-4 text-xs font-bold uppercase tracking-wider text-muted">
               Live Student Preview
             </span>
-            <SponsoredCard
-              ad={previewAd}
-              cta={previewCta}
-              className="scale-95"
-            />
+            <div className="w-full max-w-[340px]">
+              <SponsoredCard
+                ad={previewAd}
+                cta={previewCta}
+              />
+            </div>
           </div>
         </div>
       </Modal>

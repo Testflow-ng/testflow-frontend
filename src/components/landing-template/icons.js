@@ -1,5 +1,5 @@
 import {
-  BarChart3, BookOpen, Briefcase, CalendarDays, Check, ClipboardList, Flag, Globe, GraduationCap, LayoutTemplate,
+  BarChart3, BookOpen, Briefcase, CalendarDays, Check, ClipboardList, Clock, CreditCard, Flag, Globe, GraduationCap, LayoutTemplate,
   ListChecks, MessageCircle, ShieldCheck, Timer, TrendingUp, Users,
 } from 'lucide-react';
 
@@ -21,4 +21,6 @@ export const ICONS = {
   calendar: CalendarDays,
   timer: Timer,
   trend: TrendingUp,
+  creditCard: CreditCard,
+  clock: Clock,
 };

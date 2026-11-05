@@ -76,64 +76,69 @@ function PaymentsScreen() {
             items={[{ label: 'Statement (PDF)', icon: Printer, onSelect: statement }, { label: 'Spreadsheet (CSV)', icon: FileText, onSelect: () => downloadStatementCsv(rows, periodLabel) }]} />
         }
       />
-      <PlanLock locked={!canCharge} plan="Studio" title="Charging for exams is part of Studio" description="Charge students for an exam, get paid to your account, and download statements and receipts." className="mt-8">
-
       <div className="mt-6"><SegmentedControl label="Period" size="sm" value={period} onValueChange={setPeriod} options={PERIODS.map(({ value, label }) => ({ value, label }))} /></div>
 
-      <div className="mt-6 space-y-8">
-        <Reveal>
-          {isLoading ? <Skeleton className="h-52 w-full rounded-[28px]" /> : (
-            <div className="rounded-[28px] bg-secondary p-6 text-secondary-foreground sm:p-8">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">You received · {periodLabel}</p>
-                  <p className="mt-2 font-heading text-5xl font-extrabold tracking-tight text-white sm:text-6xl">{formatMoney(t.net)}</p>
+      <PlanLock
+        locked={!canCharge}
+        plan="Studio"
+        title="Paid exams are part of Studio"
+        description="Charge students for exam access, receive direct payouts to your bank account, and track your revenue."
+        className="mt-6"
+      >
+        <div className="space-y-8">
+          <Reveal>
+            {isLoading ? <Skeleton className="h-52 w-full rounded-[28px]" /> : (
+              <div className="rounded-[28px] bg-secondary p-6 text-secondary-foreground sm:p-8">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/60">You received · {periodLabel}</p>
+                    <p className="mt-2 font-heading text-5xl font-extrabold tracking-tight text-white sm:text-6xl">{formatMoney(t.net)}</p>
+                  </div>
+                  <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10 text-accent"><Wallet size={26} strokeWidth={1.5} aria-hidden="true" /></span>
                 </div>
-                <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10 text-accent"><Wallet size={26} strokeWidth={1.5} aria-hidden="true" /></span>
+                <dl className="mt-8 grid gap-6 sm:grid-cols-3">
+                  {[['Students paid', formatMoney(t.gross)], [`Testflow share (${org.payout?.platformPercent ?? 5}%)`, `-${formatMoney(t.fee)}`], ['Payments', t.count]].map(([k, v]) => <div key={k}><dt className="text-sm text-white/60">{k}</dt><dd className="mt-1 font-heading text-2xl font-extrabold text-white">{v}</dd></div>)}
+                </dl>
+                <p className="mt-6 flex items-center gap-2 text-sm text-white/70"><Landmark size={15} aria-hidden="true" />{org.payout?.status === 'active' ? `Paid to ${org.payout.accountName ?? 'your account'}` : 'Add a payout account to receive your money'}</p>
               </div>
-              <dl className="mt-8 grid gap-6 sm:grid-cols-3">
-                {[['Students paid', formatMoney(t.gross)], [`Testflow share (${org.payout?.platformPercent ?? 10}%)`, `-${formatMoney(t.fee)}`], ['Payments', t.count]].map(([k, v]) => <div key={k}><dt className="text-sm text-white/60">{k}</dt><dd className="mt-1 font-heading text-2xl font-extrabold text-white">{v}</dd></div>)}
-              </dl>
-              <p className="mt-6 flex items-center gap-2 text-sm text-white/70"><Landmark size={15} aria-hidden="true" />{org.payout?.status === 'active' ? `Paid to ${org.payout.accountName ?? 'your account'}` : 'Add a payout account to receive your money'}</p>
-            </div>
-          )}
-        </Reveal>
-
-        <Reveal delay={0.06}>
-          <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
-            <div className="space-y-6">
-              <Card padding="lg">
-                <h2 className="font-heading text-base font-bold text-foreground-strong">Your earnings by day</h2>
-                <p className="mb-4 text-sm text-muted">What you keep, in naira.</p>
-                {byDay.length ? <BrandBarChart label="Earnings by day" height={240} animate highlightLast={false} data={byDay} /> : <p className="py-12 text-center text-sm text-muted">No payments in this period.</p>}
-              </Card>
-              <Card padding="lg">
-                <h2 className="font-heading text-base font-bold text-foreground-strong">Where it comes from</h2>
-                <p className="mb-4 text-sm text-muted">Your top exams by what you received.</p>
-                {byItem.length ? (
-                  <ul className="space-y-4">{byItem.map(([name, v]) => <li key={name}><div className="mb-1.5 flex justify-between gap-3 text-sm"><span className="truncate font-semibold text-foreground-strong">{name}</span><span className="tabular-nums text-muted">{formatMoney(v)}</span></div><div className="h-2 overflow-hidden rounded-full bg-surface-strong"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(6, (v / byItem[0][1]) * 100)}%` }} /></div></li>)}</ul>
-                ) : <p className="py-6 text-center text-sm text-muted">Nothing yet.</p>}
-              </Card>
-            </div>
-            <PayoutCard org={org} />
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.12}>
-          <section aria-labelledby="tx">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h2 id="tx" className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">Payments</h2>
-              <SearchField className="w-full max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} onClear={() => setSearch('')} placeholder="Search exam, student or reference" />
-            </div>
-            {!isLoading && all.length === 0 ? (
-              <EmptyState icon={Receipt} title="No payments yet" description="When a student pays for one of your exams it shows up here, with a receipt you can download." />
-            ) : (
-              <DataTable caption="Payments" columns={columns} rows={shown} pageSize={10} initialSort={{ key: 'paidAt', dir: 'desc' }} emptyMessage="No payments match." loading={isLoading}
-                rowActions={(p) => <IconButton aria-label={`Download receipt for ${p.item}`} title="Download receipt" size="sm" variant="ghost" onClick={() => receipt(p)}><Receipt {...ICON} size={16} /></IconButton>} />
             )}
-          </section>
-        </Reveal>
-      </div>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
+              <div className="space-y-6">
+                <Card padding="lg">
+                  <h2 className="font-heading text-base font-bold text-foreground-strong">Your earnings by day</h2>
+                  <p className="mb-4 text-sm text-muted">What you keep, in naira.</p>
+                  {byDay.length ? <BrandBarChart label="Earnings by day" height={240} animate highlightLast={false} data={byDay} /> : <p className="py-12 text-center text-sm text-muted">No payments in this period.</p>}
+                </Card>
+                <Card padding="lg">
+                  <h2 className="font-heading text-base font-bold text-foreground-strong">Where it comes from</h2>
+                  <p className="mb-4 text-sm text-muted">Your top exams by what you received.</p>
+                  {byItem.length ? (
+                    <ul className="space-y-4">{byItem.map(([name, v]) => <li key={name}><div className="mb-1.5 flex justify-between gap-3 text-sm"><span className="truncate font-semibold text-foreground-strong">{name}</span><span className="tabular-nums text-muted">{formatMoney(v)}</span></div><div className="h-2 overflow-hidden rounded-full bg-surface-strong"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(6, (v / byItem[0][1]) * 100)}%` }} /></div></li>)}</ul>
+                  ) : <p className="py-6 text-center text-sm text-muted">Nothing yet.</p>}
+                </Card>
+              </div>
+              <PayoutCard org={org} />
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.12}>
+            <section aria-labelledby="tx">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 id="tx" className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">Payments</h2>
+                <SearchField className="w-full max-w-xs" value={search} onChange={(e) => setSearch(e.target.value)} onClear={() => setSearch('')} placeholder="Search exam, student or reference" />
+              </div>
+              {!isLoading && all.length === 0 ? (
+                <EmptyState icon={Receipt} title="No payments yet" description="When a student pays for one of your exams it shows up here, with a receipt you can download." />
+              ) : (
+                <DataTable caption="Payments" columns={columns} rows={shown} pageSize={10} initialSort={{ key: 'paidAt', dir: 'desc' }} emptyMessage="No payments match." loading={isLoading}
+                  rowActions={(p) => <IconButton aria-label={`Download receipt for ${p.item}`} title="Download receipt" size="sm" variant="ghost" onClick={() => receipt(p)}><Receipt {...ICON} size={16} /></IconButton>} />
+              )}
+            </section>
+          </Reveal>
+        </div>
       </PlanLock>
     </Screen>
   );

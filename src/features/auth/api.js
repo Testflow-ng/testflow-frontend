@@ -16,6 +16,16 @@ export const authApi = {
     apiClient.patch('/api/auth/username', { username }).then((res) => res.data.user),
   updateProfile: (payload) =>
     apiClient.patch('/api/auth/profile', payload).then((res) => res.data.user),
+  uploadAvatar: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient
+      .post('/api/auth/profile/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data);
+  },
+  deleteAvatar: () => apiClient.delete('/api/auth/profile/avatar').then((res) => res.data),
   changePassword: (payload) =>
     apiClient.post('/api/auth/change-password', payload).then((res) => res.data),
 };

@@ -109,7 +109,7 @@ function AcceptInvitePage() {
       <p style={{ marginTop: '0.6rem' }} className="text-center text-sm text-muted">Accept to join the organisation as the account below.</p>
       <Card padding="lg" raised={false} style={{ marginTop: '1.75rem', boxShadow: 'none' }} className="flex flex-col gap-5">
         <div className="flex items-center gap-3 rounded-2xl bg-surface-strong/60 p-3">
-          <Avatar name={user.fullName} size="md" />
+          <Avatar name={user.fullName} src={user.avatarUrl} size="md" />
           <div className="min-w-0"><p className="truncate font-semibold text-foreground-strong">{user.fullName}</p><p className="truncate text-sm text-muted">{user.email}</p></div>
         </div>
         {error && <Banner variant="danger">{error}</Banner>}

@@ -6,7 +6,14 @@ import { useIsMobile } from '../../hooks/useMediaQuery.js';
 
 // Explicit widths: this app redefines --container-sm/md/lg (44/60/72rem) in global.css, so Tailwind's
 // max-w-sm/md/lg are NOT 24/28/32rem here and made dialogs span the screen.
-const sizes = { sm: 'max-w-[22rem]', md: 'max-w-[28rem]', lg: 'max-w-[36rem]' };
+const sizes = {
+  sm: 'max-w-[22rem]',
+  md: 'max-w-[28rem]',
+  lg: 'max-w-[36rem]',
+  xl: 'max-w-[48rem]',
+  '2xl': 'max-w-[56rem]',
+  '3xl': 'max-w-[64rem]',
+};
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])';

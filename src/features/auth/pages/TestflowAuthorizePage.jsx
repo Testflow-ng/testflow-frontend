@@ -99,7 +99,7 @@ function TestflowAuthorizePage() {
 
         <Card padding="lg" className="mt-6 space-y-5">
           <div className="flex items-center gap-3 rounded-2xl bg-surface-strong/60 p-3">
-            <Avatar name={user.fullName} size="md" />
+            <Avatar name={user.fullName} src={user.avatarUrl} size="md" />
             <div className="min-w-0"><p className="truncate font-semibold text-foreground-strong">{user.fullName}</p><p className="truncate text-sm text-muted">{user.email}</p></div>
           </div>
           {error && <Banner variant="danger">{error}</Banner>}

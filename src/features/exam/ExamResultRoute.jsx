@@ -8,7 +8,7 @@ import { clearAdDue, isAdDue } from '../advertising/adDue.js';
 function ExamResultRoute() {
   const { id } = useParams();
   const [params] = useSearchParams();
-  const [gated, setGated] = useState(() => params.get('type') !== 'post-utme' && isAdDue(id));
+  const [gated, setGated] = useState(() => isAdDue(id));
 
   const done = useCallback(() => {
     clearAdDue(id);

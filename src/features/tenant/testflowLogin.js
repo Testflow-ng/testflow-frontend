@@ -10,7 +10,7 @@ export const testflowRedirectUri = () => `${apiClient.defaults.baseURL}/api/auth
 export async function startTestflowLogin(hostname) {
   const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
   const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
-  const state = btoa(JSON.stringify({ n: b64url(crypto.getRandomValues(new Uint8Array(8))), o: window.location.origin })).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const state = btoa(JSON.stringify({ n: b64url(crypto.getRandomValues(new Uint8Array(8))), o: window.location.origin, h: hostname })).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   sessionStorage.setItem(KEY, JSON.stringify({ verifier, state }));
   const base = import.meta.env.VITE_TESTFLOW_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5173' : 'https://testflow.com.ng');
   const url = new URL('/oauth/authorize', base);

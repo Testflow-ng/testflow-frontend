@@ -1,3 +1,4 @@
+import { Fragment, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -28,9 +29,9 @@ import { useStats } from '../analytics/useStats.js';
 import { useNewAchievements } from '../analytics/useNewAchievements.js';
 import AchievementUnlock from '../analytics/AchievementUnlock.jsx';
 import PageLoader from '../../components/PageLoader.jsx';
+import AdSlot from '../advertising/AdSlot.jsx';
 import MathText from '../../components/MathText.jsx';
 import { cn } from '../../utils/cn.js';
-import { useState } from 'react';
 import { useAuth } from '../auth/useAuth.js';
 import { useExamResult } from './useExamResult.js';
 import { examApi } from './api.js';
@@ -372,24 +373,33 @@ function ExamResultPage() {
         </p>
       ) : (
         <ol className="mt-3 flex flex-col gap-2">
-          {visibleQuestions.map((question) => (
-            <CorrectionItem
-              key={question.index}
-              question={question}
-              defaultOpen={filter !== 'all' && visibleQuestions.length <= 5}
-              bookmarked={question.id ? bookmarkedIds.has(question.id) : false}
-              onBookmark={
-                question.id
-                  ? () =>
-                      toggleBookmark.mutate({
-                        questionId: question.id,
-                        question: bookmarkPayload(question),
-                      })
-                  : undefined
-              }
-              onReport={question.id ? () => setReportFor(question) : undefined}
-            />
-          ))}
+          {visibleQuestions.map((question, qIdx) => {
+            const showAdAfter = qIdx === Math.min(2, visibleQuestions.length - 1);
+            return (
+              <Fragment key={question.index}>
+                <CorrectionItem
+                  question={question}
+                  defaultOpen={filter !== 'all' && visibleQuestions.length <= 5}
+                  bookmarked={question.id ? bookmarkedIds.has(question.id) : false}
+                  onBookmark={
+                    question.id
+                      ? () =>
+                          toggleBookmark.mutate({
+                            questionId: question.id,
+                            question: bookmarkPayload(question),
+                          })
+                      : undefined
+                  }
+                  onReport={question.id ? () => setReportFor(question) : undefined}
+                />
+                {showAdAfter && (
+                  <li className="list-none">
+                    <AdSlot placement="in_result" variant="compact" className="my-2" />
+                  </li>
+                )}
+              </Fragment>
+            );
+          })}
         </ol>
       )}
 
