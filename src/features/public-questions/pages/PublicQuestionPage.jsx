@@ -17,6 +17,7 @@ import { Card, Button } from '../../../components/ui/index.js';
 import PageLoader from '../../../components/PageLoader.jsx';
 import MathText from '../../../components/MathText.jsx';
 import Confetti from '../../../components/brand/Confetti.jsx';
+import NotFoundTv from '../../../components/brand/NotFoundTv.jsx';
 import { cn } from '../../../utils/cn.js';
 import apiClient from '../../../api/client.js';
 
@@ -62,16 +63,17 @@ function PublicQuestionPage() {
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-md px-5 py-20 text-center">
-        <div className="mb-6 flex justify-center">
-            <div className="size-16 rounded-full bg-danger/10 text-danger flex items-center justify-center">
-                <XCircle size={32} />
-            </div>
-        </div>
-        <h2 className="text-xl font-bold text-foreground-strong">Question Not Found</h2>
-        <p className="text-sm text-muted mt-2">This link may have expired or the question was removed.</p>
-        <Button as={Link} to="/" className="mt-8 w-full">Back to Home</Button>
-      </div>
+      <section className="flex flex-1 flex-col items-center justify-center gap-2 overflow-x-clip px-4 pb-12 pt-10 text-center tf-nav-clearance">
+        <NotFoundTv />
+        <p className="font-mono text-[13px] font-bold uppercase tracking-[0.2em] text-muted">404</p>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground-strong">Question not found</h1>
+        <p className="max-w-[34ch] text-sm leading-relaxed text-muted">
+          This question does not exist, has been removed, or is not publicly available.
+        </p>
+        <Button as={Link} to="/" size="lg" className="mt-4 px-8">
+          Back to home
+        </Button>
+      </section>
     );
   }
 

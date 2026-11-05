@@ -10,7 +10,7 @@ import { adminApi } from '../api.js';
 import { useAdminMutation } from '../useAdmin.js';
 import { LoadError } from './shared.jsx';
 
-const BLANK = { stem: '', options: ['', '', '', ''], correctIndex: 0, topic: '', difficulty: 'medium', explanation: '', subject: '', isActive: true, isShareable: false, shareTitle: '' };
+const BLANK = { stem: '', options: ['', '', '', ''], correctIndex: 0, topic: '', difficulty: 'medium', explanation: '', subject: '', isActive: true, isShareable: true, shareTitle: '' };
 
 function QuestionEditorScreen() {
   const { id } = useParams();

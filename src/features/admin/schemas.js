@@ -11,7 +11,7 @@ export const questionSchema = z.object({
   explanation: z.string().trim().max(2000).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
   isActive: z.boolean().default(true),
-  isShareable: z.boolean().default(false),
+  isShareable: z.boolean().default(true),
   shareTitle: z.string().trim().max(200).optional(),
 });
 

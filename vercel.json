@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/r/:path*", "destination": "https://api.testflow.com.ng/r/:path*" },
+    { "source": "/api/public/:path*", "destination": "https://api.testflow.com.ng/api/public/:path*" },
     { "source": "/((?!api/|assets/|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [
