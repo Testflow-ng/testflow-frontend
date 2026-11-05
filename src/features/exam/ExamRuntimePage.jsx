@@ -369,7 +369,7 @@ function ExamRuntime({ session }) {
     <div className="fixed inset-0 z-40 flex flex-col bg-background">
       {/* Fixed top: the clock and the progress must never scroll out of reach. */}
       <header className="shrink-0 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-        <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-6 sm:py-3">
           {/*
             Leave. The exam was a trap without this: the only exits were
             submitting (which scores every unanswered question wrong) or the
@@ -380,22 +380,23 @@ function ExamRuntime({ session }) {
             variant="ghost"
             onClick={() => setExitOpen(true)}
             aria-label="Leave this paper"
-            className="-ml-2 shrink-0"
+            className="-ml-1.5 shrink-0"
           >
             <ChevronLeft size={20} aria-hidden="true" />
           </IconButton>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
+            <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-muted leading-tight">
               {session.subjectCode}
             </p>
-            <p className="text-sm font-bold text-foreground-strong">
-              Question {current + 1}
-              <span className="text-muted"> / {total}</span>
+            <p className="whitespace-nowrap text-xs font-bold text-foreground-strong sm:text-sm leading-tight">
+              <span className="sm:hidden">Q{current + 1}</span>
+              <span className="hidden sm:inline">Question {current + 1}</span>
+              <span className="text-muted font-medium"> / {total}</span>
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             {isPostUtme && (
               <Badge
                 variant="danger"
@@ -406,23 +407,37 @@ function ExamRuntime({ session }) {
               </Badge>
             )}
             {showCalculator && (
-              <Button
-                variant={calcOpen ? 'primary' : 'outline'}
-                size="sm"
-                onClick={() => setCalcOpen((open) => !open)}
-                aria-pressed={calcOpen}
-                leadingIcon={<CalcIcon size={15} aria-hidden="true" />}
-              >
-                <span className="hidden sm:inline">Calculator</span>
-              </Button>
+              <>
+                <IconButton
+                  variant={calcOpen ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setCalcOpen((open) => !open)}
+                  aria-pressed={calcOpen}
+                  aria-label="Calculator"
+                  className="sm:hidden shrink-0"
+                >
+                  <CalcIcon size={16} aria-hidden="true" />
+                </IconButton>
+                <Button
+                  variant={calcOpen ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setCalcOpen((open) => !open)}
+                  aria-pressed={calcOpen}
+                  leadingIcon={<CalcIcon size={15} aria-hidden="true" />}
+                  className="hidden sm:inline-flex shrink-0"
+                >
+                  Calculator
+                </Button>
+              </>
             )}
             <ExamTimer secondsLeft={remaining} totalSeconds={session.timeLimitSeconds} />
             <Button
               variant="outline"
               size="sm"
               onClick={() => setPaletteOpen(true)}
-              className="tabular-nums lg:hidden"
-              leadingIcon={<LayoutGrid size={15} aria-hidden="true" />}
+              className="tabular-nums lg:hidden shrink-0 whitespace-nowrap px-2.5 sm:px-3 text-xs sm:text-sm"
+              leadingIcon={<LayoutGrid size={14} aria-hidden="true" />}
+              aria-label={`Questions palette, ${answeredCount} of ${total} answered`}
             >
               {answeredCount}/{total}
             </Button>
@@ -430,7 +445,7 @@ function ExamRuntime({ session }) {
         </div>
 
         {subjects.length > 1 && (
-          <div className="no-scrollbar overflow-x-auto border-t border-border bg-surface-strong/30 px-4 py-2 sm:px-6">
+          <div className="no-scrollbar overflow-x-auto border-t border-border bg-surface-strong/30 px-3 py-1.5 sm:px-6 sm:py-2">
             <div className="mx-auto w-full max-w-5xl">
               <Tabs
                 idPrefix="paper"
@@ -447,7 +462,7 @@ function ExamRuntime({ session }) {
           </div>
         )}
 
-        <div className="mx-auto w-full max-w-5xl px-4 pb-3 sm:px-6">
+        <div className="mx-auto w-full max-w-5xl px-3 pb-2 sm:px-6 sm:pb-3">
           <ProgressBar
             value={answeredCount}
             max={total}
