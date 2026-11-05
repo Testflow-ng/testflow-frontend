@@ -1,9 +1,14 @@
 import axios from 'axios';
 
-// The API origin is deliberately configured at build time rather than tied to
-// a hosting provider. Use HTTPS for production and configure CORS/cookies on
-// the backend for this frontend's origin.
-const baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:5001').replace(/\/$/, '');
+// The API origin is configured at build time, with an automatic fallback to
+// the production gateway (https://api.testflow.com.ng) when running on a live host.
+const isBrowserLocal = typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
+
+const baseURL = (!isBrowserLocal && typeof window !== 'undefined' && (!rawApiUrl || rawApiUrl.includes('localhost')))
+  ? 'https://api.testflow.com.ng'
+  : (rawApiUrl || (import.meta.env.PROD ? 'https://api.testflow.com.ng' : 'http://localhost:5001'));
+
 
 /**
  * Shared Axios instance for the TestFlow API.
