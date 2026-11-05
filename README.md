@@ -1,5 +1,5 @@
 > **Note:** this is a fresh repository with clean history, created 2026-11-04. The previous history
-> contained hidden malicious code and is archived privately as `testflow-frontend-DANGER`. Do not use that one.
+> contained hidden malicious code and is archived privately as `testflow-frontend-DANGER`. Do not use that one..
 
 # TestFlow Frontend
 
