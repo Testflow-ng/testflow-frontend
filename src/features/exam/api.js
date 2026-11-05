@@ -12,7 +12,10 @@ export const examApi = {
   /* Mints (or returns) the public share link for this attempt. The link is served by the
      backend because the preview card is built from Open Graph tags, and WhatsApp, Telegram
      and X read those without running any JavaScript. */
-  share: (id) => apiClient.post(`/api/exam-sessions/${id}/share`).then((res) => res.data.share),
+  share: (id, payload = {}) => {
+    const origin = payload.origin || (typeof window !== 'undefined' ? window.location.origin : undefined);
+    return apiClient.post(`/api/exam-sessions/${id}/share`, { ...payload, origin }).then((res) => res.data.share);
+  },
   history: () => apiClient.get('/api/exam-sessions').then((res) => res.data.sessions),
 };
 
