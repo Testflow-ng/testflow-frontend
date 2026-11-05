@@ -23,7 +23,16 @@ function SegmentedControl({ options, value, onValueChange, label, size = 'md', f
     refs.current[options[next].value]?.focus();
   };
   return (
-    <div role="radiogroup" aria-label={label} onKeyDown={onKeyDown} className={cn('inline-flex rounded-full border border-border bg-surface p-1', fullWidth && 'flex w-full', className)}>
+    <div
+      role="radiogroup"
+      aria-label={label}
+      onKeyDown={onKeyDown}
+      className={cn(
+        'inline-flex shrink-0 min-w-max rounded-full border border-border bg-surface p-1',
+        fullWidth && 'flex w-full min-w-0',
+        className,
+      )}
+    >
       {options.map((o) => {
         const selected = o.value === value;
         return (
@@ -38,10 +47,10 @@ function SegmentedControl({ options, value, onValueChange, label, size = 'md', f
             tabIndex={selected ? 0 : -1}
             onClick={() => onValueChange(o.value)}
             className={cn(
-              'inline-flex items-center justify-center rounded-full font-medium transition-colors motion-reduce:transition-none',
+              'inline-flex items-center justify-center rounded-full font-medium transition-colors motion-reduce:transition-none whitespace-nowrap shrink-0',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              size === 'sm' ? 'h-8 px-3 text-sm' : 'h-10 px-4 text-[15px]',
-              fullWidth && 'flex-1',
+              size === 'sm' ? 'h-8 px-3.5 text-sm' : 'h-10 px-4 text-[15px]',
+              fullWidth && 'flex-1 min-w-0',
               selected ? 'bg-primary text-primary-foreground' : 'text-muted hover:text-foreground-strong',
               o.disabled && 'cursor-not-allowed opacity-50 hover:text-muted',
             )}

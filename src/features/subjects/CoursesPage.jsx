@@ -22,7 +22,7 @@ function CoursesPage() {
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
 
   return (
-    <Screen width="full">
+    <Screen width="full" className="pb-28 sm:pb-24">
       <PageHeader
         title="Courses"
         subtitle="Browse and practise your subjects."
@@ -42,8 +42,15 @@ function CoursesPage() {
           placeholder="Search courses"
           aria-label="Search subjects"
         />
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
-          <SegmentedControl label="Filter courses" size="sm" value={filter} onValueChange={setFilter} options={FILTERS} />
+        <div className="-mx-1 overflow-x-auto px-1 pb-1 touch-pan-x flex scrollbar-none">
+          <SegmentedControl
+            label="Filter courses"
+            size="sm"
+            value={filter}
+            onValueChange={setFilter}
+            options={FILTERS}
+            className="shrink-0"
+          />
         </div>
       </div>
 
