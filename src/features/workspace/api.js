@@ -73,5 +73,9 @@ export const wsApi = {
   changePlan: (subId, planKey) => apiClient.post(`${base}/subscriptions/${subId}/upgrade`, { planKey }, { headers: { 'Idempotency-Key': crypto.randomUUID() } }).then((r) => r.data),
   renew: (subId) => apiClient.post(`${base}/subscriptions/${subId}/renew`, {}, { headers: { 'Idempotency-Key': crypto.randomUUID() } }).then((r) => r.data),
   verifyPayment: (reference) => apiClient.get(`${base}/payments/verify`, { params: { reference } }).then((r) => r.data),
+  subscriptionCheckout: (orgId, subId, idempotencyKey) => apiClient.post(`${org(orgId)}/subscriptions/${subId}/checkout`, { paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': idempotencyKey ?? crypto.randomUUID() } }).then((r) => r.data),
+  subscriptionCheckoutStatus: (orgId, subId, reference) => apiClient.get(`${org(orgId)}/subscriptions/${subId}/checkout-status`, { params: { reference } }).then((r) => r.data),
+  subscriptionPaymentStatus: (orgId, subId, reference, refresh = true) => apiClient.get(`${org(orgId)}/subscriptions/${subId}/payment-status`, { params: { reference, refresh } }).then((r) => r.data),
+  verifySubscriptionPayment: (orgId, subId, reference) => apiClient.get(`${org(orgId)}/subscriptions/${subId}/verify`, { params: { reference } }).then((r) => r.data),
   subscriptionPayments: (id) => apiClient.get(`${base}/payments`, { params: { organizationId: id } }).then((r) => unwrap(r, 'items')),
 };
