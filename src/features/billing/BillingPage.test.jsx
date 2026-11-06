@@ -161,4 +161,71 @@ describe('student checkout', () => {
     fireEvent.click(screen.getByText('Get Plus'));
     await screen.findByText('Payment received');
   });
+
+  it('generates a fresh idempotency key for a new purchase after a completed one', async () => {
+    let uuidCounter = 0;
+    globalThis.crypto.randomUUID = vi.fn(() => `key-${++uuidCounter}`);
+    billingApi.checkout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'TFS-1',
+      planKey: 'pass_30d',
+      planName: 'Plus',
+      amountKobo: 50000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    billingApi.checkout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'TFS-2',
+      planKey: 'pass_30d',
+      planName: 'Plus',
+      amountKobo: 50000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    render(<BillingPage />);
+    // First purchase.
+    fireEvent.click(screen.getByText('Get Plus'));
+    await screen.findByText('Payment received');
+    fireEvent.click(screen.getByText('Start another payment'));
+    // Second purchase must use a fresh key, not replay the first.
+    fireEvent.click(screen.getByText('Get Plus'));
+    await screen.findByText('Payment received');
+    const keys = billingApi.checkout.mock.calls.map((c) => c[1]);
+    expect(keys[0]).not.toBe(keys[1]);
+    expect(keys[0]).toBe('key-1');
+    expect(keys[1]).toBe('key-2');
+  });
+
+  it('clears the idempotency key after a failed payment so a retry is fresh', async () => {
+    let uuidCounter = 0;
+    globalThis.crypto.randomUUID = vi.fn(() => `key-${++uuidCounter}`);
+    billingApi.checkout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'TFS-1',
+      planKey: 'pass_30d',
+      planName: 'Plus',
+      amountKobo: 50000,
+      currency: 'NGN',
+      status: 'failed',
+    });
+    billingApi.checkout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'TFS-2',
+      planKey: 'pass_30d',
+      planName: 'Plus',
+      amountKobo: 50000,
+      currency: 'NGN',
+      status: 'initialized',
+      transferInstructions,
+    });
+    render(<BillingPage />);
+    fireEvent.click(screen.getByText('Get Plus'));
+    await screen.findByText('Payment did not go through');
+    fireEvent.click(screen.getByText('Start a new payment'));
+    fireEvent.click(screen.getByText('Get Plus'));
+    await screen.findByText('Wema Bank');
+    const keys = billingApi.checkout.mock.calls.map((c) => c[1]);
+    expect(keys[0]).not.toBe(keys[1]);
+  });
 });

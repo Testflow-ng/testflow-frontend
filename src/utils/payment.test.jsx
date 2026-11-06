@@ -65,6 +65,25 @@ describe('normalizePaymentStatus', () => {
     expect(n.status).toBe('expired');
   });
 
+  it('treats a conflicting failure as terminal failure (fail-safe)', () => {
+    expect(normalizePaymentStatus({ status: 'paid', paymentState: 'failed' }).isFailure).toBe(true);
+    expect(normalizePaymentStatus({ status: 'paid', paymentState: 'failed' }).isSuccess).toBe(false);
+    expect(normalizePaymentStatus({ status: 'failed', paymentState: 'paid' }).isFailure).toBe(true);
+    expect(normalizePaymentStatus({ status: 'failed', paymentState: 'paid' }).isSuccess).toBe(false);
+  });
+
+  it('treats conflicting organisation payment.status as terminal failure (fail-safe)', () => {
+    const n = normalizePaymentStatus({ status: 'paid', payment: { status: 'failed' } });
+    expect(n.isFailure).toBe(true);
+    expect(n.isSuccess).toBe(false);
+  });
+
+  it('still treats success as success when paired with a pending state', () => {
+    const n = normalizePaymentStatus({ status: 'success', paymentState: 'pending' });
+    expect(n.isSuccess).toBe(true);
+    expect(n.isTerminal).toBe(true);
+  });
+
   it('returns non-terminal for null/empty input', () => {
     const n = normalizePaymentStatus(null);
     expect(n.isTerminal).toBe(false);

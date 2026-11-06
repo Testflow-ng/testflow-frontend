@@ -178,4 +178,92 @@ describe('organisation subscription lifecycle', () => {
     // Abandoned is terminal: no polling should be scheduled.
     expect(wsApi.subscriptionPaymentStatus).not.toHaveBeenCalled();
   });
+
+  let orgUuidCounter = 0;
+
+  it('uses a separate idempotency key for initial subscription checkout', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: freeSub });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Wema Bank');
+    expect(wsApi.subscriptionCheckout).toHaveBeenCalledWith('o1', 'sub1', 'org-key-1');
+    expect(wsApi.changePlan).not.toHaveBeenCalled();
+  });
+
+  it('uses a separate idempotency key for upgrades on an existing subscription', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: proSub });
+    wsApi.changePlan.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'SUB-UPGRADE',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'initialized',
+    });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Wema Bank');
+    expect(wsApi.changePlan).toHaveBeenCalledWith('sub1', 'studio', 'org-key-2');
+    expect(wsApi.subscriptionCheckout).not.toHaveBeenCalled();
+  });
+
+  it('uses a separate idempotency key for renewals', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: studioSub });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Renew early'));
+    await screen.findByText('Wema Bank');
+    expect(wsApi.renew).toHaveBeenCalledWith('sub1', 'org-key-3');
+  });
+
+  it('clears idempotency keys after a completed checkout so a new purchase is fresh', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    wsApi.subscriptionCheckout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'SUB-1',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    wsApi.subscriptionCheckout.mockResolvedValueOnce({
+      ...transferInstructions,
+      reference: 'SUB-2',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    useSubscription.mockReturnValue({ data: freeSub });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Payment received');
+    fireEvent.click(screen.getByText('Done'));
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Payment received');
+    expect(wsApi.subscriptionCheckout).toHaveBeenCalledTimes(2);
+    const keys = wsApi.subscriptionCheckout.mock.calls.map((c) => c[2]);
+    expect(keys[0]).not.toBe(keys[1]);
+  });
+
+  it('recovers an existing checkout without initializing a new one', async () => {
+    useSubscription.mockReturnValue({ data: freeSub });
+    // Simulate a pending reference persisted from a previous session.
+    localStorage.setItem('tf_org_checkout_o1_sub1', JSON.stringify({ reference: 'SUB-EXISTING' }));
+    wsApi.subscriptionPaymentStatus.mockResolvedValue({
+      payment: { ...transferInstructions, reference: 'SUB-EXISTING', status: 'initialized' },
+    });
+    render(<BillingScreen />);
+    // Recovery must not start a new checkout.
+    expect(wsApi.subscriptionCheckout).not.toHaveBeenCalled();
+    expect(wsApi.changePlan).not.toHaveBeenCalled();
+    // Recovery uses the existing reference (passed to the status endpoint).
+    await screen.findByText('Awaiting transfer');
+    expect(wsApi.subscriptionCheckoutStatus).toHaveBeenCalledWith('o1', 'sub1', 'SUB-EXISTING');
+  });
 });

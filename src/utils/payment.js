@@ -1,14 +1,18 @@
 // Shared payment-status normalization for student and organisation bank-transfer flows.
 //
-// The backend contract normalises terminal states as:
-//   success / paid          -> successful terminal state
-//   failed / expired / abandoned / cancelled / canceled / refunded -> terminal failure
+// Status authority (per the November 6 backend contract):
+//   - Student:  `purchase.status` and/or `purchase.paymentState`. No single field is
+//     declared authoritative.
+//   - Organisation: `status` and/or `payment.status`. No single field is declared
+//     authoritative.
 //
-// Student responses expose `purchase.status` and/or `purchase.paymentState`.
-// Organisation responses expose `status` and/or `payment.status`.
-// Response shapes differ between endpoints, so candidates are collected from
-// every documented location rather than assuming one structure.
-
+// Contradictory values can occur transiently (e.g. purchase.status updated before
+// paymentState). The backend contract does not specify which field wins on
+// contradiction, so the frontend adopts a defensive fail-safe rule: any terminal
+// failure anywhere in the response wins over any terminal success. A payment is
+// therefore never activated on a conflicting signal, and is never left pending when
+// the backend has settled it. This assumption is unverified against a live backend.
+//
 const SUCCESS_STATES = new Set(['paid', 'success']);
 const FAILURE_STATES = new Set([
   'failed',

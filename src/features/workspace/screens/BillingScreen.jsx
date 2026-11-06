@@ -71,6 +71,20 @@ function BillingScreen() {
     return generated;
   };
 
+  const clearStoredCheckout = () => {
+    if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+  };
+
+  // Clear every idempotency key for this org/subscription/operation so that a
+  // legitimately new purchase (checkout, upgrade or renewal) gets a fresh key
+  // instead of an idempotent replay of a terminal checkout.
+  const clearStoredIdemKeys = () => {
+    if (!orgId || !sub?.id) return;
+    for (const op of ['checkout', 'upgrade', 'renew']) {
+      try { localStorage.removeItem(`tf_org_idem_${orgId}_${sub.id}_${op}`); } catch { /* ignore */ }
+    }
+  };
+
   const extractCheckout = (res) => {
     // Unwrap the documented envelopes without assuming every response has the
     // identical structure.
@@ -116,12 +130,14 @@ function BillingScreen() {
     if (n.isSuccess) {
       setPStatus('success');
       if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+      clearStoredIdemKeys();
       qc.invalidateQueries({ queryKey: ['ws'] });
       return;
     }
     if (n.isFailure) {
       setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
       if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+      clearStoredIdemKeys();
       return;
     }
     setPStatus(paymentUiStatus(res) ?? 'awaiting_transfer');
@@ -174,10 +190,6 @@ function BillingScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkout, pStatus, orgId]);
 
-  const clearStoredCheckout = () => {
-    if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
-  };
-
   const startCheckout = async (key, run, operation) => {
     if (busy) return;
     setBusy(key);
@@ -202,10 +214,12 @@ function BillingScreen() {
         if (n.isSuccess) {
           setPStatus('success');
           clearStoredCheckout();
+          clearStoredIdemKeys();
           qc.invalidateQueries({ queryKey: ['ws'] });
         } else if (n.isFailure) {
           setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
           clearStoredCheckout();
+          clearStoredIdemKeys();
         } else {
           setPStatus('awaiting_transfer');
         }
@@ -269,6 +283,7 @@ function BillingScreen() {
     setCheckout(null);
     setPStatus('idle');
     clearStoredCheckout();
+    clearStoredIdemKeys();
   };
 
   const ordered = [...(plans ?? []).filter((p) => p.key !== 'free'), FREE_PLAN].sort((a, b) => (RANK[a.key] ?? 9) - (RANK[b.key] ?? 9));

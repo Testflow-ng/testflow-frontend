@@ -66,9 +66,15 @@ function BillingPage() {
 
     setCheckout((prev) => {
       const current = prev ?? {};
+      const currentPlanKey = current.planKey ?? purchase?.planKey;
       const next = { ...current, ...purchase };
       const incomingInstructions = purchase?.transferInstructions ?? purchase?.transfer ?? null;
       if (n.isTerminal) {
+        // Clear the idempotency key for this plan so a legitimate new purchase
+        // gets a fresh key instead of an idempotent replay of the completed one.
+        if (currentPlanKey) {
+          try { localStorage.removeItem(`${IDEM_PREFIX}${currentPlanKey}`); } catch { /* ignore */ }
+        }
         // Do not retain stale instructions once the payment is terminal.
         if (next.transferInstructions) delete next.transferInstructions;
       } else if (incomingInstructions) {
