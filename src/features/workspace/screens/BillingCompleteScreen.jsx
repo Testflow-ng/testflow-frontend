@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import PaymentReturnStatus from '../../../components/everybody/PaymentReturnStatus.jsx';
 import Screen from '../../../components/layout/Screen.jsx';
 import { formatMoney } from '../../../utils/money.js';
+import { normalizePaymentStatus } from '../../../utils/payment.js';
 import { wsApi } from '../api.js';
 
 const TRIES = 8;
@@ -32,10 +33,18 @@ function BillingCompleteScreen() {
             res = await wsApi.verifyPayment(reference);
           }
           if (!live) return;
-          const p = res?.payment ?? res;
-          setPayment(p);
-          if (p?.status === 'paid' || res?.subscription) { qc.invalidateQueries({ queryKey: ['ws'] }); setState('paid'); return; }
-          if (['failed', 'abandoned', 'cancelled', 'canceled', 'expired'].includes(p?.status)) { setState('failed'); return; }
+          const n = normalizePaymentStatus(res);
+          const payment = res?.payment ?? res;
+          setPayment(payment);
+          if (n.isSuccess || res?.subscription) {
+            qc.invalidateQueries({ queryKey: ['ws'] });
+            setState('paid');
+            return;
+          }
+          if (n.isFailure) {
+            setState('failed');
+            return;
+          }
         } catch {
           /* blip */
         }

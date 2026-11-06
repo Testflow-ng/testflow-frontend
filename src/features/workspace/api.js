@@ -70,8 +70,8 @@ export const wsApi = {
   subscription: (id) => apiClient.get(`${base}/subscription`, { params: { organizationId: id } }).then((r) => ({ ...unwrap(r, 'subscription'), perks: r.data?.perks })),
   plans: () => apiClient.get(`${base}/plans`).then((r) => unwrap(r, 'plans')),
   /** Upgrade (a checkout for the prorated difference) or a scheduled downgrade (no payment, no url). */
-  changePlan: (subId, planKey) => apiClient.post(`${base}/subscriptions/${subId}/upgrade`, { planKey, paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': crypto.randomUUID() } }).then((r) => r.data),
-  renew: (subId) => apiClient.post(`${base}/subscriptions/${subId}/renew`, { paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': crypto.randomUUID() } }).then((r) => r.data),
+  changePlan: (subId, planKey, idempotencyKey) => apiClient.post(`${base}/subscriptions/${subId}/upgrade`, { planKey, paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': idempotencyKey ?? crypto.randomUUID() } }).then((r) => r.data),
+  renew: (subId, idempotencyKey) => apiClient.post(`${base}/subscriptions/${subId}/renew`, { paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': idempotencyKey ?? crypto.randomUUID() } }).then((r) => r.data),
   verifyPayment: (reference) => apiClient.get(`${base}/payments/verify`, { params: { reference } }).then((r) => r.data),
   subscriptionCheckout: (orgId, subId, idempotencyKey) => apiClient.post(`${org(orgId)}/subscriptions/${subId}/checkout`, { paymentMethod: 'paystack_bank_transfer' }, { headers: { 'Idempotency-Key': idempotencyKey ?? crypto.randomUUID() } }).then((r) => r.data),
   subscriptionCheckoutStatus: (orgId, subId, reference) => apiClient.get(`${org(orgId)}/subscriptions/${subId}/checkout-status`, { params: { reference } }).then((r) => r.data),

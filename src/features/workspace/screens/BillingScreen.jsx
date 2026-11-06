@@ -6,11 +6,15 @@ import InvoiceTable from '../../../components/everybody/InvoiceTable.jsx';
 import Screen, { PageHeader } from '../../../components/layout/Screen.jsx';
 import { cn } from '../../../utils/cn.js';
 import { formatMoney } from '../../../utils/money.js';
+import { normalizeTransfer } from '../../../utils/transfer.js';
+import { normalizePaymentStatus, paymentUiStatus } from '../../../utils/payment.js';
 import { wsApi } from '../api.js';
 import BankTransferInstructions from '../../../components/billing/BankTransferInstructions.jsx';
 import { useOrg } from '../OrgContext.js';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePlans, useSubscription, useSubscriptionPayments } from '../useWorkspace.js';
+
+const REF_KEY = (orgId, subId) => (orgId && subId ? `tf_org_checkout_${orgId}_${subId}` : null);
 
 /** What each plan includes, in plain words. `[feature, free, pro, studio]`: true is included, false is not, text is a limit. */
 const MATRIX = [
@@ -49,61 +53,97 @@ function BillingScreen() {
   const { data: plans } = usePlans();
   const payments = useSubscriptionPayments().data ?? [];
   const [busy, setBusy] = useState(null);
-  const [checkout, setCheckout] = useState(null); // { reference, subId, transfer, amountKobo, currency, status }
-  const [pStatus, setPStatus] = useState('idle'); // idle | verifying | awaiting_transfer | processing | success | failed | expired | cancelled
+  const [checkout, setCheckout] = useState(null); // { reference, subId, orgId, amountKobo, currency, planName, transferInstructions, status }
+  const [pStatus, setPStatus] = useState('idle');
   const [refreshing, setRefreshing] = useState(false);
   const refreshRef = useRef(false);
 
-  const REF_KEY = orgId && sub?.id ? `tf_org_checkout_${orgId}_${sub.id}` : null;
+  const refKey = REF_KEY(orgId, sub?.id);
+
+  const getIdemKey = (operation) => {
+    const key = `tf_org_idem_${orgId}_${sub?.id}_${operation}`;
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) return stored;
+    } catch { /* ignore */ }
+    const generated = crypto.randomUUID();
+    try { localStorage.setItem(key, generated); } catch { /* ignore */ }
+    return generated;
+  };
 
   const extractCheckout = (res) => {
-    const src = res?.checkout ?? res?.payment ?? res ?? {};
-    const reference = src?.reference ?? src?.paymentId ?? res?.reference ?? res?.paymentId;
-    const transferSrc = src?.transfer ?? src?.bankTransfer ?? src?.bank_transfer;
-    const hasTransfer = Boolean(transferSrc && (transferSrc.bankName || transferSrc.bank_name || transferSrc.accountNumber || transferSrc.account_number));
+    // Unwrap the documented envelopes without assuming every response has the
+    // identical structure.
+    const purchase = res?.checkout ?? res?.payment ?? res?.purchase ?? res ?? {};
+    const reference =
+      purchase?.reference ?? purchase?.paymentId ?? res?.reference ?? res?.paymentId;
+    const instructions = normalizeTransfer(purchase);
+    const hasInstructions = Boolean(
+      instructions.bankName ||
+        instructions.accountName ||
+        instructions.accountNumber ||
+        instructions.reference ||
+        instructions.amountKobo != null ||
+        instructions.displayText
+    );
     return {
       reference,
-      amountKobo: src?.amountKobo ?? src?.amount_kobo ?? src?.amount,
-      currency: src?.currency ?? 'NGN',
-      planName: src?.planName,
-      status: src?.status ?? 'initialized',
-      transfer: hasTransfer ? transferSrc : (reference ? src : null),
+      amountKobo: instructions.amountKobo ?? purchase?.amountKobo ?? purchase?.amount_kobo ?? purchase?.amount,
+      currency: instructions.currency ?? purchase?.currency ?? 'NGN',
+      planName: purchase?.planName,
+      status: purchase?.status ?? purchase?.paymentState ?? res?.status,
+      transferInstructions: hasInstructions ? instructions : null,
     };
   };
 
   const applyOrgStatus = (res) => {
-    const src = res?.payment ?? res?.purchase ?? res ?? {};
-    const st = src?.status ?? res?.status;
-    if (res?.subscription) {
-      // refresh subscription data
-    }
-    if (st === 'paid') {
+    const n = normalizePaymentStatus(res);
+    const purchase = res?.checkout ?? res?.payment ?? res?.purchase ?? res ?? {};
+    const instructions = purchase?.transferInstructions ?? purchase?.transfer ?? null;
+
+    setCheckout((prev) => {
+      const current = prev ?? {};
+      if (n.isTerminal) {
+        const next = { ...current };
+        if (next.transferInstructions) delete next.transferInstructions;
+        return next;
+      }
+      if (instructions) return { ...current, transferInstructions: instructions };
+      if (current.transferInstructions) return current;
+      return current;
+    });
+
+    if (n.isSuccess) {
       setPStatus('success');
-      if (REF_KEY) try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+      if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
       qc.invalidateQueries({ queryKey: ['ws'] });
-    } else if (st === 'failed') setPStatus('failed');
-    else if (st === 'expired') setPStatus('expired');
-    else if (st === 'cancelled' || st === 'canceled') setPStatus('cancelled');
-    else if (st === 'processing') setPStatus('processing');
-    else setPStatus('awaiting_transfer');
+      return;
+    }
+    if (n.isFailure) {
+      setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
+      if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+      return;
+    }
+    setPStatus(paymentUiStatus(res) ?? 'awaiting_transfer');
   };
 
-  // recover pending checkout
+  // Recover a pending checkout after refresh or navigation. Must not start a
+  // new checkout.
   useEffect(() => {
-    if (!orgId || !sub?.id || !REF_KEY) return undefined;
+    if (!orgId || !sub?.id || !refKey) return undefined;
     let live = true;
-    let ref = null;
+    let reference = null;
     try {
-      const raw = localStorage.getItem(REF_KEY);
-      if (raw) ref = JSON.parse(raw)?.reference;
+      const raw = localStorage.getItem(refKey);
+      if (raw) reference = JSON.parse(raw)?.reference;
     } catch { /* ignore */ }
-    if (!ref) return undefined;
+    if (!reference) return undefined;
     (async () => {
-      setCheckout({ reference: ref, subId: sub.id, orgId });
+      setCheckout({ reference, subId: sub.id, orgId });
       setPStatus('verifying');
       try {
-        await wsApi.subscriptionCheckoutStatus(orgId, sub.id, ref);
-        const res = await wsApi.subscriptionPaymentStatus(orgId, sub.id, ref, true);
+        await wsApi.subscriptionCheckoutStatus(orgId, sub.id, reference);
+        const res = await wsApi.subscriptionPaymentStatus(orgId, sub.id, reference, true);
         if (!live) return;
         applyOrgStatus(res);
       } catch {
@@ -114,10 +154,10 @@ function BillingScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orgId, sub?.id]);
 
-  // poll
+  // Poll while a payment is pending. Stops on unmount and terminal states.
   useEffect(() => {
     if (!checkout?.reference || !orgId || !checkout.subId) return undefined;
-    if (['success', 'failed', 'expired', 'cancelled'].includes(pStatus)) return undefined;
+    if (['success', 'failed', 'expired', 'cancelled', 'abandoned'].includes(pStatus)) return undefined;
     let live = true;
     const tick = async () => {
       if (refreshRef.current) return;
@@ -126,35 +166,61 @@ function BillingScreen() {
         const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
         if (!live) return;
         applyOrgStatus(res);
-      } catch { /* keep */ }
+      } catch { /* temporary failure; keep checkout */ }
       finally { refreshRef.current = false; }
     };
     const id = setInterval(tick, 6000);
     return () => { live = false; clearInterval(id); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkout, pStatus, orgId]);
 
-  const startCheckout = async (key, run) => {
+  const clearStoredCheckout = () => {
+    if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+  };
+
+  const startCheckout = async (key, run, operation) => {
     if (busy) return;
     setBusy(key);
     try {
       const res = await run();
       const c = extractCheckout(res);
       if (c.reference) {
-        setCheckout({ reference: c.reference, subId: sub.id, orgId, amountKobo: c.amountKobo, currency: c.currency, planName: c.planName, transfer: c.transfer, status: c.status });
-        if (c.status === 'paid') {
+        setCheckout({
+          reference: c.reference,
+          subId: sub.id,
+          orgId,
+          amountKobo: c.amountKobo,
+          currency: c.currency,
+          planName: c.planName,
+          transferInstructions: c.transferInstructions,
+          status: c.status,
+        });
+        try {
+          localStorage.setItem(refKey, JSON.stringify({ reference: c.reference }));
+        } catch { /* ignore */ }
+        const n = normalizePaymentStatus(res);
+        if (n.isSuccess) {
           setPStatus('success');
-          if (REF_KEY) try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+          clearStoredCheckout();
           qc.invalidateQueries({ queryKey: ['ws'] });
+        } else if (n.isFailure) {
+          setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
+          clearStoredCheckout();
         } else {
           setPStatus('awaiting_transfer');
-          if (REF_KEY) try { localStorage.setItem(REF_KEY, JSON.stringify({ reference: c.reference })); } catch { /* ignore */ }
         }
       } else {
-        toast.success('Plan change scheduled', 'It starts when your current period ends.');
-        qc.invalidateQueries({ queryKey: ['ws'] });
+        // No payment reference: a scheduled downgrade or a change that does not
+        // require immediate payment. Never show bank-transfer UI for these.
+        if (operation === 'upgrade') {
+          toast.success('Plan change scheduled', 'It starts when your current period ends.');
+          qc.invalidateQueries({ queryKey: ['ws'] });
+        } else {
+          toast.error('Could not start the payment', 'No payment reference was returned.');
+        }
         setPStatus('idle');
         setCheckout(null);
+        clearStoredCheckout();
       }
     } catch (e) {
       toast.error('Could not start the payment', e?.message ?? 'Try again.');
@@ -162,11 +228,29 @@ function BillingScreen() {
       setBusy(null);
     }
   };
+
   const choose = (p) => {
     if (sub && p.key === (sub.planKey ?? 'free')) return;
-    startCheckout(p.key, () => wsApi.changePlan(sub?.id, p.key));
+    const isInitial = !sub || sub.planKey === 'free';
+    if (isInitial && p.key !== 'free' && sub?.id) {
+      // First paid subscription: use the organisation checkout endpoint.
+      startCheckout(
+        p.key,
+        () => wsApi.subscriptionCheckout(orgId, sub.id, getIdemKey('checkout')),
+        'checkout'
+      );
+    } else {
+      // Upgrade or scheduled downgrade on an existing subscription.
+      startCheckout(
+        p.key,
+        () => wsApi.changePlan(sub?.id, p.key, getIdemKey('upgrade')),
+        'upgrade'
+      );
+    }
   };
-  const renew = () => startCheckout('renew', () => wsApi.renew(sub.id));
+
+  const renew = () =>
+    startCheckout('renew', () => wsApi.renew(sub.id, getIdemKey('renew')), 'renew');
 
   const manualRefreshOrg = async () => {
     if (!checkout?.reference || refreshing) return;
@@ -184,7 +268,7 @@ function BillingScreen() {
   const resetOrgCheckout = () => {
     setCheckout(null);
     setPStatus('idle');
-    if (REF_KEY) try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+    clearStoredCheckout();
   };
 
   const ordered = [...(plans ?? []).filter((p) => p.key !== 'free'), FREE_PLAN].sort((a, b) => (RANK[a.key] ?? 9) - (RANK[b.key] ?? 9));

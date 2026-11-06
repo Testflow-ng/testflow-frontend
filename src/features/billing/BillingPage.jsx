@@ -9,6 +9,7 @@ import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { ICON } from '../../components/ui/iconProps.js';
 import { cn } from '../../utils/cn.js';
 import { formatMoney } from '../../utils/money.js';
+import { normalizePaymentStatus } from '../../utils/payment.js';
 import { billingApi } from './api.js';
 import { useEntitlement, useProducts } from './useBilling.js';
 
@@ -28,11 +29,13 @@ const COMING_SOON_BENEFITS = [
 ];
 
 const REF_KEY = 'tf_student_checkout_ref';
+const IDEM_PREFIX = 'tf_student_idem_';
 const fmtDate = (v) => (v ? new Date(v).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' }) : null);
 const perDay = (p) => formatMoney(Math.round(p.priceMinor / p.durationDays), p.currency);
 
 const STATUS_COPY = {
   verifying: { title: 'Recovering your payment', body: 'Checking with the server. Please wait.' },
+  initializing: { title: 'Initializing payment', body: 'Your checkout is being created. Please wait.' },
   awaiting_transfer: { title: 'Awaiting your transfer', body: 'Use the details below to complete the payment.' },
   processing: { title: 'Processing payment', body: 'Your transfer has been received and is being confirmed.' },
   success: { title: 'Payment received', body: 'Your Plus plan is now active.' },
@@ -58,23 +61,38 @@ function BillingPage() {
   const refreshingRef = useRef(false);
 
   const applyStatus = (res) => {
-    const purchase = res?.purchase ?? res;
-    if (purchase && (purchase.transfer || purchase.bankName || purchase.accountNumber)) {
-      setCheckout((prev) => ({ ...(prev ?? {}), ...purchase }));
-    } else if (purchase) {
-      setCheckout((prev) => (prev ? { ...prev, ...purchase } : prev));
-    }
-    const st = purchase?.status ?? res?.status;
-    if (st === 'paid') {
+    const n = normalizePaymentStatus(res);
+    const purchase = res?.purchase ?? res?.payment ?? res ?? {};
+
+    setCheckout((prev) => {
+      const current = prev ?? {};
+      const next = { ...current, ...purchase };
+      const incomingInstructions = purchase?.transferInstructions ?? purchase?.transfer ?? null;
+      if (n.isTerminal) {
+        // Do not retain stale instructions once the payment is terminal.
+        if (next.transferInstructions) delete next.transferInstructions;
+      } else if (incomingInstructions) {
+        next.transferInstructions = incomingInstructions;
+      } else if (current.transferInstructions) {
+        // Preserve previously received valid instructions when refresh omits them.
+        next.transferInstructions = current.transferInstructions;
+      }
+      return next;
+    });
+
+    if (n.isSuccess) {
       setStatus('success');
       try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
       qc.invalidateQueries({ queryKey: ['billing'] });
       qc.invalidateQueries({ queryKey: ['advertising'] });
-    } else if (st === 'failed') setStatus('failed');
-    else if (st === 'expired') setStatus('expired');
-    else if (st === 'cancelled' || st === 'canceled') setStatus('cancelled');
-    else if (st === 'processing' || st === 'verifying') setStatus('processing');
-    else setStatus('awaiting_transfer');
+      return;
+    }
+    if (n.isFailure) {
+      setStatus(n.status === 'canceled' ? 'cancelled' : n.status);
+      return;
+    }
+    const PENDING = new Set(['initializing', 'verifying', 'awaiting_transfer', 'processing', 'pending']);
+    setStatus(PENDING.has(n.status) ? n.status : 'awaiting_transfer');
   };
 
   // Recover an existing checkout on first load.
@@ -124,21 +142,22 @@ function BillingPage() {
   const pay = async (plan) => {
     if (plan.comingSoon || plan.available === false || busyPlan) return;
     setBusyPlan(plan.key);
+    // Reuse the idempotency key for the same plan/checkout to avoid duplicate
+    // transactions on retry; generate a new key for a genuinely new operation.
+    let idempotencyKey;
     try {
-      const purchase = await billingApi.checkout(plan.key, crypto.randomUUID());
-      setCheckout(purchase);
+      idempotencyKey = localStorage.getItem(`${IDEM_PREFIX}${plan.key}`);
+    } catch { /* ignore */ }
+    if (!idempotencyKey) idempotencyKey = crypto.randomUUID();
+    try {
+      const purchase = await billingApi.checkout(plan.key, idempotencyKey);
       const ref = purchase?.reference;
       if (ref) {
         setReference(ref);
         try { localStorage.setItem(REF_KEY, ref); } catch { /* ignore */ }
+        try { localStorage.setItem(`${IDEM_PREFIX}${plan.key}`, idempotencyKey); } catch { /* ignore */ }
       }
-      if (purchase?.status === 'paid') {
-        setStatus('success');
-        qc.invalidateQueries({ queryKey: ['billing'] });
-        qc.invalidateQueries({ queryKey: ['advertising'] });
-      } else {
-        setStatus('awaiting_transfer');
-      }
+      applyStatus({ purchase });
     } catch (e) {
       toast.error('Could not start the payment', e?.message ?? 'Try again.');
     } finally {
@@ -163,8 +182,7 @@ function BillingPage() {
     if (!reference) return;
     try {
       const p = await billingApi.cancel(reference);
-      setCheckout((prev) => ({ ...(prev ?? {}), ...p }));
-      setStatus('cancelled');
+      applyStatus({ purchase: p });
       try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
       toast.success('Payment cancelled');
     } catch (e) {

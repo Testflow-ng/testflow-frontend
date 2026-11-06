@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import PaymentReturnStatus from '../../components/everybody/PaymentReturnStatus.jsx';
 import Screen from '../../components/layout/Screen.jsx';
 import { formatMoney } from '../../utils/money.js';
+import { normalizePaymentStatus } from '../../utils/payment.js';
 import { billingApi } from './api.js';
 
 /** Where Paystack sends the student back. Recover checkout, fetch authoritative status. */
@@ -25,20 +26,16 @@ function BillingCompletePage() {
           try { cs = await billingApi.checkoutStatus(reference); } catch { /* ignore */ }
           const res = await billingApi.refreshStatus(reference);
           if (!live) return;
-          const p = res?.purchase ?? cs ?? res;
-          setPurchase(p);
-          const status = p?.status;
-          if (status === 'paid') {
+          const n = normalizePaymentStatus(res);
+          const purchase = res?.purchase ?? cs ?? res;
+          setPurchase(purchase);
+          if (n.isSuccess) {
             qc.invalidateQueries({ queryKey: ['billing'] });
             qc.invalidateQueries({ queryKey: ['advertising'] });
             setState('paid');
             return;
           }
-          if (['failed', 'cancelled', 'canceled', 'refunded'].includes(status)) {
-            setState('failed');
-            return;
-          }
-          if (status === 'expired') {
+          if (n.isFailure) {
             setState('failed');
             return;
           }
