@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, act, fireEvent } from '@testing-library/react';
 import { render } from '../../../test/customRender.jsx';
 import BillingScreen from './BillingScreen.jsx';
 
@@ -54,9 +54,12 @@ const plans = [
   { key: 'studio', name: 'Studio', priceMinor: 2000000, currency: 'NGN', interval: 'month', adsEnabled: false },
 ];
 
+let orgUuidCounter = 0;
+
 beforeEach(() => {
   vi.resetAllMocks();
   localStorage.clear();
+  orgUuidCounter = 0;
   if (!globalThis.crypto) globalThis.crypto = {};
   globalThis.crypto.randomUUID = vi.fn(() => 'test-idem-key');
   usePlans.mockReturnValue({ data: plans });
@@ -179,8 +182,6 @@ describe('organisation subscription lifecycle', () => {
     expect(wsApi.subscriptionPaymentStatus).not.toHaveBeenCalled();
   });
 
-  let orgUuidCounter = 0;
-
   it('uses a separate idempotency key for initial subscription checkout', async () => {
     globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
     useSubscription.mockReturnValue({ data: freeSub });
@@ -206,7 +207,7 @@ describe('organisation subscription lifecycle', () => {
     render(<BillingScreen />);
     fireEvent.click(screen.getByText('Upgrade to Studio'));
     await screen.findByText('Wema Bank');
-    expect(wsApi.changePlan).toHaveBeenCalledWith('sub1', 'studio', 'org-key-2');
+    expect(wsApi.changePlan).toHaveBeenCalledWith('sub1', 'studio', 'org-key-1');
     expect(wsApi.subscriptionCheckout).not.toHaveBeenCalled();
   });
 
@@ -216,7 +217,7 @@ describe('organisation subscription lifecycle', () => {
     render(<BillingScreen />);
     fireEvent.click(screen.getByText('Renew early'));
     await screen.findByText('Wema Bank');
-    expect(wsApi.renew).toHaveBeenCalledWith('sub1', 'org-key-3');
+    expect(wsApi.renew).toHaveBeenCalledWith('sub1', 'org-key-1');
   });
 
   it('clears idempotency keys after a completed checkout so a new purchase is fresh', async () => {
@@ -251,10 +252,150 @@ describe('organisation subscription lifecycle', () => {
     expect(keys[0]).not.toBe(keys[1]);
   });
 
+  it('terminal checkout clears only the checkout idempotency key', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: freeSub });
+    // Seed all three idempotency keys.
+    localStorage.setItem('tf_org_idem_o1_sub1_checkout', 'key-checkout');
+    localStorage.setItem('tf_org_idem_o1_sub1_upgrade', 'key-upgrade');
+    localStorage.setItem('tf_org_idem_o1_sub1_renew', 'key-renew');
+
+    wsApi.subscriptionCheckout.mockResolvedValue({
+      ...transferInstructions,
+      reference: 'SUB-1',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    render(<BillingScreen />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Upgrade to Studio'));
+    });
+    await screen.findByText('Payment received');
+
+    // Checkout key should be cleared; upgrade and renew keys should survive.
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBeNull();
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_upgrade')).toBe('key-upgrade');
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_renew')).toBe('key-renew');
+  });
+
+  it('terminal upgrade clears only the upgrade idempotency key', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: proSub });
+    wsApi.changePlan.mockResolvedValue({
+      ...transferInstructions,
+      reference: 'SUB-U',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    localStorage.setItem('tf_org_idem_o1_sub1_checkout', 'key-checkout');
+    localStorage.setItem('tf_org_idem_o1_sub1_upgrade', 'key-upgrade');
+    localStorage.setItem('tf_org_idem_o1_sub1_renew', 'key-renew');
+
+    render(<BillingScreen />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Upgrade to Studio'));
+    });
+    await screen.findByText('Payment received');
+
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBe('key-checkout');
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_upgrade')).toBeNull();
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_renew')).toBe('key-renew');
+  });
+
+  it('terminal renewal clears only the renewal idempotency key', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: studioSub });
+    wsApi.renew.mockResolvedValue({
+      ...transferInstructions,
+      reference: 'SUB-R',
+      amountKobo: 700000,
+      currency: 'NGN',
+      status: 'paid',
+    });
+    localStorage.setItem('tf_org_idem_o1_sub1_checkout', 'key-checkout');
+    localStorage.setItem('tf_org_idem_o1_sub1_upgrade', 'key-upgrade');
+    localStorage.setItem('tf_org_idem_o1_sub1_renew', 'key-renew');
+
+    render(<BillingScreen />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Renew early'));
+    });
+    await screen.findByText('Payment received');
+
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBe('key-checkout');
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_upgrade')).toBe('key-upgrade');
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_renew')).toBeNull();
+  });
+
+  it('unrelated operation keys survive terminal-state cleanup', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: freeSub });
+    localStorage.setItem('tf_org_idem_o1_sub1_checkout', 'key-checkout');
+    localStorage.setItem('tf_org_idem_o1_sub1_upgrade', 'key-upgrade');
+    localStorage.setItem('tf_org_idem_o1_sub1_renew', 'key-renew');
+
+    wsApi.subscriptionCheckout.mockResolvedValue({
+      ...transferInstructions,
+      reference: 'SUB-1',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'failed',
+    });
+    render(<BillingScreen />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Upgrade to Studio'));
+    });
+    // Allow the async checkout handler to complete and state to flush.
+    await new Promise((r) => setTimeout(r, 100));
+
+    // Checkout key cleared on terminal failure; unrelated keys survive.
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBeNull();
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_upgrade')).toBe('key-upgrade');
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_renew')).toBe('key-renew');
+  });
+
+  it('pending operations retain their keys across retries', async () => {
+    globalThis.crypto.randomUUID = vi.fn(() => `org-key-${++orgUuidCounter}`);
+    useSubscription.mockReturnValue({ data: freeSub });
+
+    // First attempt: pending (not terminal).
+    wsApi.subscriptionCheckout.mockResolvedValue({
+      ...transferInstructions,
+      reference: 'SUB-1',
+      planKey: 'studio',
+      planName: 'Studio',
+      amountKobo: 2000000,
+      currency: 'NGN',
+      status: 'initialized',
+    });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Wema Bank');
+
+    const keyBefore = localStorage.getItem('tf_org_idem_o1_sub1_checkout');
+    expect(keyBefore).toBe('org-key-1');
+
+    // Same checkout retried manually: should reuse the same key.
+    fireEvent.click(screen.getByText('Check payment status'));
+    await new Promise((r) => setTimeout(r, 50));
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBe(keyBefore);
+  });
+
   it('recovers an existing checkout without initializing a new one', async () => {
     useSubscription.mockReturnValue({ data: freeSub });
-    // Simulate a pending reference persisted from a previous session.
-    localStorage.setItem('tf_org_checkout_o1_sub1', JSON.stringify({ reference: 'SUB-EXISTING' }));
+    localStorage.setItem(
+      'tf_org_checkout_o1_sub1',
+      JSON.stringify({ reference: 'SUB-EXISTING', operation: 'checkout' }),
+    );
+    localStorage.setItem('tf_org_idem_o1_sub1_checkout', 'key-checkout');
     wsApi.subscriptionPaymentStatus.mockResolvedValue({
       payment: { ...transferInstructions, reference: 'SUB-EXISTING', status: 'initialized' },
     });
@@ -262,7 +403,8 @@ describe('organisation subscription lifecycle', () => {
     // Recovery must not start a new checkout.
     expect(wsApi.subscriptionCheckout).not.toHaveBeenCalled();
     expect(wsApi.changePlan).not.toHaveBeenCalled();
-    // Recovery uses the existing reference (passed to the status endpoint).
+    // Recovery reuses the existing idempotency key.
+    expect(localStorage.getItem('tf_org_idem_o1_sub1_checkout')).toBe('key-checkout');
     await screen.findByText('Awaiting transfer');
     expect(wsApi.subscriptionCheckoutStatus).toHaveBeenCalledWith('o1', 'sub1', 'SUB-EXISTING');
   });

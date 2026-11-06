@@ -75,14 +75,12 @@ function BillingScreen() {
     if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
   };
 
-  // Clear every idempotency key for this org/subscription/operation so that a
-  // legitimately new purchase (checkout, upgrade or renewal) gets a fresh key
-  // instead of an idempotent replay of a terminal checkout.
-  const clearStoredIdemKeys = () => {
-    if (!orgId || !sub?.id) return;
-    for (const op of ['checkout', 'upgrade', 'renew']) {
-      try { localStorage.removeItem(`tf_org_idem_${orgId}_${sub.id}_${op}`); } catch { /* ignore */ }
-    }
+  // Clear only the idempotency key for a specific operation so that a terminal
+  // payment for one operation does not invalidate the retry identity of another
+  // operation (e.g. a completed checkout should not clear a pending renewal key).
+  const clearStoredIdemKey = (operation) => {
+    if (!orgId || !sub?.id || !operation) return;
+    try { localStorage.removeItem(`tf_org_idem_${orgId}_${sub.id}_${operation}`); } catch { /* ignore */ }
   };
 
   const extractCheckout = (res) => {
@@ -110,7 +108,7 @@ function BillingScreen() {
     };
   };
 
-  const applyOrgStatus = (res) => {
+  const applyOrgStatus = (res, operation) => {
     const n = normalizePaymentStatus(res);
     const purchase = res?.checkout ?? res?.payment ?? res?.purchase ?? res ?? {};
     const instructions = purchase?.transferInstructions ?? purchase?.transfer ?? null;
@@ -130,14 +128,14 @@ function BillingScreen() {
     if (n.isSuccess) {
       setPStatus('success');
       if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
-      clearStoredIdemKeys();
+      clearStoredIdemKey(operation);
       qc.invalidateQueries({ queryKey: ['ws'] });
       return;
     }
     if (n.isFailure) {
       setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
       if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
-      clearStoredIdemKeys();
+      clearStoredIdemKey(operation);
       return;
     }
     setPStatus(paymentUiStatus(res) ?? 'awaiting_transfer');
@@ -149,19 +147,24 @@ function BillingScreen() {
     if (!orgId || !sub?.id || !refKey) return undefined;
     let live = true;
     let reference = null;
+    let recoveredOperation = null;
     try {
       const raw = localStorage.getItem(refKey);
-      if (raw) reference = JSON.parse(raw)?.reference;
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        reference = parsed?.reference;
+        recoveredOperation = parsed?.operation;
+      }
     } catch { /* ignore */ }
     if (!reference) return undefined;
     (async () => {
-      setCheckout({ reference, subId: sub.id, orgId });
+      setCheckout({ reference, subId: sub.id, orgId, operation: recoveredOperation });
       setPStatus('verifying');
       try {
         await wsApi.subscriptionCheckoutStatus(orgId, sub.id, reference);
         const res = await wsApi.subscriptionPaymentStatus(orgId, sub.id, reference, true);
         if (!live) return;
-        applyOrgStatus(res);
+        applyOrgStatus(res, recoveredOperation);
       } catch {
         if (live) setPStatus('failed');
       }
@@ -181,7 +184,7 @@ function BillingScreen() {
       try {
         const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
         if (!live) return;
-        applyOrgStatus(res);
+        applyOrgStatus(res, checkout.operation);
       } catch { /* temporary failure; keep checkout */ }
       finally { refreshRef.current = false; }
     };
@@ -201,6 +204,7 @@ function BillingScreen() {
           reference: c.reference,
           subId: sub.id,
           orgId,
+          operation,
           amountKobo: c.amountKobo,
           currency: c.currency,
           planName: c.planName,
@@ -208,18 +212,18 @@ function BillingScreen() {
           status: c.status,
         });
         try {
-          localStorage.setItem(refKey, JSON.stringify({ reference: c.reference }));
+          localStorage.setItem(refKey, JSON.stringify({ reference: c.reference, operation }));
         } catch { /* ignore */ }
         const n = normalizePaymentStatus(res);
         if (n.isSuccess) {
           setPStatus('success');
           clearStoredCheckout();
-          clearStoredIdemKeys();
+          clearStoredIdemKey(operation);
           qc.invalidateQueries({ queryKey: ['ws'] });
         } else if (n.isFailure) {
           setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
           clearStoredCheckout();
-          clearStoredIdemKeys();
+          clearStoredIdemKey(operation);
         } else {
           setPStatus('awaiting_transfer');
         }
@@ -270,9 +274,9 @@ function BillingScreen() {
     if (!checkout?.reference || refreshing) return;
     setRefreshing(true);
     try {
-      const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
-      applyOrgStatus(res);
-    } catch (e) {
+        const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
+        applyOrgStatus(res, checkout.operation);
+      } catch (e) {
       toast.error('Could not refresh payment status', e?.message ?? 'Try again.');
     } finally {
       setRefreshing(false);
@@ -283,7 +287,7 @@ function BillingScreen() {
     setCheckout(null);
     setPStatus('idle');
     clearStoredCheckout();
-    clearStoredIdemKeys();
+    clearStoredIdemKey(checkout?.operation);
   };
 
   const ordered = [...(plans ?? []).filter((p) => p.key !== 'free'), FREE_PLAN].sort((a, b) => (RANK[a.key] ?? 9) - (RANK[b.key] ?? 9));
