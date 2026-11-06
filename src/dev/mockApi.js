@@ -55,7 +55,7 @@ const routes = [
   ['POST', /^\/api\/billing\/ad-free\/checkout$/, (_m, body) => {
     const plan = PLANS.find((p) => p.key === body.planKey) ?? PLANS[0];
     pass.plan = plan.key;
-    return { purchase: { reference: 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', transfer: { bankName: 'Wema Bank', accountName: 'TestFlow Ltd', accountNumber: '0123456789', amountKobo: plan.priceMinor, currency: 'NGN', reference: 'TFS-MOCK123', expiresAt: new Date(Date.now()+3600000).toISOString(), instructions: 'Transfer the exact amount.' } } };
+    return { purchase: { reference: 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', transferInstructions: { bankName: 'Wema Bank', accountName: 'TestFlow Ltd', accountNumber: '0123456789', amountKobo: plan.priceMinor, currency: 'NGN', transferReference: 'TFS-MOCK123', expiresAt: new Date(Date.now()+3600000).toISOString(), displayText: 'Transfer the exact amount.' } } };
   }],
   ['GET', /^\/api\/billing\/ad-free\/checkout-status$/, (_m, _b, cfg) => {
     const query = cfg?.params ?? {};

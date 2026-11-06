@@ -62,9 +62,9 @@ function BankTransferInstructions({ transfer, className, title = 'Transfer instr
         {t.currency && <span>Currency: {t.currency}</span>}
       </div>
 
-      {t.instructions && (
+      {t.displayText && (
         <div className="rounded-2xl border border-border bg-surface p-3.5 text-sm text-muted">
-          {t.instructions}
+          {t.displayText}
         </div>
       )}
 
