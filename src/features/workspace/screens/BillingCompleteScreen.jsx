@@ -4,14 +4,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import PaymentReturnStatus from '../../../components/everybody/PaymentReturnStatus.jsx';
 import Screen from '../../../components/layout/Screen.jsx';
 import { formatMoney } from '../../../utils/money.js';
+import { normalizePaymentStatus } from '../../../utils/payment.js';
 import { wsApi } from '../api.js';
 
 const TRIES = 8;
 
-/** Where Paystack sends the organiser after paying for a plan. The backend verifies it, then we say what happened. */
+/** Where Paystack sends the organiser after paying for a plan. */
 function BillingCompleteScreen() {
   const [params] = useSearchParams();
   const reference = params.get('reference') ?? params.get('trxref');
+  const orgId = params.get('orgId') ?? params.get('organizationId');
+  const subId = params.get('subId') ?? params.get('subscriptionId');
   const qc = useQueryClient();
   const [state, setState] = useState(reference ? 'verifying' : 'failed');
   const [payment, setPayment] = useState(null);
@@ -23,13 +26,27 @@ function BillingCompleteScreen() {
     (async () => {
       for (let i = 0; i < TRIES; i += 1) {
         try {
-          const res = await wsApi.verifyPayment(reference);
+          let res;
+          if (orgId && subId) {
+            try { res = await wsApi.verifySubscriptionPayment(orgId, subId, reference); } catch { res = await wsApi.verifyPayment(reference); }
+          } else {
+            res = await wsApi.verifyPayment(reference);
+          }
           if (!live) return;
-          setPayment(res.payment);
-          if (res.payment?.status === 'paid') { qc.invalidateQueries({ queryKey: ['ws'] }); setState('paid'); return; }
-          if (['failed', 'abandoned'].includes(res.payment?.status)) { setState('failed'); return; }
+          const n = normalizePaymentStatus(res);
+          const payment = res?.payment ?? res;
+          setPayment(payment);
+          if (n.isSuccess || res?.subscription) {
+            qc.invalidateQueries({ queryKey: ['ws'] });
+            setState('paid');
+            return;
+          }
+          if (n.isFailure) {
+            setState('failed');
+            return;
+          }
         } catch {
-          /* a blip while polling: try again */
+          /* blip */
         }
         await new Promise((r) => setTimeout(r, 2500));
         if (!live) return;
@@ -37,7 +54,7 @@ function BillingCompleteScreen() {
       setState('pending');
     })();
     return () => { live = false; };
-  }, [reference, attempt, qc]);
+  }, [reference, attempt, qc, orgId, subId]);
 
   const details = [
     ...(reference ? [{ label: 'Reference', value: reference }] : []),

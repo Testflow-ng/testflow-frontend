@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
@@ -221,7 +221,7 @@ function ExamResultPage() {
         </p>
         <p
           className={cn(
-            'mt-3 font-heading text-6xl font-extrabold leading-none tabular-nums tracking-tight',
+            'mt-3 font-heading text-[4rem] font-extrabold leading-none tabular-nums tracking-tight sm:text-6xl',
             tone.color,
           )}
         >
@@ -262,7 +262,7 @@ function ExamResultPage() {
       )}
 
       {/* Stats strip */}
-      <div className="mt-3 grid grid-cols-3 gap-2.5">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <StatCard label="Correct" value={result.correctCount} tone="success" icon={CheckCircle2} />
         <StatCard label="Wrong" value={wrongOnly} tone="warning" icon={XCircle} />
         <StatCard label="Skipped" value={skippedCount} tone="sage" icon={MinusCircle} />

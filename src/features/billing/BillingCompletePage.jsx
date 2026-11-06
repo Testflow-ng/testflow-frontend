@@ -4,12 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import PaymentReturnStatus from '../../components/everybody/PaymentReturnStatus.jsx';
 import Screen from '../../components/layout/Screen.jsx';
 import { formatMoney } from '../../utils/money.js';
+import { normalizePaymentStatus } from '../../utils/payment.js';
 import { billingApi } from './api.js';
 
-const TRIES = 8;
-const DELAY = 2500;
-
-/** Where Paystack sends the student back. Asks the backend to verify the payment, then says what happened. */
+/** Where Paystack sends the student back. Recover checkout, fetch authoritative status. */
 function BillingCompletePage() {
   const [params] = useSearchParams();
   const reference = params.get('reference') ?? params.get('trxref');
@@ -22,33 +20,34 @@ function BillingCompletePage() {
     if (!reference) return undefined;
     let live = true;
     (async () => {
-      for (let i = 0; i < TRIES; i += 1) {
+      for (let i = 0; i < 8; i += 1) {
         try {
-          const res = await billingApi.status(reference);
+          let cs = null;
+          try { cs = await billingApi.checkoutStatus(reference); } catch { /* ignore */ }
+          const res = await billingApi.refreshStatus(reference);
           if (!live) return;
-          setPurchase(res.purchase);
-          const status = res.purchase?.status;
-          if (status === 'paid') {
+          const n = normalizePaymentStatus(res);
+          const purchase = res?.purchase ?? cs ?? res;
+          setPurchase(purchase);
+          if (n.isSuccess) {
             qc.invalidateQueries({ queryKey: ['billing'] });
             qc.invalidateQueries({ queryKey: ['advertising'] });
             setState('paid');
             return;
           }
-          if (['failed', 'cancelled', 'refunded'].includes(status)) {
+          if (n.isFailure) {
             setState('failed');
             return;
           }
         } catch {
-          /* a blip while polling: try again */
+          /* blip */
         }
-        await new Promise((r) => setTimeout(r, DELAY));
+        await new Promise((r) => setTimeout(r, 2500));
         if (!live) return;
       }
       setState('pending');
     })();
-    return () => {
-      live = false;
-    };
+    return () => { live = false; };
   }, [reference, attempt, qc]);
 
   const details = [

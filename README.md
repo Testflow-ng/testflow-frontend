@@ -49,3 +49,7 @@ npm run format   # Format source files
 
 - [Backend API](https://github.com/Testflow-ng/testflow-backend)
 - [Mobile app](https://github.com/Testflow-ng/testflow-mobile)
+
+## Payments
+
+Student and organisation subscriptions use native Paystack bank transfer. The frontend never trusts local state; backend payment status is authoritative. Callback routes: `/billing/complete` and `/workspace/billing/complete`.

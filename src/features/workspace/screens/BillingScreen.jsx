@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CalendarClock, Check, Crown, MoreHorizontal, Sparkles, X } from 'lucide-react';
 import { Badge, Banner, Button, Card, DropdownMenu, IconButton, Reveal, Skeleton, useToast } from '../../../components/ui/index.js';
 import FaqAccordion from '../../../components/marketing/FaqAccordion.jsx';
@@ -6,8 +6,15 @@ import InvoiceTable from '../../../components/everybody/InvoiceTable.jsx';
 import Screen, { PageHeader } from '../../../components/layout/Screen.jsx';
 import { cn } from '../../../utils/cn.js';
 import { formatMoney } from '../../../utils/money.js';
+import { normalizeTransfer } from '../../../utils/transfer.js';
+import { normalizePaymentStatus, paymentUiStatus } from '../../../utils/payment.js';
 import { wsApi } from '../api.js';
+import BankTransferInstructions from '../../../components/billing/BankTransferInstructions.jsx';
+import { useOrg } from '../OrgContext.js';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePlans, useSubscription, useSubscriptionPayments } from '../useWorkspace.js';
+
+const REF_KEY = (orgId, subId) => (orgId && subId ? `tf_org_checkout_${orgId}_${subId}` : null);
 
 /** What each plan includes, in plain words. `[feature, free, pro, studio]`: true is included, false is not, text is a limit. */
 const MATRIX = [
@@ -40,25 +47,248 @@ const daysLeft = (end) => {
 /** Your plan with Testflow: where you are, what each plan includes, and what you have paid. */
 function BillingScreen() {
   const toast = useToast();
+  const qc = useQueryClient();
+  const { orgId } = useOrg();
   const { data: sub, isLoading, error } = useSubscription();
   const { data: plans } = usePlans();
   const payments = useSubscriptionPayments().data ?? [];
   const [busy, setBusy] = useState(null);
+  const [checkout, setCheckout] = useState(null); // { reference, subId, orgId, amountKobo, currency, planName, transferInstructions, status }
+  const [pStatus, setPStatus] = useState('idle');
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshRef = useRef(false);
 
-  /** Upgrades and renewals go straight to the payment page. A downgrade needs no payment: it starts when the period ends. */
-  const go = async (key, run) => {
+  const refKey = REF_KEY(orgId, sub?.id);
+
+  const getIdemKey = (operation) => {
+    const key = `tf_org_idem_${orgId}_${sub?.id}_${operation}`;
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) return stored;
+    } catch { /* ignore */ }
+    const generated = crypto.randomUUID();
+    try { localStorage.setItem(key, generated); } catch { /* ignore */ }
+    return generated;
+  };
+
+  const clearStoredCheckout = () => {
+    if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+  };
+
+  // Clear only the idempotency key for a specific operation so that a terminal
+  // payment for one operation does not invalidate the retry identity of another
+  // operation (e.g. a completed checkout should not clear a pending renewal key).
+  const clearStoredIdemKey = (operation) => {
+    if (!orgId || !sub?.id || !operation) return;
+    try { localStorage.removeItem(`tf_org_idem_${orgId}_${sub.id}_${operation}`); } catch { /* ignore */ }
+  };
+
+  const extractCheckout = (res) => {
+    // Unwrap the documented envelopes without assuming every response has the
+    // identical structure.
+    const purchase = res?.checkout ?? res?.payment ?? res?.purchase ?? res ?? {};
+    const reference =
+      purchase?.reference ?? purchase?.paymentId ?? res?.reference ?? res?.paymentId;
+    const instructions = normalizeTransfer(purchase);
+    const hasInstructions = Boolean(
+      instructions.bankName ||
+        instructions.accountName ||
+        instructions.accountNumber ||
+        instructions.reference ||
+        instructions.amountKobo != null ||
+        instructions.displayText
+    );
+    return {
+      reference,
+      amountKobo: instructions.amountKobo ?? purchase?.amountKobo ?? purchase?.amount_kobo ?? purchase?.amount,
+      currency: instructions.currency ?? purchase?.currency ?? 'NGN',
+      planName: purchase?.planName,
+      status: purchase?.status ?? purchase?.paymentState ?? res?.status,
+      transferInstructions: hasInstructions ? instructions : null,
+    };
+  };
+
+  const applyOrgStatus = (res, operation) => {
+    const n = normalizePaymentStatus(res);
+    const purchase = res?.checkout ?? res?.payment ?? res?.purchase ?? res ?? {};
+    const instructions = purchase?.transferInstructions ?? purchase?.transfer ?? null;
+
+    setCheckout((prev) => {
+      const current = prev ?? {};
+      if (n.isTerminal) {
+        const next = { ...current };
+        if (next.transferInstructions) delete next.transferInstructions;
+        return next;
+      }
+      if (instructions) return { ...current, transferInstructions: instructions };
+      if (current.transferInstructions) return current;
+      return current;
+    });
+
+    if (n.isSuccess) {
+      setPStatus('success');
+      if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+      clearStoredIdemKey(operation);
+      qc.invalidateQueries({ queryKey: ['ws'] });
+      return;
+    }
+    if (n.isFailure) {
+      setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
+      if (refKey) try { localStorage.removeItem(refKey); } catch { /* ignore */ }
+      clearStoredIdemKey(operation);
+      return;
+    }
+    setPStatus(paymentUiStatus(res) ?? 'awaiting_transfer');
+  };
+
+  // Recover a pending checkout after refresh or navigation. Must not start a
+  // new checkout.
+  useEffect(() => {
+    if (!orgId || !sub?.id || !refKey) return undefined;
+    let live = true;
+    let reference = null;
+    let recoveredOperation = null;
+    try {
+      const raw = localStorage.getItem(refKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        reference = parsed?.reference;
+        recoveredOperation = parsed?.operation;
+      }
+    } catch { /* ignore */ }
+    if (!reference) return undefined;
+    (async () => {
+      setCheckout({ reference, subId: sub.id, orgId, operation: recoveredOperation });
+      setPStatus('verifying');
+      try {
+        await wsApi.subscriptionCheckoutStatus(orgId, sub.id, reference);
+        const res = await wsApi.subscriptionPaymentStatus(orgId, sub.id, reference, true);
+        if (!live) return;
+        applyOrgStatus(res, recoveredOperation);
+      } catch {
+        if (live) setPStatus('failed');
+      }
+    })();
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgId, sub?.id]);
+
+  // Poll while a payment is pending. Stops on unmount and terminal states.
+  useEffect(() => {
+    if (!checkout?.reference || !orgId || !checkout.subId) return undefined;
+    if (['success', 'failed', 'expired', 'cancelled', 'abandoned'].includes(pStatus)) return undefined;
+    let live = true;
+    const tick = async () => {
+      if (refreshRef.current) return;
+      refreshRef.current = true;
+      try {
+        const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
+        if (!live) return;
+        applyOrgStatus(res, checkout.operation);
+      } catch { /* temporary failure; keep checkout */ }
+      finally { refreshRef.current = false; }
+    };
+    const id = setInterval(tick, 6000);
+    return () => { live = false; clearInterval(id); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkout, pStatus, orgId]);
+
+  const startCheckout = async (key, run, operation) => {
+    if (busy) return;
     setBusy(key);
     try {
       const res = await run();
-      if (res?.authorizationUrl) window.location.assign(res.authorizationUrl);
-      else { toast.success('Plan change scheduled', 'It starts when your current period ends.'); setBusy(null); }
+      const c = extractCheckout(res);
+      if (c.reference) {
+        setCheckout({
+          reference: c.reference,
+          subId: sub.id,
+          orgId,
+          operation,
+          amountKobo: c.amountKobo,
+          currency: c.currency,
+          planName: c.planName,
+          transferInstructions: c.transferInstructions,
+          status: c.status,
+        });
+        try {
+          localStorage.setItem(refKey, JSON.stringify({ reference: c.reference, operation }));
+        } catch { /* ignore */ }
+        const n = normalizePaymentStatus(res);
+        if (n.isSuccess) {
+          setPStatus('success');
+          clearStoredCheckout();
+          clearStoredIdemKey(operation);
+          qc.invalidateQueries({ queryKey: ['ws'] });
+        } else if (n.isFailure) {
+          setPStatus(n.status === 'canceled' ? 'cancelled' : n.status);
+          clearStoredCheckout();
+          clearStoredIdemKey(operation);
+        } else {
+          setPStatus('awaiting_transfer');
+        }
+      } else {
+        // No payment reference: a scheduled downgrade or a change that does not
+        // require immediate payment. Never show bank-transfer UI for these.
+        if (operation === 'upgrade') {
+          toast.success('Plan change scheduled', 'It starts when your current period ends.');
+          qc.invalidateQueries({ queryKey: ['ws'] });
+        } else {
+          toast.error('Could not start the payment', 'No payment reference was returned.');
+        }
+        setPStatus('idle');
+        setCheckout(null);
+        clearStoredCheckout();
+      }
     } catch (e) {
-      toast.error('Could not start the payment', e.message);
+      toast.error('Could not start the payment', e?.message ?? 'Try again.');
+    } finally {
       setBusy(null);
     }
   };
-  const choose = (p) => go(p.key, () => wsApi.changePlan(sub?.id, p.key));
-  const renew = () => go('renew', () => wsApi.renew(sub.id));
+
+  const choose = (p) => {
+    if (sub && p.key === (sub.planKey ?? 'free')) return;
+    const isInitial = !sub || sub.planKey === 'free';
+    if (isInitial && p.key !== 'free' && sub?.id) {
+      // First paid subscription: use the organisation checkout endpoint.
+      startCheckout(
+        p.key,
+        () => wsApi.subscriptionCheckout(orgId, sub.id, getIdemKey('checkout')),
+        'checkout'
+      );
+    } else {
+      // Upgrade or scheduled downgrade on an existing subscription.
+      startCheckout(
+        p.key,
+        () => wsApi.changePlan(sub?.id, p.key, getIdemKey('upgrade')),
+        'upgrade'
+      );
+    }
+  };
+
+  const renew = () =>
+    startCheckout('renew', () => wsApi.renew(sub.id, getIdemKey('renew')), 'renew');
+
+  const manualRefreshOrg = async () => {
+    if (!checkout?.reference || refreshing) return;
+    setRefreshing(true);
+    try {
+        const res = await wsApi.subscriptionPaymentStatus(orgId, checkout.subId, checkout.reference, true);
+        applyOrgStatus(res, checkout.operation);
+      } catch (e) {
+      toast.error('Could not refresh payment status', e?.message ?? 'Try again.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const resetOrgCheckout = () => {
+    setCheckout(null);
+    setPStatus('idle');
+    clearStoredCheckout();
+    clearStoredIdemKey(checkout?.operation);
+  };
 
   const ordered = [...(plans ?? []).filter((p) => p.key !== 'free'), FREE_PLAN].sort((a, b) => (RANK[a.key] ?? 9) - (RANK[b.key] ?? 9));
   const isFree = !sub || sub.planKey === 'free';
@@ -100,6 +330,59 @@ function BillingScreen() {
                 </div>
               )}
               <div className="mt-6 flex flex-wrap gap-2">{sub.adsEnabled && <Button variant="accent" loading={busy === 'studio'} disabled={busy !== null && busy !== 'studio'} onClick={() => choose(ordered.find((p) => !p.adsEnabled) ?? { key: 'studio' })}>Upgrade to remove ads</Button>}<Button variant={sub.adsEnabled ? 'ghost' : 'accent'} className={sub.adsEnabled ? 'text-white hover:bg-white/10' : undefined} loading={busy === 'renew'} disabled={busy !== null && busy !== 'renew'} onClick={renew}>Renew early</Button></div>
+            </div>
+          </Reveal>
+        )}
+
+        {checkout?.reference && (
+          <Reveal>
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">
+                    {pStatus === 'success' ? 'Payment received' : pStatus === 'verifying' ? 'Recovering payment' : 'Awaiting transfer'}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted">
+                    {pStatus === 'success' ? 'Your plan has been updated.' : 'Complete the bank transfer to activate your plan.'}
+                  </p>
+                </div>
+                <Badge variant={pStatus === 'success' ? 'success' : pStatus === 'failed' || pStatus === 'expired' || pStatus === 'cancelled' ? 'outline' : 'warning'}>{pStatus.replace('_', ' ')}</Badge>
+              </div>
+
+              {pStatus === 'verifying' && (
+                <Card padding="lg" className="flex items-center gap-3">
+                  <span className="inline-block size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
+                  <span className="text-sm text-muted">Recovering your checkout…</span>
+                </Card>
+              )}
+
+              {pStatus === 'success' && (
+                <Card padding="lg" className="space-y-4">
+                  <p className="text-sm text-foreground">Your subscription has been updated. You can continue using your workspace.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="primary" onClick={resetOrgCheckout}>Done</Button>
+                  </div>
+                </Card>
+              )}
+
+              {(pStatus === 'failed' || pStatus === 'expired' || pStatus === 'cancelled') && (
+                <Card padding="lg" className="space-y-4">
+                  <p className="text-sm text-foreground">The payment did not complete. Start a new plan change when ready.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="primary" onClick={resetOrgCheckout}>Dismiss</Button>
+                    <Button variant="outline" onClick={manualRefreshOrg} loading={refreshing}>Check again</Button>
+                  </div>
+                </Card>
+              )}
+
+              {(pStatus === 'awaiting_transfer' || pStatus === 'processing') && (
+                <>
+                  <BankTransferInstructions transfer={checkout} title="Transfer instructions" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="outline" onClick={manualRefreshOrg} loading={refreshing}>Check payment status</Button>
+                  </div>
+                </>
+              )}
             </div>
           </Reveal>
         )}

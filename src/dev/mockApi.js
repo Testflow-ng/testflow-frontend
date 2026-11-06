@@ -55,7 +55,12 @@ const routes = [
   ['POST', /^\/api\/billing\/ad-free\/checkout$/, (_m, body) => {
     const plan = PLANS.find((p) => p.key === body.planKey) ?? PLANS[0];
     pass.plan = plan.key;
-    return { purchase: { reference: 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', authorizationUrl: `${window.location.origin}/billing/complete?reference=TFS-MOCK123` } };
+    return { purchase: { reference: 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', transferInstructions: { bankName: 'Wema Bank', accountName: 'TestFlow Ltd', accountNumber: '0123456789', amountKobo: plan.priceMinor, currency: 'NGN', transferReference: 'TFS-MOCK123', expiresAt: new Date(Date.now()+3600000).toISOString(), displayText: 'Transfer the exact amount.' } } };
+  }],
+  ['GET', /^\/api\/billing\/ad-free\/checkout-status$/, (_m, _b, cfg) => {
+    const query = cfg?.params ?? {};
+    const plan = PLANS.find((p) => p.key === pass.plan) ?? PLANS[0];
+    return { purchase: { reference: query.reference ?? 'TFS-MOCK123', planKey: plan.key, planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'initialized', transfer: { bankName: 'Wema Bank', accountName: 'TestFlow Ltd', accountNumber: '0123456789', amountKobo: plan.priceMinor, currency: 'NGN', reference: query.reference ?? 'TFS-MOCK123', expiresAt: new Date(Date.now()+3600000).toISOString(), instructions: 'Transfer the exact amount.' } } };
   }],
   ['GET', /^\/api\/billing\/ad-free\/status$/, (_m, _b, cfg) => {
     const query = cfg?.params ?? {};
@@ -64,6 +69,7 @@ const routes = [
     pass.expiresAt = new Date(Date.now() + plan.durationDays * 86400000).toISOString();
     return { entitlement: entitlement(), purchase: { reference: query.reference ?? 'TFS-MOCK123', planName: plan.name, amountKobo: plan.priceMinor, currency: 'NGN', status: 'paid' } };
   }],
+  ['POST', /^\/api\/billing\/ad-free\/cancel$/, (_m, body, cfg) => ({ purchase: { reference: (cfg?.params?.reference ?? body?.reference ?? 'TFS-MOCK123'), status: 'cancelled' } })],
   ['GET', /^\/api\/exam-sessions\/stats$/, () => ({ stats: mockStats })],
   // Scores in the list come from the same marked paper the result page renders (`mockExam.js`),
   // so a history row can never disagree with the report behind it.
