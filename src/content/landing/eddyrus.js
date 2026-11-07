@@ -52,7 +52,7 @@ export const EDDYRUS_TEAM = [
     summary:
       'Shaped the account-recovery experience, refactoring the verify-email, reset-password and forgot-password screens into cleaner, clearer flows.',
     avatar: '/team/xylara-techs.webp',
-    github: 'https://github.com/XYLARA-TECHS',
+    github: 'https://github.com/Ehiz-Studio',
     links: [],
   },
 ];
