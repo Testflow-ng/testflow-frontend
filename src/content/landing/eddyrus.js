@@ -51,7 +51,7 @@ export const EDDYRUS_TEAM = [
     role: 'Core frontend developer',
     summary:
       'Shaped the account-recovery experience, refactoring the verify-email, reset-password and forgot-password screens into cleaner, clearer flows.',
-    avatar: '/team/xylara-techs.webp',
+    avatar: '/team/ehiz-studio.png',
     github: 'https://github.com/Ehiz-Studio',
     links: [],
   },
