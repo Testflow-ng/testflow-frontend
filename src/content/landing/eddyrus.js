@@ -47,7 +47,7 @@ export const EDDYRUS_TEAM = [
   },
   {
     name: 'Ehizojie Edovia',
-    handle: 'Ehiz Studio',
+    handle: 'Ehiz-Studio',
     role: 'Core frontend developer',
     summary:
       'Shaped the account-recovery experience, refactoring the verify-email, reset-password and forgot-password screens into cleaner, clearer flows.',
