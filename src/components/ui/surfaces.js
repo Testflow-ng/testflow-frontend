@@ -38,7 +38,7 @@ export function cardClasses({ padding = 'md', interactive = false, className } =
 export function listRowClasses({ interactive = true, className } = {}) {
   return cn(
     surfaceBase,
-    'flex min-h-14 w-full items-center gap-3 p-3.5 text-left',
+    'flex min-h-14 w-full min-w-0 items-center gap-3 p-3.5 text-left',
     interactive && interactiveClasses,
     className,
   );
@@ -50,7 +50,7 @@ export function listRowClasses({ interactive = true, className } = {}) {
  */
 export function groupRowClasses({ interactive = true, className } = {}) {
   return cn(
-    'flex min-h-[3.25rem] w-full items-center justify-between gap-3 px-4 py-3 text-left',
+    'flex min-h-[3.25rem] w-full min-w-0 items-center justify-between gap-3 px-4 py-3 text-left',
     interactive &&
       'tf-pressable active:bg-surface-strong [@media(hover:hover)]:hover:bg-surface-strong',
     className,
@@ -59,7 +59,7 @@ export function groupRowClasses({ interactive = true, className } = {}) {
 
 /** Container for a grouped list: one border, hairline dividers between rows. */
 export function groupListClasses({ className } = {}) {
-  return cn('overflow-hidden divide-y divide-border', surfaceBase, className);
+  return cn('w-full min-w-0 overflow-hidden divide-y divide-border', surfaceBase, className);
 }
 
 /**

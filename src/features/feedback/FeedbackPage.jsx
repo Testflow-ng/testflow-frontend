@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Bug, Lightbulb, MapPin, MessageSquare, Send, Sparkles } from 'lucide-react';
 import {
   Alert,
-  Badge,
   Button,
   Card,
   CharacterCounter,

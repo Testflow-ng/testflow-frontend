@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Clock, ShieldCheck, Copy, Check, Building2, UserCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Clock, ShieldCheck, Copy, Check, Building2, UserCircle2 } from 'lucide-react';
 import { Card, CopyField, useToast } from '../ui/index.js';
 import { ICON } from '../ui/iconProps.js';
 import { formatMoney } from '../../utils/money.js';
@@ -86,13 +86,15 @@ function BankTransferInstructions({ transfer, className, title = 'Transfer instr
                 <p className="mt-1 text-base font-bold text-foreground-strong">{t.bankName}</p>
               </div>
             )}
-            {t.accountName && (
+            {(t.accountName || hasAccountDetails) && (
               <div className="rounded-xl border border-border/80 bg-surface p-3.5 shadow-sm">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-muted">
                   <UserCircle2 size={14} aria-hidden="true" />
                   <span>Account name</span>
                 </div>
-                <p className="mt-1 text-base font-bold text-foreground-strong">{t.accountName}</p>
+                <p className="mt-1 text-base font-bold text-foreground-strong">
+                  {(!t.accountName || t.accountName.toUpperCase() === 'PAYSTACK CHECKOUT') ? 'Testflow' : t.accountName}
+                </p>
               </div>
             )}
           </div>

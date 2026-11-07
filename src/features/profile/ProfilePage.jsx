@@ -200,9 +200,9 @@ function ProfilePage() {
     <Screen width="xl">
       <PageHeader title="Profile" subtitle="Your details, subjects and learning preferences." />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
+      <div className="mt-6 grid grid-cols-1 gap-6 w-full min-w-0 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
         {/* Profile Card */}
-        <Card padding="lg" className="flex flex-col items-center text-center lg:sticky lg:top-6">
+        <Card padding="lg" className="flex w-full min-w-0 flex-col items-center text-center lg:sticky lg:top-6">
           <div className="relative group">
             <Avatar name={user.fullName} src={user.avatarUrl} className="size-24 text-3xl shadow-sm ring-4 ring-background" />
             <input
@@ -227,11 +227,11 @@ function ProfilePage() {
               )}
             </button>
           </div>
-          <h2 className="mt-3.5 min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
+          <h2 className="mt-3.5 w-full min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
             {user.fullName}
           </h2>
-          {user.username && <p className="mt-0.5 text-sm font-medium text-muted">@{user.username}</p>}
-          <p className="mt-1 max-w-full truncate text-xs text-muted">{user.email}</p>
+          {user.username && <p className="mt-0.5 w-full min-w-0 truncate text-sm font-medium text-muted">@{user.username}</p>}
+          <p className="mt-1 w-full min-w-0 truncate text-xs text-muted">{user.email}</p>
           <div className="mt-3.5 flex flex-wrap justify-center gap-1.5">
             <Badge variant="lavender" className="uppercase tracking-wider text-[11px]">{user.role?.replace('_', ' ') || 'Student'}</Badge>
             {user.createdAt && <Badge variant="outline" className="text-[11px]">Since {formatDate(user.createdAt)}</Badge>}
@@ -242,9 +242,9 @@ function ProfilePage() {
         </Card>
 
         {/* Content Area */}
-        <div className="space-y-6">
+        <div className="w-full min-w-0 space-y-6">
           {/* My Subjects */}
-          <section aria-labelledby="my-subjects">
+          <section aria-labelledby="my-subjects" className="w-full min-w-0">
             <div className="mb-2.5 flex items-center justify-between gap-3">
               <h2 id="my-subjects" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">My subjects</h2>
               <Button size="sm" variant="ghost" onClick={() => setShowSubjectPicker(true)} leadingIcon={<Plus size={14} />}>
@@ -259,12 +259,12 @@ function ProfilePage() {
                 action={<Button size="sm" onClick={() => setShowSubjectPicker(true)}>Choose subjects</Button>}
               />
             ) : (
-              <Card padding="sm" className="flex flex-wrap gap-2">
+              <Card padding="sm" className="flex w-full min-w-0 flex-wrap gap-2">
                 {pinnedSubjects.map((s) => (
-                  <span key={s.id} className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-border bg-background py-1 pl-3 pr-1 text-xs font-semibold text-foreground-strong shadow-xs">
-                    <span className="font-bold text-primary">{s.code}</span>
-                    <span className="truncate max-w-[160px]">{s.title}</span>
-                    <IconButton size="sm" variant="ghost" className="size-6 text-muted hover:text-foreground" aria-label={`Remove ${s.title}`} onClick={() => togglePin.mutate(s.id)}>
+                  <span key={s.id} className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full border border-border bg-background py-1 pl-3 pr-1 text-xs font-semibold text-foreground-strong shadow-xs">
+                    <span className="shrink-0 font-bold text-primary">{s.code}</span>
+                    <span className="truncate max-w-[140px] sm:max-w-[180px]">{s.title}</span>
+                    <IconButton size="sm" variant="ghost" className="size-6 shrink-0 text-muted hover:text-foreground" aria-label={`Remove ${s.title}`} onClick={() => togglePin.mutate(s.id)}>
                       <X size={12} aria-hidden="true" />
                     </IconButton>
                   </span>
@@ -274,11 +274,11 @@ function ProfilePage() {
           </section>
 
           {/* Study & Practice (2-column mobile grid, Live CBT removed per user request) */}
-          <section aria-labelledby="study-practice">
+          <section aria-labelledby="study-practice" className="w-full min-w-0">
             <h2 id="study-practice" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
               Study &amp; Practice
             </h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+            <div className="grid w-full min-w-0 grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
               <StudyTile
                 to="/progress"
                 icon={TrendingUp}
@@ -328,7 +328,7 @@ function ProfilePage() {
           </section>
 
           {/* Testflow for Everyone / Workspace */}
-          <section aria-labelledby="everybody-workspace">
+          <section aria-labelledby="everybody-workspace" className="w-full min-w-0">
             <div className="mb-2.5 flex items-center justify-between">
               <h2 id="everybody-workspace" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
                 {org ? 'Workspace' : 'Testflow for Everyone'}
@@ -337,12 +337,12 @@ function ProfilePage() {
                 {org ? 'Open workspace' : 'Learn more'}
               </Link>
             </div>
-            <Card className="flex items-center justify-between gap-3 p-3.5 border-primary/20 bg-primary/[0.02]">
-              <div className="flex min-w-0 items-center gap-3">
+            <Card className="flex w-full min-w-0 items-center justify-between gap-3 p-3.5 border-primary/20 bg-primary/[0.02]">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Building2 size={17} aria-hidden="true" />
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground-strong">
                     {org ? org.name : 'Run your own CBT Platform'}
                   </p>
@@ -360,7 +360,7 @@ function ProfilePage() {
           </section>
 
           {/* Account Details */}
-          <section aria-labelledby="account-details">
+          <section aria-labelledby="account-details" className="w-full min-w-0">
             <h2 id="account-details" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
               Account Details
             </h2>
@@ -368,37 +368,37 @@ function ProfilePage() {
           </section>
 
           {/* Security & Preferences (Settings removed per user request since it is in bottom nav) */}
-          <section aria-labelledby="account-security">
+          <section aria-labelledby="account-security" className="w-full min-w-0">
             <h2 id="account-security" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
               Account &amp; Security
             </h2>
             <div className={groupListClasses()}>
               <Link to="/billing/invoices" className={groupRowClasses()}>
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <Receipt size={17} className="text-muted shrink-0" aria-hidden="true" />
-                  <span className="text-sm font-medium text-foreground-strong">Invoices &amp; receipts</span>
+                  <span className="truncate text-sm font-medium text-foreground-strong">Invoices &amp; receipts</span>
                 </div>
                 <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
               </Link>
               <button type="button" onClick={() => setPasswordModalOpen(true)} className={groupRowClasses()}>
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <KeyRound size={17} className="text-muted shrink-0" aria-hidden="true" />
-                  <span className="text-sm font-medium text-foreground-strong">Change password</span>
+                  <span className="truncate text-sm font-medium text-foreground-strong">Change password</span>
                 </div>
                 <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
               </button>
               <Link to="/settings/feedback" className={groupRowClasses()}>
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <MessageSquare size={17} className="text-muted shrink-0" aria-hidden="true" />
-                  <span className="text-sm font-medium text-foreground-strong">Send feedback</span>
+                  <span className="truncate text-sm font-medium text-foreground-strong">Send feedback</span>
                 </div>
                 <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
               </Link>
               {['admin', 'super_admin'].includes(user?.role) && (
                 <Link to="/admin" className={groupRowClasses()}>
-                  <div className="flex items-center gap-3">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <ShieldAlert size={17} className="text-muted shrink-0" aria-hidden="true" />
-                    <span className="text-sm font-medium text-foreground-strong">Admin portal</span>
+                    <span className="truncate text-sm font-medium text-foreground-strong">Admin portal</span>
                   </div>
                   <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
                 </Link>

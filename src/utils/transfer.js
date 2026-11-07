@@ -29,8 +29,11 @@ export function normalizeTransfer(input) {
   const accountNumber = pick(o, 'accountNumber', 'account_number', 'account')
     ?? pick(parent, 'accountNumber', 'account_number', 'account');
 
-  const accountName = pick(o, 'accountName', 'account_name', 'accountHolder', 'account_holder')
+  const rawAccountName = pick(o, 'accountName', 'account_name', 'accountHolder', 'account_holder')
     ?? pick(parent, 'accountName', 'account_name', 'accountHolder', 'account_holder');
+  const accountName = (!rawAccountName || String(rawAccountName).trim().toUpperCase() === 'PAYSTACK CHECKOUT')
+    ? 'Testflow'
+    : String(rawAccountName).trim();
 
   const expiresAt = pick(o, 'expiresAt', 'expiry', 'expiryAt', 'expires_at', 'expiryDate', 'expiry_date')
     ?? pick(parent, 'expiresAt', 'expiry', 'expiryAt', 'expires_at');

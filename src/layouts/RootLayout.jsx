@@ -47,7 +47,7 @@ function RootLayout() {
     <TourProvider>
     <div
       className={cn(
-        'relative flex min-h-svh flex-col bg-background text-foreground selection:bg-primary/20 selection:text-primary',
+        'relative flex min-h-svh w-full min-w-0 max-w-full flex-col overflow-x-hidden bg-background text-foreground selection:bg-primary/20 selection:text-primary',
         (showSidebar || isKit) && 'lg:pl-[var(--sidebar-w)]',
       )}
     >
@@ -61,7 +61,7 @@ function RootLayout() {
       <OfflineBanner />
       {isAuthenticated && !fullBleed && !isKit && !isLivePage && <UsernamePrompt />}
 
-      <main className="flex flex-1 flex-col">
+      <main className="flex w-full min-w-0 max-w-full flex-1 flex-col">
         <motion.div
           /*
             The key drives the fade between screens, but it must not apply to
@@ -75,7 +75,7 @@ function RootLayout() {
           initial="initial"
           animate="animate"
           transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="flex flex-1 flex-col"
+          className="flex w-full min-w-0 max-w-full flex-1 flex-col"
         >
           <Outlet />
         </motion.div>

@@ -33,7 +33,7 @@ function Screen({
   return (
     <Component
       className={cn(
-        'mx-auto w-full flex-1 pt-5 tf-gutter tf-nav-clearance sm:pt-6',
+        'mx-auto w-full min-w-0 max-w-full flex-1 pt-5 tf-gutter tf-nav-clearance sm:pt-6',
         widths[width] ?? widths.lg,
         className,
       )}

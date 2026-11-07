@@ -5,6 +5,7 @@ import { Check, Clock, Layers, Lock, Radio, Receipt, ShieldCheck, Sparkles } fro
 import { Badge, Banner, Button, Card, ConfirmDialog, KeyValueList, Reveal, SkeletonCard, useToast } from '../../components/ui/index.js';
 import BankTransferInstructions from '../../components/billing/BankTransferInstructions.jsx';
 import Mascot from '../../components/brand/Mascot.jsx';
+import Confetti from '../../components/brand/Confetti.jsx';
 import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { ICON } from '../../components/ui/iconProps.js';
 import { cn } from '../../utils/cn.js';
@@ -197,7 +198,7 @@ function BillingPage() {
       applyStatus(res);
       const nextStatus = res?.purchase?.status ?? res?.status;
       if (nextStatus === 'paid' || nextStatus === 'success') {
-        toast.success('Payment confirmed!', 'Your Plus subscription is now active.');
+        toast.success('Yeeeeee! Payment confirmed! 🎉', 'Your Plus subscription is now active.');
       } else {
         toast.info('Payment checking in progress', 'We have not received payment confirmation from your bank yet. We will continue checking automatically.');
       }
@@ -255,10 +256,10 @@ function BillingPage() {
         }
       />
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-8 space-y-8 w-full min-w-0">
         {isCheckingOut ? (
           <Reveal>
-            <div className="space-y-6">
+            <div className="space-y-6 w-full min-w-0">
               {status === 'verifying' && (
                 <Card padding="lg" className="flex items-center gap-3">
                   <span className="inline-block size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
@@ -267,16 +268,38 @@ function BillingPage() {
               )}
 
               {status === 'success' && (
-                <Card padding="lg" className="space-y-4">
-                  <p className="text-sm text-foreground">Your subscription has been activated. You can return to your dashboard.</p>
-                  <KeyValueList items={[
-                    ...(checkout?.reference ? [{ label: 'Reference', value: checkout.reference }] : []),
-                    ...(checkout?.planName ? [{ label: 'Plan', value: checkout.planName }] : []),
-                    ...(checkout?.amountKobo ? [{ label: 'Amount', value: formatMoney(checkout.amountKobo, checkout.currency) }] : []),
-                  ]} />
-                  <div className="flex flex-wrap gap-2">
-                    <Link to="/dashboard"><Button variant="primary">Go to dashboard</Button></Link>
-                    <Button variant="outline" onClick={resetCheckout}>Back to plans</Button>
+                <Card padding="lg" className="relative overflow-hidden border-success/30 bg-success/[0.02] p-6 text-center sm:p-10">
+                  <Confetti />
+                  <div className="mx-auto flex flex-col items-center">
+                    <div className="relative mb-3 flex items-center justify-center">
+                      <Mascot mood="excited" animation="celebrate" size={110} />
+                    </div>
+                    <Badge variant="success" className="mb-2">
+                      Payment confirmed
+                    </Badge>
+                    <h2 className="font-heading text-2xl font-black tracking-tight text-foreground-strong sm:text-3xl">
+                      Yeeeeee! Payment went through! 🎉
+                    </h2>
+                    <p className="mt-1.5 max-w-md text-sm text-muted">
+                      Your <span className="font-semibold text-foreground-strong">{checkout?.planName || 'Plus'}</span> subscription is active. Enjoy ad-free study, Live CBT, early AI access, and custom CBT creation.
+                    </p>
+                  </div>
+
+                  <div className="mx-auto mt-6 max-w-md rounded-2xl border border-border/80 bg-surface p-4 text-left shadow-sm">
+                    <KeyValueList items={[
+                      ...(checkout?.reference ? [{ label: 'Reference', value: checkout.reference }] : []),
+                      ...(checkout?.planName ? [{ label: 'Plan', value: checkout.planName }] : [{ label: 'Plan', value: 'Plus (30 days)' }]),
+                      ...(checkout?.amountKobo ? [{ label: 'Amount', value: formatMoney(checkout.amountKobo, checkout.currency) }] : []),
+                    ]} />
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap justify-center gap-3">
+                    <Link to="/dashboard">
+                      <Button variant="primary" size="lg">Go to dashboard</Button>
+                    </Link>
+                    <Button variant="outline" size="lg" onClick={resetCheckout}>
+                      View plans
+                    </Button>
                   </div>
                 </Card>
               )}

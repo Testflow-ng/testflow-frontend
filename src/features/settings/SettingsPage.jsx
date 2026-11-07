@@ -19,7 +19,7 @@ function SettingsPage() {
     <Screen width="lg">
       <PageHeader back="/profile" title="Settings" subtitle="Your account and preferences." />
 
-      <Link to="/profile" className={listRowClasses({ className: 'mt-6 gap-3.5 p-4' })}>
+      <Link to="/profile" className={listRowClasses({ className: 'mt-6 gap-3.5 p-4 w-full min-w-0' })}>
         <Avatar name={user.fullName} src={user.avatarUrl} size="md" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-semibold leading-snug text-foreground-strong">{user.fullName}</p>
@@ -54,11 +54,11 @@ function SettingsPage() {
 
       <SettingsGroup title="Support">
         <button type="button" onClick={startTour} className={groupRowClasses()}>
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <span className="shrink-0 text-muted"><Compass size={18} aria-hidden="true" /></span>
             <span className="truncate text-[15px] font-medium text-foreground-strong">Take the tour again</span>
           </div>
-          <ChevronRight size={16} className="text-muted" aria-hidden="true" />
+          <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
         </button>
         <SettingsRow icon={<HelpCircle size={18} aria-hidden="true" />} label="Help center" to="/help" />
         <SettingsRow icon={<MessageSquare size={18} aria-hidden="true" />} label="Send feedback" to="/settings/feedback" />
@@ -91,7 +91,7 @@ function SettingsPage() {
 
 function SettingsGroup({ title, children }) {
   return (
-    <section className="mt-7">
+    <section className="mt-7 w-full min-w-0">
       <h2 className="mb-2 px-1 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">{title}</h2>
       <div className={groupListClasses()}>{children}</div>
     </section>
@@ -101,7 +101,7 @@ function SettingsGroup({ title, children }) {
 function SettingsRow({ icon, label, to, soon }) {
   const content = (
     <>
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <span className="shrink-0 text-muted">{icon}</span>
         <span className={cn('truncate text-[15px] font-medium', soon ? 'text-muted' : 'text-foreground-strong')}>
           {label}
