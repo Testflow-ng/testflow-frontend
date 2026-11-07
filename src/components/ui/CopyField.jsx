@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn.js';
 const isMac = () => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
 /** Read-only value with a copy button (DNS records, invite links, references). */
-function CopyField({ label, value, mono = true, className }) {
+function CopyField({ label, value, mono = true, onCopy, className }) {
   // idle | copied | selected
   const [state, setState] = useState('idle');
   const valueRef = useRef(null);
@@ -48,6 +48,7 @@ function CopyField({ label, value, mono = true, className }) {
     }
     if (done) {
       setState('copied');
+      if (typeof onCopy === 'function') onCopy(value);
     } else {
       // Last resort: select the text so Cmd/Ctrl+C works, and say so.
       selectValue();

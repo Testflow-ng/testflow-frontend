@@ -171,14 +171,38 @@ function BillingPage() {
     }
   };
 
-  const manualRefresh = async () => {
+  const manualRefresh = async (silent = false) => {
     if (!reference || refreshing) return;
     setRefreshing(true);
     try {
       const res = await billingApi.refreshStatus(reference);
       applyStatus(res);
+      if (!silent) {
+        toast.info('Status updated', 'Checked the latest payment status from the server.');
+      }
     } catch (e) {
-      toast.error('Could not refresh payment status', e?.message ?? 'Try again.');
+      if (!silent) {
+        toast.error('Could not refresh payment status', e?.message ?? 'Try again.');
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleMadePayment = async () => {
+    if (!reference || refreshing) return;
+    setRefreshing(true);
+    try {
+      const res = await billingApi.refreshStatus(reference);
+      applyStatus(res);
+      const nextStatus = res?.purchase?.status ?? res?.status;
+      if (nextStatus === 'paid' || nextStatus === 'success') {
+        toast.success('Payment confirmed!', 'Your Plus subscription is now active.');
+      } else {
+        toast.info('Payment checking in progress', 'We have not received payment confirmation from your bank yet. We will continue checking automatically.');
+      }
+    } catch (e) {
+      toast.error('Could not check payment status', e?.message ?? 'Please try again in a few moments.');
     } finally {
       setRefreshing(false);
     }
@@ -189,7 +213,7 @@ function BillingPage() {
     try {
       const p = await billingApi.cancel(reference);
       applyStatus({ purchase: p });
-      try { localStorage.removeItem(REF_KEY); } catch { /* ignore */ }
+      resetCheckout();
       toast.success('Payment cancelled');
     } catch (e) {
       toast.error('Could not cancel payment', e?.message ?? 'Try again.');
@@ -207,54 +231,34 @@ function BillingPage() {
 
   const active = held?.status === 'active';
   const copy = STATUS_COPY[status] ?? STATUS_COPY.awaiting_transfer;
+  const isCheckingOut = Boolean(reference && checkout && status !== 'idle');
 
   return (
     <Screen width="xl">
       <PageHeader
-        back="/settings"
-        eyebrow="Plans"
-        title="Plans"
-        subtitle="Ad-free study, Live CBT, early AI access, and custom CBT creation. One payment, no auto-renewal."
+        back={isCheckingOut ? undefined : '/settings'}
+        eyebrow={isCheckingOut ? 'Checkout' : 'Plans'}
+        title={isCheckingOut ? (status === 'success' ? 'Payment received' : status === 'failed' || status === 'expired' || status === 'cancelled' ? copy.title : 'Complete your payment') : 'Plans'}
+        subtitle={isCheckingOut ? (status === 'success' ? 'Your Plus plan is now active.' : status === 'failed' || status === 'expired' || status === 'cancelled' ? copy.body : 'Pay by bank transfer to activate your Plus subscription.') : 'Ad-free study, Live CBT, early AI access, and custom CBT creation. One payment, no auto-renewal.'}
         action={
-          <Link to="/billing/invoices">
-            <Button size="sm" variant="outline" leadingIcon={<Receipt size={14} />}>
-              Invoices
-            </Button>
-          </Link>
+          isCheckingOut ? (
+            <Badge variant={status === 'success' ? 'success' : status === 'failed' || status === 'expired' || status === 'cancelled' ? 'outline' : 'warning'}>
+              {status.replace('_', ' ')}
+            </Badge>
+          ) : (
+            <Link to="/billing/invoices">
+              <Button size="sm" variant="outline" leadingIcon={<Receipt size={14} />}>
+                Invoices
+              </Button>
+            </Link>
+          )
         }
       />
 
       <div className="mt-8 space-y-8">
-        <Reveal>
-          <Card padding="lg" className={cn('flex flex-col gap-5 sm:flex-row sm:items-center', active ? 'bg-[var(--brand-sage)]' : 'bg-[var(--brand-lavender)]')}>
-            <Mascot mood={active ? 'excited' : 'happy'} animation="float" size={88} className="mx-auto shrink-0" />
-            <div className="min-w-0 flex-1 text-center sm:text-left">
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">{active ? 'Your Plus plan is active' : 'You are on the free plan'}</h2>
-                <Badge variant={active ? 'success' : 'outline'}>{active ? 'Plus Active' : held?.status === 'expired' ? 'Expired' : 'Free'}</Badge>
-              </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-foreground">
-                {active
-                  ? `Ad-free with Live CBT, early AI access, and CBT creation privileges until ${fmtDate(held.expiresAt)}.`
-                  : 'Ads show on Home and after each exam. Upgrade to Plus to remove ads, unlock Live CBT, get early access to AI tools, and create two free CBT sections for everyone.'}
-              </p>
-            </div>
-          </Card>
-        </Reveal>
-
-        {reference && checkout && (
+        {isCheckingOut ? (
           <Reveal>
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">{copy.title}</h2>
-                  <p className="mt-1 text-sm text-muted">{copy.body}</p>
-                </div>
-                <Badge variant={status === 'success' ? 'success' : status === 'failed' || status === 'expired' || status === 'cancelled' ? 'outline' : 'warning'}>
-                  {status.replace('_', ' ')}
-                </Badge>
-              </div>
-
+            <div className="space-y-6">
               {status === 'verifying' && (
                 <Card padding="lg" className="flex items-center gap-3">
                   <span className="inline-block size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
@@ -272,7 +276,7 @@ function BillingPage() {
                   ]} />
                   <div className="flex flex-wrap gap-2">
                     <Link to="/dashboard"><Button variant="primary">Go to dashboard</Button></Link>
-                    <Button variant="outline" onClick={resetCheckout}>Start another payment</Button>
+                    <Button variant="outline" onClick={resetCheckout}>Back to plans</Button>
                   </div>
                 </Card>
               )}
@@ -281,8 +285,8 @@ function BillingPage() {
                 <Card padding="lg" className="space-y-4">
                   <p className="text-sm text-foreground">{copy.body}</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="primary" onClick={resetCheckout}>Start a new payment</Button>
-                    <Button variant="outline" onClick={manualRefresh} loading={refreshing}>Check again</Button>
+                    <Button variant="primary" onClick={resetCheckout}>Choose a plan</Button>
+                    <Button variant="outline" onClick={() => manualRefresh(false)} loading={refreshing}>Check again</Button>
                   </div>
                 </Card>
               )}
@@ -290,139 +294,167 @@ function BillingPage() {
               {(status === 'awaiting_transfer' || status === 'processing') && (
                 <>
                   <BankTransferInstructions transfer={checkout} />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button variant="outline" onClick={manualRefresh} loading={refreshing}>Check payment status</Button>
-                    <Button variant="ghost" onClick={() => setCancelOpen(true)}>Cancel payment</Button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button variant="primary" onClick={handleMadePayment} loading={refreshing}>
+                      I&apos;ve Made Payment
+                    </Button>
+                    <Button variant="outline" onClick={() => manualRefresh(false)} loading={refreshing}>
+                      Check payment status
+                    </Button>
+                    <Button variant="ghost" onClick={() => setCancelOpen(true)}>
+                      Cancel payment
+                    </Button>
                   </div>
                 </>
               )}
             </div>
           </Reveal>
-        )}
-
-        {error ? (
-          <Banner variant="danger">Could not load the passes. Check your connection and try again.</Banner>
-        ) : isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2"><SkeletonCard className="h-72" /><SkeletonCard className="h-72" /></div>
         ) : (
-          <Reveal delay={0.08}>
-            <ul className="grid gap-5 sm:grid-cols-2">
-              {plans.map((plan) => {
-                const isAvailable = plan.available !== false && !plan.comingSoon;
-                return (
-                  <li key={plan.key} className="flex">
-                    <Card
-                      padding="lg"
-                      className={cn(
-                        'relative flex w-full flex-col gap-5 transition-all',
-                        isAvailable && 'border-primary/40 ring-1 ring-primary/20 shadow-md',
-                        !isAvailable && 'border-dashed border-border/80 bg-surface/40 opacity-80',
-                      )}
-                    >
-                      {isAvailable ? (
-                        <Badge variant="lime" className="absolute right-5 top-5">Popular</Badge>
-                      ) : (
-                        <Badge variant="outline" className="absolute right-5 top-5 border-border/80 text-muted">Coming soon</Badge>
-                      )}
-                      <div>
-                        <h3 className="font-heading text-lg font-bold text-foreground-strong">{plan.name}</h3>
-                        <p className="mt-1 text-sm text-muted">{plan.description}</p>
-                      </div>
-                      <div>
-                        <p className="font-heading text-4xl font-extrabold tracking-tight text-foreground-strong">{formatMoney(plan.priceMinor, plan.currency)}</p>
-                        <p className="mt-1 text-sm text-muted">{plan.durationDays} days · about {perDay(plan)} a day</p>
-                      </div>
-                      <ul className="space-y-2.5">
-                        {(isAvailable ? MONTHLY_BENEFITS : COMING_SOON_BENEFITS).map((item, idx) => {
-                          if (item.isPlaceholder) {
-                            return (
-                              <li key={idx} className="flex items-center gap-2.5 text-sm">
-                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-surface-strong/80 text-muted/40">
-                                  <Check size={12} strokeWidth={2} aria-hidden="true" />
-                                </span>
-                                <span className="font-mono text-xs font-semibold tracking-widest text-muted/40 filter blur-[0.5px] select-none">
-                                  ----
-                                </span>
-                              </li>
-                            );
-                          }
-                          const Icon = item.icon;
-                          return (
-                            <li
-                              key={item.text}
-                              className={cn('flex items-start gap-2.5 text-sm', item.isHighlight ? 'font-semibold text-foreground-strong' : 'text-foreground')}
-                            >
-                              <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--brand-lavender)] text-primary">
-                                <Check size={12} strokeWidth={2.5} aria-hidden="true" />
-                              </span>
-                              <span className="flex items-start gap-1.5">
-                                {Icon && <Icon {...ICON} size={15} className="mt-0.5 shrink-0 text-muted" />}
-                                {item.text}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      {isAvailable ? (
-                        <Button
-                          size="lg"
-                          className="mt-auto w-full shadow-sm"
-                          variant="primary"
-                          loading={busyPlan === plan.key}
-                          disabled={busyPlan !== null || (reference && status !== 'success' && status !== 'idle')}
-                          onClick={() => pay(plan)}
-                        >
-                          {active ? 'Extend Plus' : 'Get Plus'}
-                        </Button>
-                      ) : (
-                        <div className="relative mt-auto w-full overflow-hidden rounded-xl">
-                          <Button
-                            size="lg"
-                            className="w-full filter blur-[2px] opacity-40 pointer-events-none select-none cursor-not-allowed"
-                            variant="outline"
-                            disabled
-                            tabIndex={-1}
-                          >
-                            Get Pro
-                          </Button>
-                          <div className="absolute inset-0 flex items-center justify-center bg-surface/30 backdrop-blur-[1px]">
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/95 px-3.5 py-1 text-xs font-bold text-muted shadow-sm">
-                              <Clock size={13} aria-hidden="true" />
-                              Coming soon
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </Card>
-                  </li>
-                );
-              })}
-            </ul>
-          </Reveal>
-        )}
+          <>
+            <Reveal>
+              <Card padding="lg" className={cn('flex flex-col gap-5 sm:flex-row sm:items-center', active ? 'bg-[var(--brand-sage)]' : 'bg-[var(--brand-lavender)]')}>
+                <Mascot mood={active ? 'excited' : 'happy'} animation="float" size={88} className="mx-auto shrink-0" />
+                <div className="min-w-0 flex-1 text-center sm:text-left">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                    <h2 className="font-heading text-xl font-extrabold tracking-tight text-foreground-strong">{active ? 'Your Plus plan is active' : 'You are on the free plan'}</h2>
+                    <Badge variant={active ? 'success' : 'outline'}>{active ? 'Plus Active' : held?.status === 'expired' ? 'Expired' : 'Free'}</Badge>
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-foreground">
+                    {active
+                      ? `Ad-free with Live CBT, early AI access, and CBT creation privileges until ${fmtDate(held.expiresAt)}.`
+                      : 'Ads show on Home and after each exam. Upgrade to Plus to remove ads, unlock Live CBT, get early access to AI tools, and create two free CBT sections for everyone.'}
+                  </p>
+                </div>
+              </Card>
+            </Reveal>
 
-        <Reveal delay={0.16}>
-          <div className="grid gap-5 lg:grid-cols-2">
-            <KeyValueList items={[
-              { label: 'Payment', value: 'Bank transfer via Paystack' },
-              { label: 'Renewal', value: 'None. You choose when to pay again' },
-              { label: 'Refunds', value: 'Contact support with your payment reference' },
-            ]} />
-            <p className="flex items-start gap-2.5 rounded-[20px] border border-border bg-surface p-5 text-sm leading-relaxed text-muted">
-              <Lock {...ICON} size={16} className="mt-0.5 shrink-0" />
-              Payments are processed by Paystack. Testflow never sees or stores your card details, and your pass is only switched on after the payment is verified.
-            </p>
-          </div>
-        </Reveal>
+            {error ? (
+              <Banner variant="danger">Could not load the passes. Check your connection and try again.</Banner>
+            ) : isLoading ? (
+              <div className="grid gap-4 sm:grid-cols-2"><SkeletonCard className="h-72" /><SkeletonCard className="h-72" /></div>
+            ) : (
+              <Reveal delay={0.08}>
+                <ul className="grid gap-5 sm:grid-cols-2">
+                  {plans.map((plan) => {
+                    const isAvailable = plan.available !== false && !plan.comingSoon;
+                    return (
+                      <li key={plan.key} className="flex">
+                        <Card
+                          padding="lg"
+                          className={cn(
+                            'relative flex w-full flex-col gap-5 transition-all',
+                            isAvailable && 'border-primary/40 ring-1 ring-primary/20 shadow-md',
+                            !isAvailable && 'border-dashed border-border/80 bg-surface/40 opacity-80',
+                          )}
+                        >
+                          {isAvailable ? (
+                            <Badge variant="lime" className="absolute right-5 top-5">Popular</Badge>
+                          ) : (
+                            <Badge variant="outline" className="absolute right-5 top-5 border-border/80 text-muted">Coming soon</Badge>
+                          )}
+                          <div>
+                            <h3 className="font-heading text-lg font-bold text-foreground-strong">{plan.name}</h3>
+                            <p className="mt-1 text-sm text-muted">{plan.description}</p>
+                          </div>
+                          <div>
+                            <p className="font-heading text-4xl font-extrabold tracking-tight text-foreground-strong">{formatMoney(plan.priceMinor, plan.currency)}</p>
+                            <p className="mt-1 text-sm text-muted">{plan.durationDays} days · about {perDay(plan)} a day</p>
+                          </div>
+                          <ul className="space-y-2.5">
+                            {(isAvailable ? MONTHLY_BENEFITS : COMING_SOON_BENEFITS).map((item, idx) => {
+                              if (item.isPlaceholder) {
+                                return (
+                                  <li key={idx} className="flex items-center gap-2.5 text-sm">
+                                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-surface-strong/80 text-muted/40">
+                                      <Check size={12} strokeWidth={2} aria-hidden="true" />
+                                    </span>
+                                    <span className="font-mono text-xs font-semibold tracking-widest text-muted/40 filter blur-[0.5px] select-none">
+                                      ----
+                                    </span>
+                                  </li>
+                                );
+                              }
+                              const Icon = item.icon;
+                              return (
+                                <li
+                                  key={item.text}
+                                  className={cn('flex items-start gap-2.5 text-sm', item.isHighlight ? 'font-semibold text-foreground-strong' : 'text-foreground')}
+                                >
+                                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--brand-lavender)] text-primary">
+                                    <Check size={12} strokeWidth={2.5} aria-hidden="true" />
+                                  </span>
+                                  <span className="flex items-start gap-1.5">
+                                    {Icon && <Icon {...ICON} size={15} className="mt-0.5 shrink-0 text-muted" />}
+                                    {item.text}
+                                  </span>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                          {isAvailable ? (
+                            <Button
+                              size="lg"
+                              className="mt-auto w-full shadow-sm"
+                              variant="primary"
+                              loading={busyPlan === plan.key}
+                              disabled={busyPlan !== null || (reference && status !== 'success' && status !== 'idle')}
+                              onClick={() => pay(plan)}
+                            >
+                              {active ? 'Extend Plus' : 'Get Plus'}
+                            </Button>
+                          ) : (
+                            <div className="relative mt-auto w-full overflow-hidden rounded-xl">
+                              <Button
+                                size="lg"
+                                className="w-full filter blur-[2px] opacity-40 pointer-events-none select-none cursor-not-allowed"
+                                variant="outline"
+                                disabled
+                                tabIndex={-1}
+                              >
+                                Get Pro
+                              </Button>
+                              <div className="absolute inset-0 flex items-center justify-center bg-surface/30 backdrop-blur-[1px]">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/95 px-3.5 py-1 text-xs font-bold text-muted shadow-sm">
+                                  <Clock size={13} aria-hidden="true" />
+                                  Coming soon
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </Card>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Reveal>
+            )}
+
+            <Reveal delay={0.16}>
+              <div className="grid gap-5 lg:grid-cols-2">
+                <KeyValueList items={[
+                  { label: 'Payment', value: 'Bank transfer via Paystack' },
+                  { label: 'Renewal', value: 'None. You choose when to pay again' },
+                  { label: 'Refunds', value: 'Contact support with your payment reference' },
+                ]} />
+                <p className="flex items-start gap-2.5 rounded-[20px] border border-border bg-surface p-5 text-sm leading-relaxed text-muted">
+                  <Lock {...ICON} size={16} className="mt-0.5 shrink-0" />
+                  Payments are processed by Paystack. Testflow never sees or stores your card details, and your pass is only switched on after the payment is verified.
+                </p>
+              </div>
+            </Reveal>
+          </>
+        )}
       </div>
 
       <ConfirmDialog
         open={cancelOpen}
+        onOpenChange={setCancelOpen}
         title="Cancel this payment?"
         description="You can start a new payment at any time."
-        confirmLabel="Cancel payment"
+        cancelLabel="No, keep payment"
+        confirmLabel="Yes, cancel payment"
+        tone="danger"
         onConfirm={cancel}
-        onClose={() => setCancelOpen(false)}
       />
     </Screen>
   );

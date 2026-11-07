@@ -7,16 +7,48 @@ const pick = (o, ...keys) => {
 
 export function normalizeTransfer(input) {
   const o = input?.transferInstructions ?? input?.transfer ?? input?.bankTransfer ?? input?.bank_transfer ?? input ?? {};
-  const amount = pick(o, 'amountKobo', 'amount_kobo', 'amountMinor', 'amount_minor', 'amount');
+  const parent = input && typeof input === 'object' && input !== o ? input : {};
+
+  let bankName = pick(o, 'bankName', 'bank_name', 'bank');
+  if (bankName && typeof bankName === 'object') {
+    bankName = bankName.name || bankName.slug || null;
+  }
+  if (!bankName && parent) {
+    const parentBank = pick(parent, 'bankName', 'bank_name', 'bank');
+    bankName = typeof parentBank === 'object' ? (parentBank.name || parentBank.slug) : parentBank;
+  }
+
+  const amount = pick(o, 'amountKobo', 'amount_kobo', 'amountMinor', 'amount_minor', 'amount')
+    ?? pick(parent, 'amountKobo', 'amount_kobo', 'amountMinor', 'amount_minor', 'amount');
+
+  const currency = pick(o, 'currency') ?? pick(parent, 'currency') ?? 'NGN';
+
+  const reference = pick(o, 'transferReference', 'transfer_reference', 'reference', 'paymentReference')
+    ?? pick(parent, 'reference', 'transferReference', 'transfer_reference');
+
+  const accountNumber = pick(o, 'accountNumber', 'account_number', 'account')
+    ?? pick(parent, 'accountNumber', 'account_number', 'account');
+
+  const accountName = pick(o, 'accountName', 'account_name', 'accountHolder', 'account_holder')
+    ?? pick(parent, 'accountName', 'account_name', 'accountHolder', 'account_holder');
+
+  const expiresAt = pick(o, 'expiresAt', 'expiry', 'expiryAt', 'expires_at', 'expiryDate', 'expiry_date')
+    ?? pick(parent, 'expiresAt', 'expiry', 'expiryAt', 'expires_at');
+
+  const displayText = pick(o, 'displayText', 'display_text', 'instructions', 'message', 'note', 'notes')
+    ?? pick(parent, 'displayText', 'display_text', 'instructions');
+
+  const channel = pick(o, 'channel') ?? pick(parent, 'providerChannel', 'channel') ?? 'bank_transfer';
+
   return {
-    bankName: pick(o, 'bankName', 'bank_name', 'bank'),
-    accountName: pick(o, 'accountName', 'account_name', 'accountHolder', 'account_holder'),
-    accountNumber: pick(o, 'accountNumber', 'account_number', 'account'),
-    amountKobo: amount,
-    currency: pick(o, 'currency') ?? 'NGN',
-    reference: pick(o, 'transferReference', 'transfer_reference', 'reference', 'paymentReference'),
-    expiresAt: pick(o, 'expiresAt', 'expiry', 'expiryAt', 'expires_at', 'expiryDate', 'expiry_date'),
-    displayText: pick(o, 'displayText', 'display_text', 'instructions', 'message', 'note', 'notes'),
-    channel: pick(o, 'channel'),
+    bankName: bankName ? String(bankName) : null,
+    accountName: accountName ? String(accountName) : null,
+    accountNumber: accountNumber ? String(accountNumber) : null,
+    amountKobo: amount != null ? Number(amount) : null,
+    currency: String(currency).toUpperCase(),
+    reference: reference ? String(reference) : null,
+    expiresAt,
+    displayText: displayText ? String(displayText) : null,
+    channel,
   };
 }
