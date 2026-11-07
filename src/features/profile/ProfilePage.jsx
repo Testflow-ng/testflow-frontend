@@ -14,10 +14,8 @@ import {
   MessageSquare,
   Pencil,
   Plus,
-  Radio,
   Receipt,
   Save,
-  Settings,
   ShieldAlert,
   Sparkles,
   Target,
@@ -45,7 +43,9 @@ import {
   Switch,
   useToast,
 } from '../../components/ui/index.js';
+import { groupListClasses, groupRowClasses } from '../../components/ui/surfaces.js';
 import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
+import { cn } from '../../utils/cn.js';
 import { authApi } from '../auth/api.js';
 import { useAuth } from '../auth/useAuth.js';
 import { useSubjects, useTogglePin } from '../subjects/useSubjects.js';
@@ -198,12 +198,13 @@ function ProfilePage() {
 
   return (
     <Screen width="xl">
-      <PageHeader title="Profile" subtitle="Your details, subjects and security." />
+      <PageHeader title="Profile" subtitle="Your details, subjects and learning preferences." />
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
+        {/* Profile Card */}
         <Card padding="lg" className="flex flex-col items-center text-center lg:sticky lg:top-6">
           <div className="relative group">
-            <Avatar name={user.fullName} src={user.avatarUrl} className="size-24 text-3xl shadow-sm" />
+            <Avatar name={user.fullName} src={user.avatarUrl} className="size-24 text-3xl shadow-sm ring-4 ring-background" />
             <input
               ref={fileInputRef}
               type="file"
@@ -226,23 +227,25 @@ function ProfilePage() {
               )}
             </button>
           </div>
-          <h2 className="mt-4 min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
+          <h2 className="mt-3.5 min-w-0 break-words font-heading text-xl font-extrabold leading-tight tracking-tight text-foreground-strong">
             {user.fullName}
           </h2>
           {user.username && <p className="mt-0.5 text-sm font-medium text-muted">@{user.username}</p>}
-          <p className="mt-1 max-w-full truncate text-sm text-muted">{user.email}</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <Badge variant="lavender" className="uppercase tracking-wider">{user.role.replace('_', ' ')}</Badge>
-            {user.createdAt && <Badge variant="outline">Since {formatDate(user.createdAt)}</Badge>}
+          <p className="mt-1 max-w-full truncate text-xs text-muted">{user.email}</p>
+          <div className="mt-3.5 flex flex-wrap justify-center gap-1.5">
+            <Badge variant="lavender" className="uppercase tracking-wider text-[11px]">{user.role?.replace('_', ' ') || 'Student'}</Badge>
+            {user.createdAt && <Badge variant="outline" className="text-[11px]">Since {formatDate(user.createdAt)}</Badge>}
           </div>
-          <Button variant="outline" className="mt-6 w-full" onClick={openEditor} leadingIcon={<Pencil size={15} />}>
+          <Button variant="outline" size="sm" className="mt-5 w-full font-semibold" onClick={openEditor} leadingIcon={<Pencil size={14} />}>
             Edit profile
           </Button>
         </Card>
 
+        {/* Content Area */}
         <div className="space-y-6">
+          {/* My Subjects */}
           <section aria-labelledby="my-subjects">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-2.5 flex items-center justify-between gap-3">
               <h2 id="my-subjects" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">My subjects</h2>
               <Button size="sm" variant="ghost" onClick={() => setShowSubjectPicker(true)} leadingIcon={<Plus size={14} />}>
                 Add
@@ -252,17 +255,17 @@ function ProfilePage() {
               <EmptyState
                 icon={BookOpen}
                 title="No subjects yet"
-                description="Choose the courses you are taking and they show up in your sidebar."
-                action={<Button onClick={() => setShowSubjectPicker(true)}>Choose subjects</Button>}
+                description="Choose the courses you are taking and they show up in your shortcuts."
+                action={<Button size="sm" onClick={() => setShowSubjectPicker(true)}>Choose subjects</Button>}
               />
             ) : (
-              <Card padding="md" className="flex flex-wrap gap-2">
+              <Card padding="sm" className="flex flex-wrap gap-2">
                 {pinnedSubjects.map((s) => (
-                  <span key={s.id} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-border bg-background py-1 pl-3 pr-1 text-sm font-semibold text-foreground-strong">
-                    <span className="text-[11px] font-bold text-primary">{s.code}</span>
-                    {s.title}
-                    <IconButton size="sm" variant="ghost" aria-label={`Remove ${s.title}`} onClick={() => togglePin.mutate(s.id)}>
-                      <X size={14} aria-hidden="true" />
+                  <span key={s.id} className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-border bg-background py-1 pl-3 pr-1 text-xs font-semibold text-foreground-strong shadow-xs">
+                    <span className="font-bold text-primary">{s.code}</span>
+                    <span className="truncate max-w-[160px]">{s.title}</span>
+                    <IconButton size="sm" variant="ghost" className="size-6 text-muted hover:text-foreground" aria-label={`Remove ${s.title}`} onClick={() => togglePin.mutate(s.id)}>
+                      <X size={12} aria-hidden="true" />
                     </IconButton>
                   </span>
                 ))}
@@ -270,119 +273,152 @@ function ProfilePage() {
             )}
           </section>
 
-          <section aria-labelledby="all-links" className="lg:hidden">
-            <h2 id="all-links" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Study &amp; Practice</h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <QuickLink to="/history" icon={History} title="Exam history" hint="Review past attempts" />
-              <QuickLink to="/progress" icon={TrendingUp} title="My progress" hint="Track performance" />
-              <QuickLink
+          {/* Study & Practice (2-column mobile grid, Live CBT removed per user request) */}
+          <section aria-labelledby="study-practice">
+            <h2 id="study-practice" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+              Study &amp; Practice
+            </h2>
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+              <StudyTile
+                to="/progress"
+                icon={TrendingUp}
+                title="My progress"
+                hint="Track performance"
+              />
+              <StudyTile
+                to="/history"
+                icon={History}
+                title="Exam history"
+                hint="Past CBT attempts"
+              />
+              <StudyTile
                 to="/profile/bookmarks"
                 icon={Bookmark}
                 title="Saved questions"
-                hint="Questions you kept, with answers"
+                hint="Your question bank"
               />
-              <QuickLink to="/live" icon={Radio} title="Live CBT" hint="Sit exams with friends in real time" />
-              <QuickLink to="/hall-of-fame" icon={Trophy} title="Hall of Fame" hint="Leaderboards and top scores" />
-              <QuickLink to="/achievements" icon={Award} title="Achievements" hint="Badges you earn as you practice" />
-              <QuickLink to="/ai-study" icon={Sparkles} title="AI Study" hint="AI explanations and practice" tag="Soon" />
-              <QuickLink to="/post-utme" icon={Target} title="Post-UTME" hint="Screening preparation" tag="Soon" />
+              <StudyTile
+                to="/hall-of-fame"
+                icon={Trophy}
+                title="Hall of Fame"
+                hint="Top scores & rank"
+              />
+              <StudyTile
+                to="/achievements"
+                icon={Award}
+                title="Achievements"
+                hint="Badges you earned"
+              />
+              <StudyTile
+                to="/ai-study"
+                icon={Sparkles}
+                title="AI Study"
+                hint="AI explanations"
+                tag="Soon"
+              />
+              <StudyTile
+                to="/post-utme"
+                icon={Target}
+                title="Post-UTME"
+                hint="Screening prep"
+                tag="Soon"
+                className="col-span-2 sm:col-span-1"
+              />
             </div>
           </section>
 
-          <section aria-labelledby="prefs-support" className="lg:hidden">
-            <h2 id="prefs-support" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Preferences &amp; Support</h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {org ? (
-                <QuickLink to="/workspace" icon={Building2} title={`${org.name} Workspace`} hint="Manage exams, questions and students" />
-              ) : (
-                <QuickLink to="/everybody" icon={Building2} title="Testflow for Everyone" hint="Create your branded CBT platform" />
-              )}
-              <QuickLink to="/billing/invoices" icon={Receipt} title="Invoices &amp; Receipts" hint="View your past payments" />
-              <QuickLink to="/settings" icon={Settings} title="Settings" hint="Account, notifications and theme" />
-              <QuickLink to="/settings/feedback" icon={MessageSquare} title="Feedback" hint="Share your thoughts with the team" />
-              {['admin', 'super_admin'].includes(user?.role) && (
-                <QuickLink to="/admin" icon={ShieldAlert} title="Admin Portal" hint="Manage questions, exams and students" />
-              )}
-            </div>
-          </section>
-
+          {/* Testflow for Everyone / Workspace */}
           <section aria-labelledby="everybody-workspace">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 id="everybody-workspace" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Testflow for Everyone</h2>
+            <div className="mb-2.5 flex items-center justify-between">
+              <h2 id="everybody-workspace" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+                {org ? 'Workspace' : 'Testflow for Everyone'}
+              </h2>
               <Link to={org ? '/workspace' : '/everybody'} className="text-xs font-semibold text-primary hover:underline">
                 {org ? 'Open workspace' : 'Learn more'}
               </Link>
             </div>
-            <Card className="flex flex-wrap items-center justify-between gap-4 p-4 border-primary/20 bg-primary/[0.02]">
+            <Card className="flex items-center justify-between gap-3 p-3.5 border-primary/20 bg-primary/[0.02]">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Building2 size={18} aria-hidden="true" />
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Building2 size={17} aria-hidden="true" />
                 </span>
-                <div>
-                  <p className="font-semibold text-foreground-strong">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground-strong">
                     {org ? org.name : 'Run your own CBT Platform'}
                   </p>
-                  <p className="text-sm text-muted">
-                    {org ? 'Manage your exams, questions, students and payments.' : 'Create branded CBT exams for your school or tutorial center.'}
+                  <p className="truncate text-xs text-muted">
+                    {org ? 'Manage exams, questions and students' : 'Create branded CBT exams for schools'}
                   </p>
                 </div>
               </div>
-              <Link to={org ? '/workspace' : '/everybody/start'}>
+              <Link to={org ? '/workspace' : '/everybody/start'} className="shrink-0">
                 <Button variant="primary" size="sm">
-                  {org ? 'Switch to Workspace' : 'Launch Platform'}
+                  {org ? 'Switch' : 'Launch'}
                 </Button>
               </Link>
             </Card>
           </section>
 
-          <section aria-labelledby="billing-invoices">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 id="billing-invoices" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Subscription &amp; Invoices</h2>
-              <Link to="/billing" className="text-xs font-semibold text-primary hover:underline">Manage plan</Link>
-            </div>
-            <Card className="flex flex-wrap items-center justify-between gap-4 p-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary">
-                  <Receipt size={18} aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-semibold text-foreground-strong">Invoices &amp; Receipts</p>
-                  <p className="text-sm text-muted">View past payments and download official receipts.</p>
-                </div>
-              </div>
-              <Link to="/billing/invoices">
-                <Button variant="outline" size="sm">View invoices</Button>
-              </Link>
-            </Card>
-          </section>
-
-          <section aria-labelledby="account">
-            <h2 id="account" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Account</h2>
+          {/* Account Details */}
+          <section aria-labelledby="account-details">
+            <h2 id="account-details" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+              Account Details
+            </h2>
             <KeyValueList items={accountItems} />
           </section>
 
-          <section aria-labelledby="security">
-            <h2 id="security" className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Security</h2>
-            <Card className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary">
-                  <KeyRound size={18} aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-semibold text-foreground-strong">Password</p>
-                  <p className="text-sm text-muted">You will be signed out after changing it.</p>
+          {/* Security & Preferences (Settings removed per user request since it is in bottom nav) */}
+          <section aria-labelledby="account-security">
+            <h2 id="account-security" className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+              Account &amp; Security
+            </h2>
+            <div className={groupListClasses()}>
+              <Link to="/billing/invoices" className={groupRowClasses()}>
+                <div className="flex items-center gap-3">
+                  <Receipt size={17} className="text-muted shrink-0" aria-hidden="true" />
+                  <span className="text-sm font-medium text-foreground-strong">Invoices &amp; receipts</span>
                 </div>
-              </div>
-              <Button variant="outline" onClick={() => setPasswordModalOpen(true)}>Change password</Button>
-            </Card>
+                <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
+              </Link>
+              <button type="button" onClick={() => setPasswordModalOpen(true)} className={groupRowClasses()}>
+                <div className="flex items-center gap-3">
+                  <KeyRound size={17} className="text-muted shrink-0" aria-hidden="true" />
+                  <span className="text-sm font-medium text-foreground-strong">Change password</span>
+                </div>
+                <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
+              </button>
+              <Link to="/settings/feedback" className={groupRowClasses()}>
+                <div className="flex items-center gap-3">
+                  <MessageSquare size={17} className="text-muted shrink-0" aria-hidden="true" />
+                  <span className="text-sm font-medium text-foreground-strong">Send feedback</span>
+                </div>
+                <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
+              </Link>
+              {['admin', 'super_admin'].includes(user?.role) && (
+                <Link to="/admin" className={groupRowClasses()}>
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert size={17} className="text-muted shrink-0" aria-hidden="true" />
+                    <span className="text-sm font-medium text-foreground-strong">Admin portal</span>
+                  </div>
+                  <ChevronRight size={16} className="text-muted shrink-0" aria-hidden="true" />
+                </Link>
+              )}
+            </div>
           </section>
 
-          <Button variant="outline" className="w-full border-danger/30 text-danger hover:bg-danger/5 lg:w-auto" onClick={() => setConfirmOut(true)} leadingIcon={<LogOut size={16} />}>
+          {/* Sign Out */}
+          <Button
+            variant="outline"
+            className="w-full border-danger/30 text-danger hover:bg-danger/5 lg:w-auto"
+            onClick={() => setConfirmOut(true)}
+            leadingIcon={<LogOut size={16} />}
+          >
             Sign out
           </Button>
         </div>
       </div>
 
+      {/* Choose Subjects Modal */}
       <Modal open={showSubjectPicker} onOpenChange={setShowSubjectPicker} title="Choose subjects" description="Pick the courses you are taking this semester">
         <div className="flex flex-col gap-2 py-1">
           {(subjects ?? []).length === 0 && <p className="py-6 text-center text-sm text-muted">No subjects available yet.</p>}
@@ -394,6 +430,7 @@ function ProfilePage() {
         </div>
       </Modal>
 
+      {/* Edit Profile Modal */}
       <Modal
         open={isEditing}
         onOpenChange={setIsEditing}
@@ -460,6 +497,7 @@ function ProfilePage() {
         </div>
       </Modal>
 
+      {/* Change Password Modal */}
       <Modal open={isPasswordModalOpen} onOpenChange={(next) => (next ? setPasswordModalOpen(true) : closePasswordModal())} title="Change password" description="Strengthen your account security">
         <form onSubmit={handleChangePassword} className="space-y-4 py-1">
           {passwordError && <Alert variant="danger">{passwordError}</Alert>}
@@ -484,20 +522,33 @@ function ProfilePage() {
   );
 }
 
-function QuickLink({ to, icon: Icon, title, hint, tag }) {
+function StudyTile({ to, icon: Icon, title, hint, tag, className }) {
   return (
-    <Link to={to} className="tf-pressable flex items-center gap-3 rounded-[20px] border border-border bg-surface p-4 hover:border-border-strong hover:bg-surface-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary">
-        <Icon size={18} aria-hidden="true" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="block text-[15px] font-semibold text-foreground-strong">{title}</span>
-          {tag ? <Badge variant="lime" className="text-[10px] px-1.5 py-0">{tag}</Badge> : null}
+    <Link
+      to={to}
+      className={cn(
+        'tf-pressable group flex flex-col justify-between rounded-2xl border border-border bg-surface p-3 sm:p-3.5 transition-all hover:border-border-strong hover:bg-surface-strong/70 hover:shadow-xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        className,
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-lavender)] text-primary transition-transform group-hover:scale-105">
+          <Icon size={18} aria-hidden="true" />
         </span>
-        <span className="block text-xs text-muted truncate">{hint}</span>
-      </span>
-      <ChevronRight size={16} className="shrink-0 text-muted" aria-hidden="true" />
+        {tag && (
+          <Badge variant="lime" className="text-[10px] px-1.5 py-0 font-bold uppercase tracking-wider">
+            {tag}
+          </Badge>
+        )}
+      </div>
+      <div className="mt-3 min-w-0">
+        <p className="text-[13px] sm:text-[14px] font-bold tracking-tight text-foreground-strong group-hover:text-primary transition-colors">
+          {title}
+        </p>
+        <p className="mt-0.5 truncate text-[11px] text-muted">
+          {hint}
+        </p>
+      </div>
     </Link>
   );
 }
