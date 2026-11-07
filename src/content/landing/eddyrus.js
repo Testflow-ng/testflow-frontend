@@ -46,7 +46,7 @@ export const EDDYRUS_TEAM = [
     links: [],
   },
   {
-    name: 'Ehizojie Edovia',
+    name: 'Ehizojie Edovia (KHAOS)',
     handle: 'Ehiz-Studio',
     role: 'Core frontend developer',
     summary:
