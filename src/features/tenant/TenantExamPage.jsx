@@ -33,6 +33,7 @@ function TenantExamPage() {
     try {
       const a = await tenantApi.startExam(id, accessCode ? { accessCode } : {});
       setAttempt(a);
+      setAnswers(Object.fromEntries((a.answers ?? []).map((row) => [row.questionId, row.selectedIndex])));
       setLeft(a.remainingSeconds);
       setPhase('sitting');
     } catch (e) {
@@ -40,6 +41,8 @@ function TenantExamPage() {
       if (c === 'PAYMENT_REQUIRED') { setInfo(e.data?.error?.details ?? {}); setPhase('pay'); }
       else if (c === 'INVALID_ACCESS_CODE') { setInfo(code ? 'That code is not correct.' : null); setPhase('code'); }
       else if (c === 'ATTEMPTS_EXHAUSTED') { setInfo(e.message || 'You have already submitted this exam.'); setPhase('completed'); }
+      else if (c === 'EXAM_NOT_STARTED') { setInfo(e.message || 'This exam has not started yet.'); setPhase('error'); }
+      else if (c === 'EXAM_CLOSED') { setInfo(e.message || 'This exam is closed.'); setPhase('error'); }
       else { setInfo(e.message || 'Could not start this exam.'); setPhase('error'); }
     }
   }, [id, code]);

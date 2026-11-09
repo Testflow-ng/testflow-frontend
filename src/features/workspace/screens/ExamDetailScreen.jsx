@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Calendar, Check, ChevronDown, CircleAlert, Clock, CreditCard, Download, Eye, EyeOff, FileText, FileUp, ListPlus, Lock, MoreHorizontal, Pencil, PenLine, Radio, RotateCcw, Shield, ShieldCheck, Sliders, Sparkles, Trash2, UserCheck, Users } from 'lucide-react';
-import { Badge, Banner, Button, Card, Checkbox, ConfirmDialog, CopyField, DropdownMenu, EmptyState, Field, FileUpload, IconButton, Input, Modal, SegmentedControl, Select, SkeletonCard, StatusBadge, StickyActionBar, Switch, TabPanel, TagInput, Tabs, useToast } from '../../../components/ui/index.js';
+import { ArrowLeft, Calendar, Check, CircleAlert, CreditCard, Download, Eye, FileUp, ListPlus, MoreHorizontal, Pencil, PenLine, RotateCcw, ShieldCheck, Sliders, Trash2, Users } from 'lucide-react';
+import { Badge, Banner, Button, Card, Checkbox, ConfirmDialog, CopyField, DropdownMenu, EmptyState, Field, FileUpload, IconButton, Input, Modal, SkeletonCard, StatusBadge, StickyActionBar, Switch, TabPanel, TagInput, Tabs, useToast } from '../../../components/ui/index.js';
 import { cn } from '../../../utils/cn.js';
 import StatCard from '../../../components/data/StatCard.jsx';
 import DataTable from '../../../components/data/DataTable.jsx';
@@ -182,12 +182,7 @@ function PickModal({ existing, onClose, onAdd }) {
   );
 }
 
-const CORRECTIONS = [
-  { value: 'now', label: 'Show their score and corrections straight away' },
-  { value: 'after_exam', label: 'Show their score now, corrections after the exam closes' },
-  { value: 'score_only', label: 'Show only their score, no corrections' },
-  { value: 'hidden', label: 'Show nothing. Just record it, only I see the results' },
-];
+
 
 function ChoiceCard({ selected, onClick, disabled, badge, title, description, children, className }) {
   return (
