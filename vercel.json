@@ -13,21 +13,6 @@
       "destination": "https://api.testflow.com.ng/api/v1/public/:path*"
     },
     {
-      "source": "/((?!assets/|api/|.*\\..*).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "(?<sub>(?!www$)[a-z0-9-]+)\\.testflow\\.com\\.ng"
-        },
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(.*(facebookexternalhit|Facebot|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Discordbot|Googlebot|bingbot|SkypeUriPreview|Pinterest|Embedly).*)"
-        }
-      ],
-      "destination": "https://api.testflow.com.ng/api/v1/public/site/page?host=:sub.testflow.com.ng"
-    },
-    {
       "source": "/((?!api/|assets/|.*\\..*).*)",
       "destination": "/index.html"
     }
