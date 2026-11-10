@@ -96,6 +96,7 @@ function Address({ sub, orgSlug }) {
   const toast = useToast();
   const [name, setName] = useState('');
   const [avail, setAvail] = useState(null);
+  const [changing, setChanging] = useState(false);
   // Checked by itself a moment after typing stops; there is no Check button.
   useEffect(() => {
     if (name.length < 3) return undefined;
@@ -105,11 +106,11 @@ function Address({ sub, orgSlug }) {
     }, 450);
     return () => { live = false; clearTimeout(timer); };
   }, [name]);
-  const add = useWsMutation((id, body) => wsApi.addDomain(id, body), { onSuccess: () => { toast.success('Address set'); setName(''); setAvail(null); }, onError: (e) => toast.error('Could not set', e.message) });
+  const add = useWsMutation((id, body) => wsApi.addDomain(id, body), { onSuccess: () => { toast.success('Address changed', 'Your old address no longer opens your site.'); setName(''); setAvail(null); setChanging(false); }, onError: (e) => toast.error('Could not set', e.message) });
 
   return (
     <Section icon={Link2} step={2} title="Your Testflow address" text="Free and ready straight away. Students open your CBT here.">
-      {sub ? (
+      {sub && !changing ? (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-strong/60 p-4">
             <Globe {...ICON} size={20} className="shrink-0 text-primary" />
@@ -118,6 +119,7 @@ function Address({ sub, orgSlug }) {
             <a href={`https://${sub.hostname}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Open <ExternalLink size={13} aria-hidden="true" /></a>
           </div>
           <CopyField value={`https://${sub.hostname}`} label="Link to share" />
+          <Button variant="outline" size="sm" onClick={() => setChanging(true)}>Change address</Button>
         </div>
       ) : (
         <div className="space-y-4">
@@ -126,7 +128,8 @@ function Address({ sub, orgSlug }) {
             {name.length >= 3 && !avail && <p className="text-sm text-muted">Checking {name}.{HOST}…</p>}
             {avail && (avail.available ? <p className="flex items-center gap-2 text-sm font-semibold text-score-good"><Check size={15} aria-hidden="true" />{name}.{HOST} is free.</p> : <Banner variant="warning">{avail.reason ?? 'That name is taken.'}</Banner>)}
           </div>
-          <Button className="w-full sm:w-auto" loading={add.isPending} disabled={!avail?.available} onClick={() => add.mutate({ type: 'subdomain', hostname: `${name}.${HOST}` })}>Use this address</Button>
+          <Button className="w-full sm:w-auto" loading={add.isPending} disabled={!avail?.available} onClick={() => add.mutate({ type: 'subdomain', hostname: `${name}.${HOST}` })}>{sub ? 'Change to this address' : 'Use this address'}</Button>
+          {sub && <><p className="text-xs text-muted">Your current address {sub.hostname} will stop working, so share the new link with your students.</p><Button variant="ghost" size="sm" onClick={() => { setChanging(false); setName(''); setAvail(null); }}>Cancel</Button></>}
         </div>
       )}
     </Section>
