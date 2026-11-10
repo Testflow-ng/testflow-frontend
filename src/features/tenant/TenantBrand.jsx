@@ -11,7 +11,7 @@ function TenantBrand({ size = 36, className, light = false }) {
       ) : (
         <span aria-hidden="true" className="flex shrink-0 items-center justify-center rounded-xl bg-primary font-heading font-extrabold text-primary-foreground" style={{ width: size, height: size, fontSize: size * 0.45 }}>{(brand.name ?? '?').slice(0, 1).toUpperCase()}</span>
       )}
-      <span className={cn('font-heading text-lg font-extrabold tracking-tight', light ? 'text-white' : 'text-foreground-strong')}>{brand.name}</span>
+      <span className={cn('truncate font-heading text-base font-extrabold tracking-tight sm:text-lg', light ? 'text-white' : 'text-foreground-strong')}>{brand.name}</span>
     </span>
   );
 }

@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn.js';
 import TenantBrand from './TenantBrand.jsx';
 import { useTenant } from './TenantContext.js';
 
-const link = ({ isActive }) => cn('rounded-full px-3.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', isActive ? 'bg-primary text-primary-foreground' : 'text-muted hover:text-foreground-strong');
+const link = ({ isActive }) => cn('whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm sm:px-3.5 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary', isActive ? 'bg-primary text-primary-foreground' : 'text-muted hover:text-foreground-strong');
 
 /** The organisation's header and footer around a student page. */
 function TenantShell({ title, back, children, wide }) {
@@ -13,9 +13,9 @@ function TenantShell({ title, back, children, wide }) {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[64rem] items-center justify-between gap-4 px-5">
-          <TenantBrand />
-          <nav aria-label="Main" className="flex items-center gap-1">
+        <div className="mx-auto flex h-16 max-w-[64rem] items-center justify-between gap-2 px-3 sm:gap-4 sm:px-5">
+          <TenantBrand className="min-w-0 shrink" />
+          <nav aria-label="Main" className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <NavLink to="/" end className={link}>Exams</NavLink>
             {site?.pages?.results !== false && <NavLink to="/results" className={link}>My results</NavLink>}
           </nav>

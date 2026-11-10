@@ -8,6 +8,7 @@ import TenantSetPasswordPage from './TenantSetPasswordPage.jsx';
 import TenantExamPage from './TenantExamPage.jsx';
 import TenantPaymentComplete from './TenantPaymentComplete.jsx';
 import TenantPortal from './TenantPortal.jsx';
+import TenantErrorBoundary, { TenantCrash } from './TenantErrorBoundary.jsx';
 import TenantProvider from './TenantProvider.jsx';
 import { TenantResultDetail, TenantResultsList } from './TenantResults.jsx';
 import { useTenant } from './TenantContext.js';
@@ -28,11 +29,11 @@ function Guard({ children }) {
 /** The whole app when it is opened on an organisation's address: its own sign-in, sign-up and student site. Anyone can sign up; the organisation can suspend a student. */
 function TenantApp({ hostname }) {
   const router = useMemo(() => createBrowserRouter([
-    { path: '/', element: <Gate /> },
-    { path: '/results', element: <Guard><TenantResultsList /></Guard> },
-    { path: '/results/:id', element: <Guard><TenantResultDetail /></Guard> },
-    { path: '/exam/complete', element: <Guard><TenantPaymentComplete /></Guard> },
-    { path: '/exam/:id', element: <Guard><TenantExamPage /></Guard> },
+    { path: '/', element: <Gate />, errorElement: <TenantCrash /> },
+    { path: '/results', errorElement: <TenantCrash />, element: <Guard><TenantResultsList /></Guard> },
+    { path: '/results/:id', errorElement: <TenantCrash />, element: <Guard><TenantResultDetail /></Guard> },
+    { path: '/exam/complete', errorElement: <TenantCrash />, element: <Guard><TenantPaymentComplete /></Guard> },
+    { path: '/exam/:id', errorElement: <TenantCrash />, element: <Guard><TenantExamPage /></Guard> },
     { path: '/signin', element: <TenantAuthPage /> },
     { path: '/set-password', element: <TenantSetPasswordPage /> },
     { path: '/register', element: <TenantAuthPage mode="register" /> },
@@ -40,7 +41,7 @@ function TenantApp({ hostname }) {
     { path: '/auth/complete', element: <TenantGoogleCompletePage /> },
     { path: '*', element: <Navigate to="/" replace /> },
   ]), []);
-  return <TenantProvider hostname={hostname}><RouterProvider router={router} /></TenantProvider>;
+  return <TenantErrorBoundary><TenantProvider hostname={hostname}><RouterProvider router={router} /></TenantProvider></TenantErrorBoundary>;
 }
 
 export default TenantApp;

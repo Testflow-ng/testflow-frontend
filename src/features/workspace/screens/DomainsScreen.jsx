@@ -65,7 +65,7 @@ function NameAndLogo({ site, org, onDraft }) {
   const dirty = JSON.stringify(v) !== JSON.stringify(saved);
   const update = (patch) => { const next = { ...v, ...patch }; setV(next); onDraft(JSON.stringify(next) === JSON.stringify(saved) ? null : next); };
 
-  const save = useWsMutation(async (id) => { await wsApi.saveSite(id, { brand: { ...site.brand, name: v.name.trim(), logoUrl: v.logo, primaryColor: v.primary, accentColor: v.accent } }); return wsApi.publishSite(id); }, {
+  const save = useWsMutation(async (id) => { await wsApi.saveSite(id, { brand: { ...Object.fromEntries(Object.entries(site.brand ?? {}).filter(([, x]) => x != null)), name: v.name.trim(), logoUrl: v.logo, primaryColor: v.primary, accentColor: v.accent } }); return wsApi.publishSite(id); }, {
     onSuccess: () => { onDraft(null); toast.success('Saved', 'Your site now uses your name, logo and colours.'); },
     onError: (e) => toast.error('Could not save', e.message),
   });

@@ -87,7 +87,7 @@ export function TenantResultDetail() {
                       {c.explanationImageUrl && <img src={c.explanationImageUrl} alt="Picture for the explanation" loading="lazy" className="h-auto max-h-72 w-auto max-w-full rounded-lg object-contain" />}
                     </div>
                   )}
-                  {c.questionId && <button type="button" onClick={() => setReporting(c)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Flag size={14} aria-hidden="true" /> Report a problem with this question</button>}
+                  {c.questionId && data.canReport && <button type="button" onClick={() => setReporting(c)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Flag size={14} aria-hidden="true" /> Report a problem with this question</button>}
                 </QuestionCard>
               ))}
             </section>
@@ -115,7 +115,7 @@ function ReportModal({ question, onClose }) {
       setNote('');
       onClose();
     } catch (e) {
-      toast.error('Could not send', e.message);
+      toast.error('Could not send', e.code === 'PLAN_REQUIRED' ? 'Reporting is not available right now.' : e.message);
     } finally {
       setBusy(false);
     }
