@@ -249,13 +249,13 @@ function BillingScreen() {
   };
 
   const choose = (p) => {
-    if (sub && p.key === (sub.planKey ?? 'free')) return;
-    const isInitial = !sub || sub.planKey === 'free';
+    if (sub && p.key === (sub.planKey ?? 'free') && !sub.trial?.active) return;
+    const isInitial = !sub || sub.planKey === 'free' || sub.trial?.active;
     if (isInitial && p.key !== 'free' && sub?.id) {
       // First paid subscription: use the organisation checkout endpoint.
       startCheckout(
         p.key,
-        () => wsApi.subscriptionCheckout(orgId, sub.id, getIdemKey('checkout')),
+        () => wsApi.subscriptionCheckout(orgId, sub.id, getIdemKey('checkout'), p.key),
         'checkout'
       );
     } else {

@@ -94,7 +94,7 @@ describe('organisation subscription lifecycle', () => {
     await screen.findByText('Upgrade to Studio');
     fireEvent.click(screen.getByText('Upgrade to Studio'));
     await screen.findByText('Wema Bank');
-    expect(wsApi.subscriptionCheckout).toHaveBeenCalledWith('o1', 'sub1', expect.any(String));
+    expect(wsApi.subscriptionCheckout).toHaveBeenCalledWith('o1', 'sub1', expect.any(String), expect.any(String));
     expect(wsApi.changePlan).not.toHaveBeenCalled();
     expect(screen.getByText('0123456789')).toBeInTheDocument();
     expect(screen.getByText('SUB-1')).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe('organisation subscription lifecycle', () => {
     render(<BillingScreen />);
     fireEvent.click(screen.getByText('Upgrade to Studio'));
     await screen.findByText('Wema Bank');
-    expect(wsApi.subscriptionCheckout).toHaveBeenCalledWith('o1', 'sub1', 'org-key-1');
+    expect(wsApi.subscriptionCheckout).toHaveBeenCalledWith('o1', 'sub1', 'org-key-1', 'studio');
     expect(wsApi.changePlan).not.toHaveBeenCalled();
   });
 
