@@ -314,7 +314,7 @@ function BillingScreen() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={sub.status === 'active' ? 'lime' : 'warning'}>{sub.status === 'active' ? 'Active' : sub.status === 'past_due' ? 'Renew now' : sub.status}</Badge>
+                  <Badge variant={sub.status === 'active' ? 'lime' : 'warning'}>{sub.trial?.active ? `Free trial · ${sub.trial.daysLeft}d left` : sub.status === 'active' ? 'Active' : sub.status === 'past_due' ? 'Renew now' : sub.status}</Badge>
                   <DropdownMenu placement="bottom-end" trigger={(p) => <IconButton aria-label="Plan actions" variant="ghost" className="text-white hover:bg-white/10" {...p}><MoreHorizontal size={18} /></IconButton>} items={[{ label: 'Renew now', icon: Sparkles, onSelect: renew }, { label: 'Cancel at the end of the period', onSelect: () => toast.info('Your plan simply ends. It does not renew by itself.') }]} />
                 </div>
               </div>

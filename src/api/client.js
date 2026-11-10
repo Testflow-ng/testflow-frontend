@@ -1,3 +1,4 @@
+import { deviceFingerprint } from '../utils/deviceFingerprint.js';
 import axios from 'axios';
 
 // The API origin is configured at build time, with an automatic fallback to
@@ -57,6 +58,10 @@ apiClient.interceptors.request.use(async (config) => {
     // An organisation site sends its own token (set by tenantApi); everything else uses Testflow's.
     const token = readCookie('tf_csrf');
     if (token && !config.headers['X-CSRF-Token']) config.headers['X-CSRF-Token'] = token;
+  }
+  if ((config.method ?? 'get').toLowerCase() === 'post' && /\/organizations\/?$/.test(config.url ?? '')) {
+    const fp = await deviceFingerprint();
+    if (fp) config.headers['X-Device-Fp'] = fp;
   }
   return config;
 });
