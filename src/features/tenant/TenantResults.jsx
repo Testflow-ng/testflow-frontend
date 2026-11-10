@@ -79,8 +79,14 @@ export function TenantResultDetail() {
               <h2 id="corr" className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Corrections</h2>
               {data.corrections.map((c, i) => (
                 <QuestionCard key={i} number={i + 1} total={data.corrections.length} stem={c.stem}>
-                  {c.options.map((o, j) => <OptionRow key={j} name={`c${i}`} label={LETTERS[j]} disabled state={j === c.correctIndex ? (c.selectedIndex === j ? 'correct' : 'missed') : j === c.selectedIndex ? 'wrong' : 'idle'}>{o}</OptionRow>)}
-                  {c.explanation && <p className="rounded-xl bg-surface-strong p-3 text-sm text-foreground"><MathText>{c.explanation}</MathText></p>}
+                  {c.stemImageUrl && <img src={c.stemImageUrl} alt="Picture for this question" className="h-auto max-h-72 w-auto max-w-full rounded-xl object-contain" />}
+                  {c.options.map((o, j) => <OptionRow key={j} name={`c${i}`} label={LETTERS[j]} image={c.optionImages?.[j]} disabled state={j === c.correctIndex ? (c.selectedIndex === j ? 'correct' : 'missed') : j === c.selectedIndex ? 'wrong' : 'idle'}>{o}</OptionRow>)}
+                  {(c.explanation || c.explanationImageUrl) && (
+                    <div className="space-y-2 rounded-xl bg-surface-strong p-3 text-sm text-foreground">
+                      {c.explanation && <p><MathText>{c.explanation}</MathText></p>}
+                      {c.explanationImageUrl && <img src={c.explanationImageUrl} alt="Picture for the explanation" loading="lazy" className="h-auto max-h-72 w-auto max-w-full rounded-lg object-contain" />}
+                    </div>
+                  )}
                   {c.questionId && <button type="button" onClick={() => setReporting(c)} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-foreground-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><Flag size={14} aria-hidden="true" /> Report a problem with this question</button>}
                 </QuestionCard>
               ))}

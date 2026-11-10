@@ -187,7 +187,7 @@ describe('student checkout', () => {
     // First purchase.
     fireEvent.click(screen.getByText('Get Plus'));
     await screen.findByText('Payment received');
-    fireEvent.click(screen.getByText('Start another payment'));
+    fireEvent.click(screen.getByText('View plans'));
     // Second purchase must use a fresh key, not replay the first.
     fireEvent.click(screen.getByText('Get Plus'));
     await screen.findByText('Payment received');
@@ -222,7 +222,7 @@ describe('student checkout', () => {
     render(<BillingPage />);
     fireEvent.click(screen.getByText('Get Plus'));
     await screen.findByText('Payment did not go through');
-    fireEvent.click(screen.getByText('Start a new payment'));
+    fireEvent.click(screen.getByText('Choose a plan'));
     fireEvent.click(screen.getByText('Get Plus'));
     await screen.findByText('Wema Bank');
     const keys = billingApi.checkout.mock.calls.map((c) => c[1]);

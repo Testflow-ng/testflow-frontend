@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, ExternalLink, Globe, Link2, Type } from 'lucide-react';
 import { Badge, Banner, Button, Card, CopyField, Field, Input, Reveal, Skeleton, useToast } from '../../../components/ui/index.js';
 import ColorPicker from '../../../components/everybody/ColorPicker.jsx';
@@ -15,13 +15,15 @@ const HOST = 'testflow.com.ng';
 
 const Section = ({ icon: Icon, step, title, text, children }) => (
   <Card padding="lg" className="space-y-6">
-    <header className="flex items-start gap-4">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-lavender)] text-primary"><Icon {...ICON} size={20} /></span>
-      <div className="min-w-0">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Step {step}</p>
-        <h2 className="font-heading text-lg font-extrabold tracking-tight text-foreground-strong">{title}</h2>
-        <p className="mt-1 text-sm leading-relaxed text-muted">{text}</p>
+    <header>
+      <div className="flex items-center gap-3 sm:gap-4">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand-lavender)] text-primary"><Icon {...ICON} size={20} /></span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-muted">Step {step}</p>
+          <h2 className="font-heading text-lg font-extrabold leading-snug tracking-tight text-foreground-strong">{title}</h2>
+        </div>
       </div>
+      <p className="mt-3 text-sm leading-relaxed text-muted sm:ml-[3.75rem]">{text}</p>
     </header>
     {children}
   </Card>
@@ -82,9 +84,9 @@ function NameAndLogo({ site, org, onDraft }) {
         <p className="mb-3 text-xs font-semibold text-muted">Your colours on buttons and labels</p>
         <div className="flex flex-wrap items-center gap-3"><Button>Start exam</Button><Button variant="outline">Sign in</Button><Badge variant="primary">Live CBT</Badge><Badge variant="lime">New</Badge></div>
       </OrgThemeProvider>
-      <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
-        {dirty && <Button variant="ghost" onClick={() => { setV(saved); onDraft(null); }}>Undo</Button>}
-        <Button loading={save.isPending} disabled={!dirty || !v.name.trim()} onClick={() => save.mutate()}>Save changes</Button>
+      <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+        {dirty && <Button variant="ghost" className="w-full sm:w-auto" onClick={() => { setV(saved); onDraft(null); }}>Undo</Button>}
+        <Button className="w-full sm:w-auto" loading={save.isPending} disabled={!dirty || !v.name.trim()} onClick={() => save.mutate()}>Save changes</Button>
       </div>
     </Section>
   );
@@ -94,7 +96,15 @@ function Address({ sub, orgSlug }) {
   const toast = useToast();
   const [name, setName] = useState('');
   const [avail, setAvail] = useState(null);
-  const check = async () => { setAvail(null); try { setAvail(await wsApi.checkSubdomain(name)); } catch (e) { setAvail({ available: false, reason: e.message }); } };
+  // Checked by itself a moment after typing stops; there is no Check button.
+  useEffect(() => {
+    if (name.length < 3) return undefined;
+    let live = true;
+    const timer = setTimeout(async () => {
+      try { const res = await wsApi.checkSubdomain(name); if (live) setAvail(res); } catch (e) { if (live) setAvail({ available: false, reason: e.message }); }
+    }, 450);
+    return () => { live = false; clearTimeout(timer); };
+  }, [name]);
   const add = useWsMutation((id, body) => wsApi.addDomain(id, body), { onSuccess: () => { toast.success('Address set'); setName(''); setAvail(null); }, onError: (e) => toast.error('Could not set', e.message) });
 
   return (
@@ -111,13 +121,12 @@ function Address({ sub, orgSlug }) {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex max-w-xl flex-wrap items-end gap-2">
-            <Field label="Choose a name" className="min-w-[12rem] flex-1"><Input value={name} onChange={(e) => { setName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setAvail(null); }} placeholder={orgSlug || 'jamb'} /></Field>
-            <span className="pb-3 text-sm text-muted">.{HOST}</span>
-            <Button variant="outline" disabled={name.length < 3} onClick={check}>Check</Button>
+          <Field label="Choose a name" hint={`Your address will be ${name || 'name'}.${HOST}`} className="max-w-xl"><Input value={name} onChange={(e) => { setName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')); setAvail(null); }} placeholder={orgSlug || 'jamb'} autoCapitalize="none" autoCorrect="off" spellCheck={false} /></Field>
+          <div className="min-h-6" aria-live="polite">
+            {name.length >= 3 && !avail && <p className="text-sm text-muted">Checking {name}.{HOST}…</p>}
+            {avail && (avail.available ? <p className="flex items-center gap-2 text-sm font-semibold text-score-good"><Check size={15} aria-hidden="true" />{name}.{HOST} is free.</p> : <Banner variant="warning">{avail.reason ?? 'That name is taken.'}</Banner>)}
           </div>
-          {avail && (avail.available ? <p className="flex items-center gap-2 text-sm font-semibold text-score-good"><Check size={15} aria-hidden="true" />{name}.{HOST} is free.</p> : <Banner variant="warning">{avail.reason ?? 'That name is taken.'}</Banner>)}
-          <Button loading={add.isPending} disabled={!avail?.available} onClick={() => add.mutate({ type: 'subdomain', hostname: `${name}.${HOST}` })}>Use {name || 'this name'}.{HOST}</Button>
+          <Button className="w-full sm:w-auto" loading={add.isPending} disabled={!avail?.available} onClick={() => add.mutate({ type: 'subdomain', hostname: `${name}.${HOST}` })}>Use this address</Button>
         </div>
       )}
     </Section>
@@ -171,9 +180,9 @@ function OwnDomain({ custom }) {
           {custom ? (
             <Button variant="ghost" size="sm" className="text-danger" loading={remove.isPending} onClick={() => remove.mutate(custom.id)}>Remove this domain</Button>
           ) : (
-            <form className="flex max-w-xl flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate({ type: 'custom', hostname: value.trim().toLowerCase() }); }}>
-              <Field label="Your domain" className="min-w-[14rem] flex-1"><Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="exams.mybrand.com" /></Field>
-              <Button type="submit" loading={add.isPending} disabled={!valid}>Add domain</Button>
+            <form className="flex max-w-xl flex-col gap-3 sm:flex-row sm:items-end sm:gap-2" onSubmit={(e) => { e.preventDefault(); add.mutate({ type: 'custom', hostname: value.trim().toLowerCase() }); }}>
+              <Field label="Your domain" className="flex-1"><Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="exams.mybrand.com" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} /></Field>
+              <Button type="submit" className="w-full sm:w-auto" loading={add.isPending} disabled={!valid}>Add domain</Button>
             </form>
           )}
         </GuideStep>
@@ -198,7 +207,7 @@ function OwnDomain({ custom }) {
         <GuideStep n={3} state={live ? 'done' : 'todo'} title={live ? 'Connected' : 'Press Verify'} last>
           {custom && !live ? (
             <div className="flex flex-wrap items-center gap-3">
-              <Button loading={verify.isPending} onClick={() => verify.mutate(custom.id)}>Verify my domain</Button>
+              <Button className="w-full sm:w-auto" loading={verify.isPending} onClick={() => verify.mutate(custom.id)}>Verify my domain</Button>
               <Badge variant={custom.status === 'failed' ? 'danger' : 'warning'}>{custom.status === 'failed' ? 'Could not find the records yet' : 'Waiting for the records'}</Badge>
               <p className="w-full text-xs text-muted">It can take a few minutes, sometimes a few hours, to show up. You can leave this page and come back.</p>
             </div>

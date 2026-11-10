@@ -42,18 +42,20 @@ function RootLayout() {
   const isKit = location.pathname.startsWith('/ui-kit');
   // Signed-in desktop gets the sidebar; phones keep the header and bottom bar.
   const showSidebar = isAuthenticated && !isLoading && !fullBleed && !isLanding && !isKit;
+  // The organisation workspace brings its own phone top bar (hamburger drawer), so the student header and bottom tabs stay out.
+  const isWorkspace = location.pathname === '/workspace' || location.pathname.startsWith('/workspace/');
 
   return (
     <TourProvider>
     <div
       className={cn(
-        'relative flex min-h-svh w-full min-w-0 max-w-full flex-col overflow-x-hidden bg-background text-foreground selection:bg-primary/20 selection:text-primary',
+        'relative flex min-h-svh w-full min-w-0 max-w-full flex-col overflow-x-clip bg-background text-foreground selection:bg-primary/20 selection:text-primary',
         (showSidebar || isKit) && 'lg:pl-[var(--sidebar-w)]',
       )}
     >
       <Seo />
       {showSidebar && <AppSidebar />}
-      {!fullBleed && !isLanding && !isKit && (
+      {!fullBleed && !isLanding && !isKit && !isWorkspace && (
         <div className={showSidebar ? 'contents lg:hidden' : 'contents'}>
           <Header />
         </div>
@@ -81,7 +83,7 @@ function RootLayout() {
         </motion.div>
       </main>
 
-      {isAuthenticated && !isLoading && !fullBleed && !isKit && <BottomNav />}
+      {isAuthenticated && !isLoading && !fullBleed && !isLanding && !isKit && !isWorkspace && <BottomNav />}
       {/* {isAuthenticated && !isLoading && !isExamPage && <NightOwlPopup />} */}
     </div>
     </TourProvider>

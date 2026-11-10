@@ -162,9 +162,9 @@ function TenantExamPage() {
       <ProgressBar value={answered} max={attempt.totalQuestions} size="sm" tone="accent" className="mb-5" />
       {info && <Banner variant="danger" className="mb-4">{info}</Banner>}
       <QuestionCard number={current + 1} total={attempt.totalQuestions} stem={q.stem}>
-        {q.stemImageUrl && <img src={q.stemImageUrl} alt="" className="max-h-64 rounded-xl" />}
+        {q.stemImageUrl && <img src={q.stemImageUrl} alt="Picture for this question" className="h-auto max-h-72 w-auto max-w-full rounded-xl object-contain" />}
         {q.options.map((o, j) => (
-          <OptionRow key={j} name={`q${q.id}`} label={LETTERS[j]} state={answers[q.id] === j ? 'selected' : 'idle'} onSelect={() => choose(q.id, j)}>{o}</OptionRow>
+          <OptionRow key={j} name={`q${q.id}`} label={LETTERS[j]} image={q.optionImages?.[j]} state={answers[q.id] === j ? 'selected' : 'idle'} onSelect={() => choose(q.id, j)}>{o}</OptionRow>
         ))}
       </QuestionCard>
       <div className="mt-5 flex items-center justify-between gap-3">

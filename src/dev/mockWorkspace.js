@@ -37,6 +37,7 @@ let qbanks = [
 ];
 const bankOf = (q, i) => (i < 13 ? 'b1' : i < 22 ? 'b2' : 'b3');
 let domains = [];
+let withdrawals = [{ id: 'w0', reference: 'WD-demo', status: 'success', amountKobo: 200000, feeKobo: 1000, netKobo: 199000, accountName: 'GRACE ADEBAYO OLUWASEUN', accountLast4: '6789', requestedAt: ago(5), completedAt: ago(5) }];
 let flags = [
   { id: 'f1', status: 'open', reason: 'wrong_answer', note: 'I think B is correct, not C.', createdAt: ago(0.2), reportCount: 2, examTitle: 'Mathematics mock', studentName: 'Tunde Bello', question: { id: 'q1', stem: 'Solve $2x + 6 = 14$.', options: ['2', '3', '4', '5'], correctIndex: 2 } },
   { id: 'f2', status: 'resolved', reason: 'typo', note: '', createdAt: ago(3), reportCount: 1, examTitle: 'Mathematics mock', studentName: 'Ada Obi', resolution: 'Fixed the spelling.', question: { id: 'q2', stem: 'The SI unit of force is the...', options: ['Joule', 'Newton', 'Watt', 'Pascal'], correctIndex: 1 } },
@@ -146,6 +147,9 @@ export function workspaceRoute(method, path, body, config = {}) {
   if (bk) { if (method === 'DELETE') books = books.filter((b) => b.id !== bk[1]); else books = books.map((b) => (b.id === bk[1] ? { ...b, ...body } : b)); return { book: books.find((b) => b.id === bk[1]) ?? {} }; }
   if (r === 'payout/verify') return { accountName: 'GRACE ADEBAYO OLUWASEUN' };
   if (r === 'payout') { org = { ...org, payout: { ...org.payout, ...body, status: 'active', accountName: 'GRACE ADEBAYO OLUWASEUN' } }; return { payout: org.payout }; }
+  if (r === 'wallet') return { wallet: { currency: 'NGN', earnedKobo: 828000, withdrawnKobo: 0, pendingKobo: withdrawals.filter((w) => w.status !== 'failed').reduce((n, w) => n + w.amountKobo, 0), availableKobo: 828000 - withdrawals.filter((w) => w.status !== 'failed').reduce((n, w) => n + w.amountKobo, 0), minimumKobo: 100000, payoutReady: org.payout?.status === 'active', account: org.payout?.status === 'active' ? { accountName: 'GRACE ADEBAYO OLUWASEUN', last4: '6789' } : null } };
+  if (r === 'withdrawals' && method === 'POST') { const fee = body.amountKobo <= 500000 ? 1000 : 2500; const w = { id: `w${withdrawals.length + 1}`, reference: `WD-${Date.now()}`, status: 'processing', amountKobo: body.amountKobo, feeKobo: fee, netKobo: body.amountKobo - fee, accountName: 'GRACE ADEBAYO OLUWASEUN', accountLast4: '6789', requestedAt: new Date().toISOString() }; withdrawals = [w, ...withdrawals]; return { withdrawal: w }; }
+  if (r === 'withdrawals') return { items: withdrawals, page: 1, limit: 20, total: withdrawals.length };
   if (r === 'earnings') return { earnings: { totals: { grossKobo: 920000, orgShareKobo: 828000, platformFeeKobo: 92000, last30d: 828000 }, series } };
   if (r === 'payments') return page(payments, params);
   if (r === 'domains' && method === 'GET') return { items: domains };

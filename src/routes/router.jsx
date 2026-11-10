@@ -66,6 +66,7 @@ import WorkspacePayments from '../features/workspace/screens/PaymentsScreen.jsx'
 import WorkspaceDomains from '../features/workspace/screens/DomainsScreen.jsx';
 import WorkspaceBillingComplete from '../features/workspace/screens/BillingCompleteScreen.jsx';
 import WorkspaceBilling from '../features/workspace/screens/BillingScreen.jsx';
+import WorkspaceBillingCheckout from '../features/workspace/screens/BillingCheckoutScreen.jsx';
 import OverviewScreen from '../features/admin/screens/OverviewScreen.jsx';
 import UsersScreen from '../features/admin/screens/UsersScreen.jsx';
 import QuestionsScreen from '../features/admin/screens/QuestionsScreen.jsx';
@@ -223,6 +224,7 @@ export const router = createBrowserRouter([
               { path: 'workspace/domains', element: <WorkspaceDomains /> },
               { path: 'workspace/billing', element: <WorkspaceBilling /> },
               { path: 'workspace/billing/complete', element: <WorkspaceBillingComplete /> },
+              { path: 'workspace/billing/checkout', element: <WorkspaceBillingCheckout /> },
             ],
           },
           { path: 'exam/:id/report', element: <ExamReportPage /> },

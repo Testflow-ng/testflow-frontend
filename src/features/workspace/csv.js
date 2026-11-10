@@ -53,3 +53,22 @@ export function questionsFromCsv(text) {
 }
 
 export const CSV_TEMPLATE = 'stem,optionA,optionB,optionC,optionD,correct,topic,difficulty,explanation\n"What is 2 + 2?",3,4,5,6,B,Arithmetic,easy,"Add the two numbers."\n';
+
+/** The sheet for questions with pictures: pictures are named in `stemImage` and `optionImages` (one name per option, `|` between, blank for a text-only option). */
+export const PICTURE_CSV_TEMPLATE = 'stem,options,correctIndex,explanation,topic,difficulty,stemImage,optionImages\n"Which shape is shown?","Triangle|Square|Circle",0,"It has three sides.",Geometry,easy,q1.png,""\n"Pick the circle","||",2,"",Geometry,easy,,"a.png|b.png|c.png"\n';
+
+/** The picture file names a sheet asks for, or null when it has no picture columns (a plain sheet). */
+export function picturesNeeded(text) {
+  const [head, ...body] = parseCsv(text);
+  if (!head) return null;
+  const cols = head.map((h) => h.trim().toLowerCase().replace(/[\s_-]/g, ''));
+  const stem = cols.findIndex((c) => c === 'stemimage' || c === 'questionimage');
+  const opts = cols.indexOf('optionimages');
+  if (stem < 0 && opts < 0) return null;
+  const names = new Set();
+  body.forEach((r) => {
+    if (stem >= 0 && (r[stem] ?? '').trim()) names.add(r[stem].trim());
+    if (opts >= 0) (r[opts] ?? '').split('|').map((n) => n.trim()).filter(Boolean).forEach((n) => names.add(n));
+  });
+  return [...names];
+}

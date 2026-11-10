@@ -85,12 +85,14 @@ function WorkspaceBillingCheckout() {
   const expired = status === 'expired' || status === 'abandoned';
   const failed = status === 'failed' || status === 'refunded';
 
-  const accountNumber = payment?.accountNumber ?? payment?.bankTransfer?.accountNumber;
-  const accountName = payment?.accountName ?? payment?.bankTransfer?.accountName;
-  const bankName = payment?.bankName ?? payment?.bankTransfer?.bankName;
-  const amount = payment?.amountKobo ?? payment?.bankTransfer?.amountKobo;
-  const currency = payment?.currency ?? payment?.bankTransfer?.currency ?? 'NGN';
-  const expiresAt = payment?.accountExpiresAt ?? payment?.bankTransfer?.expiresAt;
+  // The backend nests the bank details under `transferInstructions` (see paymentView in orgSubscription.service.js).
+  const transfer = payment?.transferInstructions ?? payment?.bankTransfer ?? null;
+  const accountNumber = transfer?.accountNumber ?? payment?.accountNumber;
+  const accountName = transfer?.accountName ?? payment?.accountName;
+  const bankName = transfer?.bankName ?? payment?.bankName;
+  const amount = transfer?.amountKobo ?? payment?.amountKobo;
+  const currency = transfer?.currency ?? payment?.currency ?? 'NGN';
+  const expiresAt = transfer?.expiresAt ?? payment?.accountExpiresAt;
 
   if (loading) {
     return (

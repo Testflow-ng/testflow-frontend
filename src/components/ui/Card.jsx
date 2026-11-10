@@ -14,15 +14,18 @@ const paddings = {
 
 /**
  * Surface container. Premium by default; has subtle shadows and border.
+ * `flushMobile` drops the box on phones and keeps it from sm up (used by full-screen mobile flows like onboarding).
  */
-function Card({ as: Component = 'div', padding = 'md', raised = true, hover = false, className, ...props }) {
+function Card({ as: Component = 'div', padding = 'md', raised = true, hover = false, flushMobile = false, className, ...props }) {
   return (
     <Component
       className={cn(
-        'rounded-[20px] border border-border bg-surface transition-all duration-300 motion-reduce:transition-none',
-        raised && 'shadow-[0_1px_2px_rgba(27,67,50,0.04),0_8px_24px_-12px_rgba(27,67,50,0.12)]',
+        'transition-all duration-300 motion-reduce:transition-none',
+        // flushMobile: no box on phones (the content sits straight on the page); the normal card from sm up.
+        flushMobile ? 'sm:rounded-[20px] sm:border sm:border-border sm:bg-surface' : 'rounded-[20px] border border-border bg-surface',
+        raised && (flushMobile ? 'sm:shadow-[0_1px_2px_rgba(27,67,50,0.04),0_8px_24px_-12px_rgba(27,67,50,0.12)]' : 'shadow-[0_1px_2px_rgba(27,67,50,0.04),0_8px_24px_-12px_rgba(27,67,50,0.12)]'),
         hover && 'hover:shadow-md hover:-translate-y-0.5 hover:border-border-strong',
-        paddings[padding],
+        flushMobile ? 'sm:p-8' : paddings[padding],
         className,
       )}
       {...props}

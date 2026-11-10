@@ -11,8 +11,10 @@ import { formatMoney } from '../../../utils/money.js';
 import { downloadStatementCsv, printReceipt, printStatement, summarize } from '../invoice.js';
 import { useOrg } from '../OrgContext.js';
 import PayoutCard from '../PayoutCard.jsx';
+import WalletCard from '../WalletCard.jsx';
 import { usePayments, useSite } from '../useWorkspace.js';
 import { fmtDate } from '../../admin/screens/format.js';
+import { useMediaQuery } from '../../../hooks/useMediaQuery.js';
 
 const PERIODS = [
   { value: '7', label: '7 days', days: 7 },
@@ -25,6 +27,7 @@ const DAY = 86400000;
 /** Your earnings: what students paid, what you keep, where it goes, and every payment with a receipt. */
 function PaymentsScreen() {
   const toast = useToast();
+  const phone = useMediaQuery('(max-width: 639px)');
   const { org } = useOrg();
   const brand = useSite().data?.brand;
   const [period, setPeriod] = useState('30');
@@ -58,11 +61,11 @@ function PaymentsScreen() {
 
   const columns = [
     { key: 'paidAt', header: 'Date', sortable: true, render: (p) => fmtDate(p.paidAt) },
-    { key: 'item', header: 'For', render: (p) => <span><span className="font-semibold text-foreground-strong">{p.item}</span>{p.studentName && <span className="block text-xs text-muted">{p.studentName}</span>}</span> },
+    { key: 'item', header: 'For', primary: true, render: (p) => <span><span className="font-semibold text-foreground-strong">{p.item}</span>{p.studentName && <span className="block text-xs text-muted">{p.studentName}</span>}</span> },
     { key: 'grossKobo', header: 'Student paid', align: 'right', render: (p) => formatMoney(p.grossKobo) },
     { key: 'platformFeeKobo', header: 'Testflow share', align: 'right', render: (p) => <span className="text-muted">-{formatMoney(p.platformFeeKobo)}</span> },
     { key: 'orgShareKobo', header: 'You receive', align: 'right', render: (p) => <span className="font-semibold text-foreground-strong">{formatMoney(p.orgShareKobo)}</span> },
-    { key: 'status', header: 'Status', render: (p) => <StatusBadge status={p.status === 'paid' ? 'paid' : p.status === 'refunded' ? 'refunded' : 'failed'} /> },
+    { key: 'status', header: 'Status', inline: true, render: (p) => <StatusBadge status={p.status === 'paid' ? 'paid' : p.status === 'refunded' ? 'refunded' : 'failed'} /> },
   ];
 
   const { canCharge } = usePlanFeatures();
@@ -82,7 +85,7 @@ function PaymentsScreen() {
         locked={!canCharge}
         plan="Studio"
         title="Paid exams are part of Studio"
-        description="Charge students for exam access, receive direct payouts to your bank account, and track your revenue."
+        description="Charge students for exam access, receive your share straight in your bank account, and track your revenue."
         className="mt-6"
       >
         <div className="space-y-8">
@@ -96,13 +99,15 @@ function PaymentsScreen() {
                   </div>
                   <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10 text-accent"><Wallet size={26} strokeWidth={1.5} aria-hidden="true" /></span>
                 </div>
-                <dl className="mt-8 grid gap-6 sm:grid-cols-3">
+                <dl className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-6">
                   {[['Students paid', formatMoney(t.gross)], [`Testflow share (${org.payout?.platformPercent ?? 5}%)`, `-${formatMoney(t.fee)}`], ['Payments', t.count]].map(([k, v]) => <div key={k}><dt className="text-sm text-white/60">{k}</dt><dd className="mt-1 font-heading text-2xl font-extrabold text-white">{v}</dd></div>)}
                 </dl>
-                <p className="mt-6 flex items-center gap-2 text-sm text-white/70"><Landmark size={15} aria-hidden="true" />{org.payout?.status === 'active' ? `Paid to ${org.payout.accountName ?? 'your account'}` : 'Add a payout account to receive your money'}</p>
+                <p className="mt-6 flex items-center gap-2 text-sm text-white/70"><Landmark size={15} aria-hidden="true" />{org.payout?.status === 'active' ? `${org.payout?.mode === 'wallet' ? 'Withdraw to' : 'Paid to'} ${org.payout.accountName ?? 'your account'}` : 'Add a payout account to receive your money'}</p>
               </div>
             )}
           </Reveal>
+
+          {org.payout?.mode === 'wallet' && <Reveal delay={0.03}><WalletCard /></Reveal>}
 
           <Reveal delay={0.06}>
             <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
@@ -133,7 +138,7 @@ function PaymentsScreen() {
               {!isLoading && all.length === 0 ? (
                 <EmptyState icon={Receipt} title="No payments yet" description="When a student pays for one of your exams it shows up here, with a receipt you can download." />
               ) : (
-                <DataTable caption="Payments" columns={columns} rows={shown} pageSize={10} initialSort={{ key: 'paidAt', dir: 'desc' }} emptyMessage="No payments match." loading={isLoading}
+                <DataTable caption="Payments" columns={columns} rows={shown} pageSize={phone ? 5 : 10} initialSort={{ key: 'paidAt', dir: 'desc' }} emptyMessage="No payments match." loading={isLoading}
                   rowActions={(p) => <IconButton aria-label={`Download receipt for ${p.item}`} title="Download receipt" size="sm" variant="ghost" onClick={() => receipt(p)}><Receipt {...ICON} size={16} /></IconButton>} />
               )}
             </section>

@@ -17,6 +17,10 @@ import { Skeleton } from '../ui/Skeleton.jsx';
  * `toolbar` renders above the table (filters, search, buttons). `selectable` adds checkboxes;
  * `bulkActions({ selectedIds, clear })` renders in a bar while something is selected.
  * `loading` shows skeleton rows. `rowActions(row)` renders a trailing actions cell.
+ *
+ * On phones (below sm) each row becomes a card: the `primary` column (default: the first) is the title, the rest are
+ * label / value pairs, and the row actions sit top right. No sideways scrolling. Mark one column `primary: true`
+ * to choose the title, and `inline: true` on a column (a status badge, say) to show it under the title instead of in the grid.
  */
 function DataTable({
   columns,
@@ -93,7 +97,48 @@ function DataTable({
           </button>
         </div>
       )}
-      <div className="overflow-x-auto">
+      {/* Phones: one card per row */}
+      <div className="sm:hidden" aria-busy={loading || undefined}>
+        {loading ? (
+          <ul className="divide-y divide-border/70">
+            {Array.from({ length: Math.min(perPage, 4) }, (_, i) => <li key={i} className="space-y-2 px-4 py-4"><Skeleton className="h-5 w-2/3 rounded-full" /><Skeleton className="h-4 w-full rounded-full" /></li>)}
+          </ul>
+        ) : visible.length === 0 ? (
+          <p className="px-4 py-10 text-center text-muted">{emptyMessage}</p>
+        ) : (
+          <ul className="divide-y divide-border/70" aria-label={caption}>
+            {visible.map((row) => {
+              const title = columns.find((c) => c.primary) ?? columns[0];
+              const inline = columns.filter((c) => c.inline && c !== title);
+              const rest = columns.filter((c) => c !== title && !c.inline);
+              return (
+                <li key={row.id} className={cn('px-4 py-3.5', selected.has(row.id) && 'bg-[var(--brand-lavender)]/40')}>
+                  <div className="flex items-start gap-3">
+                    {selectable && <Checkbox aria-label={`Select row ${row.id}`} checked={selected.has(row.id)} onChange={() => toggleOne(row.id)} />}
+                    <div className="min-w-0 flex-1 text-[15px] text-foreground-strong">
+                      {title.render ? title.render(row) : row[title.key]}
+                      {inline.length > 0 && <div className="mt-2 flex flex-wrap items-center gap-2">{inline.map((c) => <span key={c.key}>{c.render ? c.render(row) : row[c.key]}</span>)}</div>}
+                    </div>
+                    {rowActions && <div className="-mr-1.5 -mt-1 shrink-0">{rowActions(row)}</div>}
+                  </div>
+                  {rest.length > 0 && (
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                      {rest.map((c) => (
+                        <div key={c.key} className="min-w-0">
+                          <dt className="text-[11px] font-bold uppercase tracking-wide text-muted">{c.header}</dt>
+                          <dd className="mt-0.5 break-words text-foreground-strong">{c.render ? c.render(row) : row[c.key]}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[32rem] border-collapse text-left text-sm" aria-busy={loading || undefined}>
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead>

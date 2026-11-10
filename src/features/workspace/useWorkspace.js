@@ -35,6 +35,10 @@ export const useStudents = scoped('students', wsApi.students);
 export const useStudent = scoped('student', (id, studentId) => wsApi.student(id, studentId));
 export const useBooks = scoped('books', (id) => wsApi.books(id));
 export const useEarnings = scoped('earnings', (id) => wsApi.earnings(id));
+const busy = (w) => ['pending', 'processing'].includes(w.status);
+// While a withdrawal is still on its way, check again every few seconds so the status moves by itself.
+export const useWallet = scoped('wallet', (id) => wsApi.wallet(id), { refetchInterval: (q) => (q.state.data?.pendingKobo > 0 ? 8000 : false) });
+export const useWithdrawals = scoped('withdrawals', wsApi.withdrawals, { refetchInterval: (q) => (q.state.data?.items?.some(busy) ? 8000 : false) });
 export const usePayments = scoped('payments', wsApi.payments);
 export const useDomains = scoped('domains', (id) => wsApi.domains(id));
 export const useSubscription = scoped('subscription', (id) => wsApi.subscription(id), { retry: false });

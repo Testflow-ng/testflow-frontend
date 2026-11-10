@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { CalendarClock, Check, Crown, MoreHorizontal, Sparkles, X } from 'lucide-react';
-import { Badge, Banner, Button, Card, DropdownMenu, IconButton, Reveal, Skeleton, useToast } from '../../../components/ui/index.js';
+import { Badge, Banner, Button, Card, DropdownMenu, IconButton, Reveal, SegmentedControl, Skeleton, useToast } from '../../../components/ui/index.js';
 import FaqAccordion from '../../../components/marketing/FaqAccordion.jsx';
 import InvoiceTable from '../../../components/everybody/InvoiceTable.jsx';
 import Screen, { PageHeader } from '../../../components/layout/Screen.jsx';
@@ -53,6 +53,7 @@ function BillingScreen() {
   const { data: plans } = usePlans();
   const payments = useSubscriptionPayments().data ?? [];
   const [busy, setBusy] = useState(null);
+  const [viewKey, setViewKey] = useState(null); // phones show one plan at a time; null means the current plan
   const [checkout, setCheckout] = useState(null); // { reference, subId, orgId, amountKobo, currency, planName, transferInstructions, status }
   const [pStatus, setPStatus] = useState('idle');
   const [refreshing, setRefreshing] = useState(false);
@@ -293,6 +294,7 @@ function BillingScreen() {
   const ordered = [...(plans ?? []).filter((p) => p.key !== 'free'), FREE_PLAN].sort((a, b) => (RANK[a.key] ?? 9) - (RANK[b.key] ?? 9));
   const isFree = !sub || sub.planKey === 'free';
   const currentKey = sub?.planKey ?? 'free';
+  const shownKey = ordered.some((p) => p.key === viewKey) ? viewKey : currentKey;
   const left = sub && !isFree ? daysLeft(sub.currentPeriodEnd) : null;
   const periodDays = 30;
 
@@ -391,13 +393,14 @@ function BillingScreen() {
           <section aria-labelledby="compare">
             <h2 id="compare" className="mb-1 font-heading text-xl font-extrabold tracking-tight text-foreground-strong">Compare plans</h2>
             <p className="mb-5 text-sm text-muted">Pro is simple and fast. Studio adds paid exams, Live CBT and no ads. Free is limited to 3 exams.</p>
+            <div className="mb-4 md:hidden"><SegmentedControl label="Choose a plan to look at" fullWidth value={shownKey} onValueChange={setViewKey} options={ordered.map((p) => ({ value: p.key, label: p.name }))} /></div>
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {ordered.map((p, col) => {
                 const current = currentKey === p.key;
                 const featured = p.key === 'studio';
                 const up = (RANK[p.key] ?? 0) > (RANK[currentKey] ?? 0);
                 return (
-                  <Card key={p.key} padding="lg" className={cn('relative flex flex-col gap-6', featured && 'border-secondary ring-1 ring-secondary/20', current && 'bg-[var(--brand-lavender)]/50')}>
+                  <Card key={p.key} padding="lg" className={cn('relative flex-col gap-6', shownKey === p.key ? 'flex' : 'hidden md:flex', featured && 'border-secondary ring-1 ring-secondary/20', current && 'bg-[var(--brand-lavender)]/50')}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0"><h3 className="font-heading text-2xl font-extrabold tracking-tight text-foreground-strong">{p.name}</h3><p className="mt-1 text-sm text-muted">{TAGLINE[p.key]}</p></div>
                       <span className="shrink-0 whitespace-nowrap">{current ? <Badge variant="success">Your plan</Badge> : featured ? <Badge variant="lime">No ads</Badge> : null}</span>

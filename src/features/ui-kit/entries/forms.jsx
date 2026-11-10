@@ -187,6 +187,7 @@ export default [
       return (
         <W w={380}>
           <FileUpload label="Ad image" accept="image/png,image/jpeg,image/webp" hint="JPEG, PNG or WebP, up to 2 MB" previewUrl={file?.url} fileName={file?.name} progress={file ? 100 : undefined} onFile={(f) => setFile({ name: f.name, url: URL.createObjectURL(f) })} onRemove={() => setFile(null)} />
+          <FileUpload multiple label="Pictures (several at once)" accept="image/png,image/jpeg,image/webp" maxBytes={1024 * 1024} hint="PNG, JPEG or WebP, each 1 MB or less" onFiles={() => {}} />
         </W>
       );
     },

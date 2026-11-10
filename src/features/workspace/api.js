@@ -36,6 +36,14 @@ export const wsApi = {
   questions: (id, params) => apiClient.get(`${org(id)}/questions`, { params }).then((r) => r.data),
   saveQuestion: (id, q) => (q.id ? apiClient.patch(`${org(id)}/questions/${q.id}`, q) : apiClient.post(`${org(id)}/questions`, q)).then((r) => unwrap(r, 'question')),
   deleteQuestion: (id, qid) => apiClient.delete(`${org(id)}/questions/${qid}`).then((r) => r.data),
+  /** A plain CSV plus pictures (matched by file name). `dryRun` checks everything and saves nothing. */
+  importWithImages: (id, { csv, images, examId, bankId, dryRun }) => {
+    const f = new FormData();
+    f.append('file', csv);
+    images.forEach((img) => f.append('images', img, img.name));
+    const params = { ...(examId ? { examId } : {}), ...(bankId ? { bankId } : {}), ...(dryRun ? { dryRun: true } : {}) };
+    return apiClient.post(`${org(id)}/questions/import/with-images`, f, { params, headers: { 'Content-Type': 'multipart/form-data' } }).then((r) => r.data);
+  },
   bulkQuestions: (id, rows, target = {}) => apiClient.post(`${org(id)}/questions/bulk`, rows, { params: target.examId || target.bankId ? target : undefined }).then((r) => r.data),
   questionBanks: (id) => apiClient.get(`${org(id)}/question-banks`).then((r) => unwrap(r, 'items')),
   saveBank: (id, bank) => (bank.id ? apiClient.patch(`${org(id)}/question-banks/${bank.id}`, bank) : apiClient.post(`${org(id)}/question-banks`, bank)).then((r) => unwrap(r, 'bank')),
@@ -58,6 +66,9 @@ export const wsApi = {
   banks: () => apiClient.get(`${base}/banks`).then((r) => unwrap(r, 'banks')),
   verifyAccount: (id, body) => apiClient.post(`${org(id)}/payout/verify`, body).then((r) => r.data),
   savePayout: (id, body) => apiClient.put(`${org(id)}/payout`, body).then((r) => unwrap(r, 'payout')),
+  wallet: (id) => apiClient.get(`${org(id)}/wallet`).then((r) => unwrap(r, 'wallet')),
+  withdrawals: (id, params) => apiClient.get(`${org(id)}/withdrawals`, { params }).then((r) => r.data),
+  withdraw: (id, amountKobo) => apiClient.post(`${org(id)}/withdrawals`, { amountKobo }).then((r) => unwrap(r, 'withdrawal')),
   earnings: (id) => apiClient.get(`${org(id)}/earnings`).then((r) => unwrap(r, 'earnings')),
   payments: (id, params) => apiClient.get(`${org(id)}/payments`, { params }).then((r) => r.data),
 

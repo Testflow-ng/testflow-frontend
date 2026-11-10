@@ -107,7 +107,7 @@ describe('organisation subscription lifecycle', () => {
     await screen.findByText('Wema Bank');
     expect(screen.getByText('TestFlow Ltd')).toBeInTheDocument();
     expect(screen.getByText('Transfer exact amount.')).toBeInTheDocument();
-    expect(screen.getByText(/Pay before/)).toBeInTheDocument();
+    expect(screen.getByText(/Account valid until/)).toBeInTheDocument();
   });
 
   it('uses changePlan for upgrade on an existing paid subscription', async () => {

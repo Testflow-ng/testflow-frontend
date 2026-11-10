@@ -15,7 +15,7 @@ export function normalizeTransfer(input) {
   }
   if (!bankName && parent) {
     const parentBank = pick(parent, 'bankName', 'bank_name', 'bank');
-    bankName = typeof parentBank === 'object' ? (parentBank.name || parentBank.slug) : parentBank;
+    bankName = parentBank && typeof parentBank === 'object' ? (parentBank.name || parentBank.slug) : parentBank;
   }
 
   const amount = pick(o, 'amountKobo', 'amount_kobo', 'amountMinor', 'amount_minor', 'amount')
@@ -31,9 +31,12 @@ export function normalizeTransfer(input) {
 
   const rawAccountName = pick(o, 'accountName', 'account_name', 'accountHolder', 'account_holder')
     ?? pick(parent, 'accountName', 'account_name', 'accountHolder', 'account_holder');
-  const accountName = (!rawAccountName || String(rawAccountName).trim().toUpperCase() === 'PAYSTACK CHECKOUT')
-    ? 'Testflow'
-    : String(rawAccountName).trim();
+  // Paystack's placeholder holder name is shown as Testflow; a missing name stays empty rather than invented.
+  const accountName = !rawAccountName
+    ? null
+    : String(rawAccountName).trim().toUpperCase() === 'PAYSTACK CHECKOUT'
+      ? 'Testflow'
+      : String(rawAccountName).trim();
 
   const expiresAt = pick(o, 'expiresAt', 'expiry', 'expiryAt', 'expires_at', 'expiryDate', 'expiry_date')
     ?? pick(parent, 'expiresAt', 'expiry', 'expiryAt', 'expires_at');

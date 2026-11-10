@@ -7,6 +7,9 @@ import ExamTimer from '../../../components/exam/ExamTimer.jsx';
 import ResultSummary from '../../../components/exam/ResultSummary.jsx';
 import Calculator from '../../post-utme/components/Calculator.jsx';
 
+// Demo picture for the question and option image examples (a wide image, to show it scales down).
+const PIC = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='400'><rect width='900' height='400' fill='%23e8e4fb'/><polygon points='450,40 760,360 140,360' fill='%236b5bd2'/></svg>";
+
 export default [
   {
     id: 'question', name: 'Question card and options', category: 'Exam', source: ['exam/QuestionCard.jsx', 'exam/OptionRow.jsx'],
@@ -40,6 +43,11 @@ export default [
             <OptionRow label="C" state="missed">-2 and -3 (the right answer you missed)</OptionRow>
             <OptionRow label="D" state="answer">0 and 5 (the answer, with nothing chosen)</OptionRow>
           </div>
+          <QuestionCard number={2} total={40} stem="Which shape is shown?">
+            <img src={PIC} alt="Picture for this question" className="h-auto max-h-72 w-auto max-w-full rounded-xl object-contain" />
+            <OptionRow label="A" image={PIC}>Triangle</OptionRow>
+            <OptionRow label="B" image={PIC} />
+          </QuestionCard>
         </div>
       );
     },

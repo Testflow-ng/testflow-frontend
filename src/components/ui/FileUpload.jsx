@@ -8,8 +8,10 @@ const fmtBytes = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Ma
  * Drag-and-drop or click-to-choose file field. Validates type (`accept`, e.g. "image/png,image/jpeg,image/webp")
  * and size (`maxBytes`) before calling `onFile(file)`. Show the chosen file with `previewUrl` + `fileName`,
  * `progress` (0-100) while uploading and `error` from the server. The caller does the actual upload.
+ * With `multiple`, several files can be chosen or dropped at once: the ones that pass go to `onFiles(files)`,
+ * the dropzone stays visible, and the ones that fail are named in the error line.
  */
-function FileUpload({ label, accept = 'image/*', maxBytes = 2 * 1024 * 1024, hint, onFile, onRemove, previewUrl, fileName, progress, error, disabled = false, className }) {
+function FileUpload({ label, accept = 'image/*', maxBytes = 2 * 1024 * 1024, hint, onFile, onFiles, multiple = false, onRemove, previewUrl, fileName, progress, error, disabled = false, className }) {
   const id = useId();
   const inputRef = useRef(null);
   const [drag, setDrag] = useState(false);
@@ -26,13 +28,23 @@ function FileUpload({ label, accept = 'image/*', maxBytes = 2 * 1024 * 1024, hin
     onFile?.(file);
   };
 
+  const takeMany = (list) => {
+    const files = Array.from(list ?? []);
+    if (!files.length) return;
+    const bad = files.filter((f) => !typeOk(f) || f.size > maxBytes);
+    const good = files.filter((f) => !bad.includes(f));
+    setLocalError(bad.length ? `Skipped ${bad.length} (wrong type or over ${fmtBytes(maxBytes)}): ${bad.slice(0, 3).map((f) => f.name).join(', ')}${bad.length > 3 ? '…' : ''}` : '');
+    if (good.length) onFiles?.(good);
+  };
+  const handle = (list) => (multiple ? takeMany(list) : take(list?.[0]));
+
   const shownError = error || localError;
   const uploading = typeof progress === 'number' && progress < 100;
 
   return (
     <div className={className}>
       {label && <p className="mb-1.5 text-sm font-medium text-foreground-strong">{label}</p>}
-      {previewUrl || fileName ? (
+      {!multiple && (previewUrl || fileName) ? (
         <div className="flex items-center gap-3 rounded-[20px] border border-border bg-surface p-3">
           {previewUrl ? <img src={previewUrl} alt="" className="size-16 shrink-0 rounded-xl object-cover" /> : <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-surface-strong text-muted"><FileImage size={24} aria-hidden="true" /></span>}
           <div className="min-w-0 flex-1">
@@ -62,7 +74,7 @@ function FileUpload({ label, accept = 'image/*', maxBytes = 2 * 1024 * 1024, hin
           onDrop={(e) => {
             e.preventDefault();
             setDrag(false);
-            if (!disabled) take(e.dataTransfer.files?.[0]);
+            if (!disabled) handle(e.dataTransfer.files);
           }}
           className={cn(
             'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed px-6 py-8 text-center transition-colors focus-within:ring-4 focus-within:ring-primary/15',
@@ -75,10 +87,10 @@ function FileUpload({ label, accept = 'image/*', maxBytes = 2 * 1024 * 1024, hin
             <UploadCloud size={24} strokeWidth={1.6} aria-hidden="true" />
           </span>
           <span className="text-sm font-semibold text-foreground-strong">
-            <span className="text-primary">Choose a file</span> or drag it here
+            <span className="text-primary">Choose {multiple ? 'files' : 'a file'}</span> or drag {multiple ? 'them' : 'it'} here
           </span>
           <span className="text-xs text-muted">{hint ?? `Up to ${fmtBytes(maxBytes)}`}</span>
-          <input ref={inputRef} id={id} type="file" accept={accept} disabled={disabled} className="sr-only" onChange={(e) => take(e.target.files?.[0])} />
+          <input ref={inputRef} id={id} type="file" accept={accept} multiple={multiple} disabled={disabled} className="sr-only" onChange={(e) => { handle(e.target.files); e.target.value = ''; }} />
         </label>
       )}
       {shownError && <p role="alert" className="mt-1.5 text-xs text-danger">{shownError}</p>}

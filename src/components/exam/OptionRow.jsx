@@ -41,7 +41,7 @@ const SR = {
  * correct / answer / wrong / missed. Review states never rely on colour alone: they add an
  * icon and screen-reader text.
  */
-function OptionRow({ label, children, state = 'idle', onSelect, disabled = false, name = 'option' }) {
+function OptionRow({ label, children, image, state = 'idle', onSelect, disabled = false, name = 'option' }) {
   const review = Boolean(SR[state]);
   const showsCheck = state === 'correct' || state === 'answer';
   return (
@@ -64,7 +64,9 @@ function OptionRow({ label, children, state = 'idle', onSelect, disabled = false
         )}
       </span>
       <span className="min-w-0 flex-1 text-[15.5px] leading-snug text-foreground-strong">
-        <MathText>{children}</MathText>
+        {children ? <MathText>{children}</MathText> : null}
+        {/* A picture option: scales down to the row, never wider than the screen. */}
+        {image && <img src={image} alt={`Option ${label}`} loading="lazy" className={cn('h-auto max-h-48 w-auto max-w-full rounded-lg object-contain', children && 'mt-2')} />}
       </span>
       {review && <span className="sr-only">{SR[state]}</span>}
     </label>
