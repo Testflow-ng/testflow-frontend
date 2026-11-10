@@ -139,7 +139,10 @@ function BillingScreen() {
       clearStoredIdemKey(operation);
       return;
     }
-    setPStatus(paymentUiStatus(res) ?? 'awaiting_transfer');
+    // Any non-final answer (the server says 'pending' or 'initialized') still means: waiting for the
+    // transfer. Showing the raw word would hide the account details.
+    const ui = paymentUiStatus(res);
+    setPStatus(ui === 'processing' ? 'processing' : 'awaiting_transfer');
   };
 
   // Recover a pending checkout after refresh or navigation. Must not start a

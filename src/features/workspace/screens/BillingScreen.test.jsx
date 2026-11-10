@@ -110,6 +110,17 @@ describe('organisation subscription lifecycle', () => {
     expect(screen.getByText(/Account valid until/)).toBeInTheDocument();
   });
 
+  it('keeps the transfer details on screen when the server answers "pending"', async () => {
+    useSubscription.mockReturnValue({ data: freeSub });
+    wsApi.subscriptionPaymentStatus.mockResolvedValue({ status: 'pending', payment: { status: 'initialized' } });
+    render(<BillingScreen />);
+    fireEvent.click(screen.getByText('Upgrade to Studio'));
+    await screen.findByText('Wema Bank');
+    await new Promise((r) => setTimeout(r, 6300));
+    expect(wsApi.subscriptionPaymentStatus).toHaveBeenCalled();
+    expect(screen.getByText('Wema Bank')).toBeInTheDocument();
+  }, 12000);
+
   it('uses changePlan for upgrade on an existing paid subscription', async () => {
     useSubscription.mockReturnValue({ data: proSub });
     render(<BillingScreen />);
