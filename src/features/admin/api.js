@@ -18,7 +18,7 @@ export const adminApi = {
   listAdmins: () => apiClient.get('/api/admin/roster').then((res) => res.data.admins),
   createAdmin: (payload) => apiClient.post('/api/admin/create', payload).then((res) => res.data.user),
   promoteAdmin: (email) => apiClient.post('/api/admin/promote', { email }).then((res) => res.data.user),
-  demoteAdmin: (id) => apiClient.patch(`/api/admin/demote/${id}`).then((res) => res.data.user),
+  demoteAdmin: (id) => apiClient.patch(`/api/admin/demote/${id}`)  .then((res) => res.data.user),
   deleteUser: (id) => apiClient.delete(`/api/admin/users/${id}`).then((res) => res.data),
 
   // Questions
@@ -87,13 +87,14 @@ export const adminApi = {
   // Advertising (Testflow Ads marketplace + Google AdSense health)
   adsOverview: () => apiClient.get('/api/admin/ads/overview').then((res) => res.data),
   adsCampaigns: (params) => apiClient.get('/api/admin/ads/campaigns', { params }).then((res) => res.data),
-  adsCampaignAction: (id, action, payload) => apiClient.post(`/api/admin/ads/campaigns/${id}/${action}`, payload ?? {}).then((res) => res.data.campaign),
+  adsCampaignAction: (id, action, payload) =>
+    apiClient.post(`/api/admin/ads/campaigns/${id}/${action}`, payload ?? {}).then((res) => res.data.campaign),
   adsPayments: (params) => apiClient.get('/api/admin/ads/payments', { params }).then((res) => res.data),
   adsRefund: (id, payload) => apiClient.post(`/api/admin/ads/payments/${id}/refund`, payload).then((res) => res.data.payment),
   adsSettings: () => apiClient.get('/api/admin/ads/settings').then((res) => res.data.settings),
   updateAdsSettings: (payload) => apiClient.patch('/api/admin/ads/settings', payload).then((res) => res.data.settings),
   adsJobs: () => apiClient.get('/api/admin/ads/jobs').then((res) => res.data.runs),
-  advertisingHealth: () => apiClient.get('/api/advertising/admin/health').then((res) => res.data.health),
+  advertisingHealth: () => apiClient.get('/api/administrating/admin/health').then((res) => res.data.health),
 
   // House Ads (Internal promos created and managed by admins)
   listHouseAds: () => apiClient.get('/api/admin/ads/house-ads').then((res) => res.data.houseAds),
@@ -113,4 +114,27 @@ export const adminApi = {
   // Data Retention
   retentionOverview: () => apiClient.get('/api/admin/retention/overview').then((res) => res.data),
   triggerRetentionSweep: () => apiClient.post('/api/admin/retention/sweep').then((res) => res.data.sweep),
+
+  // --- Library endpoints ---
+  listLibraryBooks: (params) =>
+    apiClient.get('/api/library/books', { params }).then((res) => res.data),
+  getLibraryBook: (id) => apiClient.get(`/api/library/books/${id}`).then((res) => res.data.book),
+  createLibraryBook: (payload) =>
+    apiClient.post('/api/library/books', payload).then((res) => res.data),
+  updateLibraryBook: (id, payload) =>
+    apiClient.patch(`/api/library/books/${id}`, payload).then((res) => res.data),
+  deleteLibraryBook: (id) => apiClient.delete(`/api/library/books/${id}`).then((res) => res.data),
+  uploadLibraryBook: (formData) =>
+    apiClient
+      .post('/api/library/books/:id/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data),
+  listLibraryNotes: (params) =>
+    apiClient.get('/api/library/notes', { params }).then((res) => res.data),
+  createLibraryNote: (payload) =>
+    apiClient.post('/api/library/notes', payload).then((res) => res.data),
+  getLibraryNote: (id) => apiClient.get(`/api/library/notes/${id}`).then((res) => res.data.note),
+  downloadLibraryNote: (id) =>
+    apiClient.get(`/api/library/notes/${id}/download`).then((res) => res.data),
 };

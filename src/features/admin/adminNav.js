@@ -7,6 +7,7 @@ export const ADMIN_NAV = [
   { to: '/admin/users', label: 'Users', Icon: Users },
   { to: '/admin/questions', label: 'Questions', Icon: FileQuestion },
   { to: '/admin/subjects', label: 'Subjects', Icon: BookOpenCheck },
+  { to: '/admin/library', label: 'Library', Icon: BookOpenCheck },
   { to: '/admin/reports', label: 'Problems', Icon: Flag },
   { to: '/admin/feedback', label: 'Feedback', Icon: MessageSquare },
   { to: '/admin/verifications', label: 'Verifications', Icon: ShieldCheck },
