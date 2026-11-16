@@ -41,6 +41,7 @@ import SettingsPage from '../features/settings/SettingsPage.jsx';
 import NotificationPreferencesPage from '../features/settings/NotificationPreferencesPage.jsx';
 import FeedbackPage from '../features/feedback/FeedbackPage.jsx';
 import RequireAdmin from '../features/admin/RequireAdmin.jsx';
+import AdminLibraryScreen from '../features/admin/screens/AdminLibraryScreen.jsx';
 import AdminLayout from '../features/admin/AdminLayout.jsx';
 import TestflowAuthorizePage from '../features/auth/pages/TestflowAuthorizePage.jsx';
 import AuthorizePage from '../features/workspace/onboarding/AuthorizePage.jsx';
@@ -243,6 +244,7 @@ export const router = createBrowserRouter([
                   { path: 'admin/subjects', element: <SubjectsScreen /> },
                   { path: 'admin/reports', element: <ReportsScreen /> },
                   { path: 'admin/feedback', element: <FeedbackScreen /> },
+                  { path: 'admin/library', element: <AdminLibraryScreen /> },
                   { path: 'admin/verifications', element: <VerificationsScreen /> },
                   { path: 'admin/ads', element: <AdsScreen /> },
                   { path: 'admin/activity', element: <ActivityScreen /> },
