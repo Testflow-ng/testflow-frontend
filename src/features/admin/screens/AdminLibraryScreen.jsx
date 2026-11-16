@@ -73,7 +73,10 @@ function AdminLibraryScreen() {
         title="Library"
         subtitle="Organisation library: slides, textbooks, and notes"
         action={
-          <Button size="sm" onClick={() => setShowUpload(true) } leadingIcon={<Plus size={15} }>Add a book</Button>
+          <Button size="sm" onClick={() => setShowUpload(true)}>
+            <Plus size={15} />
+            Add a book
+          </Button>
         }
       />
       <div className="mt-6 space-y-6">
@@ -138,7 +141,7 @@ function AdminLibraryScreen() {
               <Book size="full" code={b.code || 'BOOK'} title={b.title} color={b.color} />
               <div className="mt-2 flex items-center justify-between gap-2">
                 <div>
-                  <Badge variant{b.priceMinor ? 'lime' : 'outline'}{formatMoney(b.priceMinor)}</Badge>
+                  <Badge variant={b.priceMinor ? 'lime' : 'outline'}>{formatMoney(b.priceMinor)}</Badge>
                   <span>{b.bookType} | {b.visibility}</span>
                 </div>
                 <DropdownMenu placement="bottom-end" trigger={(p) => <IconButton aria-label={`Actions for ${b.title}`} size="sm" variant="ghost" {...p}><MoreHorizontal size={16} /></IconButton>} items={[
