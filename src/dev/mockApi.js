@@ -109,12 +109,13 @@ const routes = [
     'GET',
     /^\/api\/library\/books$/,
     (_m, _body, config) => {
-      const { q = '', page = 1, limit = 12, filter = 'all', bookType, level } = config.params ?? {};
+      const { q = '', page = 1, limit = 12, filter = 'all', bookType, level, subject } = config.params ?? {};
       const needle = String(q).trim().toLowerCase();
       const rows = mockBooks.filter((b) => {
         if (filter === 'bookmarks' && !bookmarked.has(b.id)) return false;
         if (bookType && b.bookType !== bookType) return false;
         if (level != null && Number(b.level) !== Number(level)) return false;
+        if (subject && b.code !== String(subject).toUpperCase()) return false;
         if (!needle) return true;
         return [b.code, b.title, b.subtitle, b.author, ...b.topics].join(' ').toLowerCase().includes(needle);
       });

@@ -9,6 +9,7 @@ import { ICON } from '../../components/ui/iconProps.js';
 import Book from '../../components/data/Book.jsx';
 import Pagination from '../../components/data/Pagination.jsx';
 import { useBooks, useDownloadBook, useNotes, useReading, useSetBookmark } from './useLibrary.js';
+import { useSubjects } from '../subjects/useSubjects.js';
 import { saveFile } from './download.js';
 import BookDetailModal from './components/BookDetailModal.jsx';
 import NoteDetailModal from './components/NoteDetailModal.jsx';
@@ -42,6 +43,7 @@ function LibraryPage({ isGatedPreview = false }) {
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('');
   const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(null);
@@ -49,6 +51,12 @@ function LibraryPage({ isGatedPreview = false }) {
   /* Bookmark state we have just changed, so the card and the dialog agree even
      when the shelf is filtered to bookmarks and the book drops out of the list. */
   const [bookmarkOverrides, setBookmarkOverrides] = useState({});
+
+  const { data: subjects } = useSubjects();
+  const subjectOptions = [
+    { value: '', label: 'All subjects' },
+    ...(subjects ?? []).map((s) => ({ value: s.code, label: `${s.code} · ${s.title}` })),
+  ];
 
   const notesView = typeFilter === 'notes';
   const bookParams = {
@@ -58,12 +66,14 @@ function LibraryPage({ isGatedPreview = false }) {
     filter: bookmarksOnly ? 'bookmarks' : 'all',
     ...(typeFilter === 'textbook' || typeFilter === 'slides' ? { bookType: typeFilter } : {}),
     ...(levelFilter ? { level: Number(levelFilter) } : {}),
+    ...(subjectFilter ? { subject: subjectFilter } : {}),
   };
   const noteParams = {
     q: query,
     page,
     limit: PAGE_SIZE,
     ...(levelFilter ? { level: Number(levelFilter) } : {}),
+    ...(subjectFilter ? { subject: subjectFilter } : {}),
   };
   const { data, isPending, isError, error, refetch, isFetching } = useBooks(bookParams);
   const { data: notesData, isPending: notesPending, isError: notesErrorFlag, error: notesError, refetch: refetchNotes, isFetching: notesFetching } = useNotes(noteParams, notesView);
@@ -111,11 +121,17 @@ function LibraryPage({ isGatedPreview = false }) {
     setPage(1);
   };
 
+  const onSubjectChange = (value) => {
+    setSubjectFilter(value);
+    setPage(1);
+  };
+
   const clearFilters = () => {
     setDraft('');
     setQuery('');
     setTypeFilter('all');
     setLevelFilter('');
+    setSubjectFilter('');
     setBookmarksOnly(false);
     setPage(1);
   };
@@ -196,14 +212,19 @@ function LibraryPage({ isGatedPreview = false }) {
         </div>
       </form>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <SegmentedControl options={TYPE_FILTERS} value={typeFilter} onValueChange={onTypeChange} label="Item type" />
-        <div className="w-full sm:w-44">
-          <Select value={levelFilter} onValueChange={onLevelChange} options={LEVEL_FILTERS} aria-label="Filter by level" />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="sm:w-60">
+            <Select value={subjectFilter} onValueChange={onSubjectChange} options={subjectOptions} placeholder="All subjects" searchable aria-label="Filter by subject" />
+          </div>
+          <div className="sm:w-44">
+            <Select value={levelFilter} onValueChange={onLevelChange} options={LEVEL_FILTERS} aria-label="Filter by level" />
+          </div>
         </div>
       </div>
 
-      {!query && !bookmarksOnly && !notesView && typeFilter === 'all' && !levelFilter ? (
+      {!query && !bookmarksOnly && !notesView && typeFilter === 'all' && !levelFilter && !subjectFilter ? (
         <ContinueReading
           items={reading ?? []}
           onResume={(book, atPage) => navigate(`/library/${book.id}/read?page=${atPage}`)}
@@ -255,7 +276,7 @@ function LibraryPage({ isGatedPreview = false }) {
                     : 'Books appear here as soon as they are published.'
             }
             action={
-              query || levelFilter || typeFilter !== 'all' ? (
+              query || levelFilter || subjectFilter || typeFilter !== 'all' ? (
                 <Button variant="outline" onClick={clearFilters}>
                   Clear search and filters
                 </Button>
