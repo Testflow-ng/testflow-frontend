@@ -124,9 +124,9 @@ export const adminApi = {
   updateLibraryBook: (id, payload) =>
     apiClient.patch(`/api/library/books/${id}`, payload).then((res) => res.data),
   deleteLibraryBook: (id) => apiClient.delete(`/api/library/books/${id}`).then((res) => res.data),
-  uploadLibraryBook: (formData) =>
+  uploadLibraryBook: (id, formData) =>
     apiClient
-      .post('/api/library/books/:id/upload', formData, {
+      .post(`/api/library/books/${id ?? 'new'}/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       .then((res) => res.data),

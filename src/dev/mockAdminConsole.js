@@ -28,6 +28,11 @@ let verifications = [
   { id: 'v3', status: 'approved', transactionRef: 'TRX-88001', receiptImage: null, createdAt: ago(80), student: { fullName: 'Chioma Eze', verificationCode: 'TF-7752' } },
 ];
 let settings = { isPostUtmeActive: true, postUtmePrice: 2000, paymentBankName: 'Test Bank', paymentAccountNumber: '1234567890', paymentAccountName: 'Testflow Admin', updatedAt: 'v1' };
+let books = [
+  { id: 'kb1', title: 'JAMB Mathematics Notes', code: 'MTH101', bookType: 'textbook', description: 'Algebra, calculus and statistics.', priceMinor: 0, visibility: 'all_students', color: '#4a35f0', createdAt: ago(72) },
+  { id: 'kb2', title: 'English Past Questions', code: 'GST101', bookType: 'textbook', description: 'Comprehension and lexis practice.', priceMinor: 150000, visibility: 'paid', color: '#1b4332', createdAt: ago(48) },
+  { id: 'kb3', title: 'Physics Lecture Slides', code: 'PHY101', bookType: 'slides', description: 'Mechanics, waves and heat.', priceMinor: 0, visibility: 'all_students', color: '#163a5f', createdAt: ago(12) },
+];
 let adsSettings = { adsEnabled: true, dailyFeeKobo: 100000, minDurationDays: 1, maxDurationDays: 30, maxAdsPerStudentPerDay: 3 };
 const campaigns = [
   { id: 'c1', status: 'pending_review', title: 'Campus laptop deals', description: 'Fresh stock, student prices.', destination: { type: 'whatsapp', whatsapp: '2348012345678' }, advertiser: { fullName: 'Campus Laptops' }, durationDays: 7, priceKobo: 700000, keywords: ['laptops'], submittedAt: ago(4) },
@@ -79,6 +84,29 @@ export function adminConsoleRoute(method, path, body, config = {}) {
   if (path === '/api/verifications/queue') return { requests: verifications.filter((v) => params.status === 'all' || v.status === params.status) };
   const ver = path.match(/^\/api\/verifications\/([^/]+)\/process$/);
   if (ver) { const v = verifications.find((x) => x.id === ver[1]); Object.assign(v, { status: body.status, rejectionReason: body.rejectionReason }); return { request: v }; }
+  if (path === '/api/library/notes') return { items: [], total: 0, page: 1, pages: 1 };
+  if (path === '/api/library/books' && method === 'GET') return { books, total: books.length, page: 1, pages: 1 };
+  if (path === '/api/library/books' && method === 'POST') {
+    const b = { id: `kb${books.length + 1}`, priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: '#163a5f', ...body, createdAt: new Date().toISOString() };
+    books = [b, ...books];
+    return { book: b };
+  }
+  const book = path.match(/^\/api\/library\/books\/([^/]+)$/);
+  if (book) {
+    if (method === 'DELETE') { books = books.filter((b) => b.id !== book[1]); return { message: 'Removed.' }; }
+    books = books.map((b) => (b.id === book[1] ? { ...b, ...body } : b));
+    return { book: books.find((b) => b.id === book[1]) };
+  }
+  if (/^\/api\/library\/books\/[^/]+\/upload$/.test(path)) {
+    const m = path.match(/^\/api\/library\/books\/([^/]+)\/upload$/);
+    if (m[1] !== 'new') {
+      books = books.map((b) => (b.id === m[1] ? { ...b, fileName: body?.file?.name ?? 'book.pdf' } : b));
+      return { book: books.find((b) => b.id === m[1]) };
+    }
+    const b = { id: `kb${books.length + 1}`, title: body?.title ?? 'Untitled book', code: body?.code ?? 'NEW', priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: '#163a5f', createdAt: new Date().toISOString() };
+    books = [b, ...books];
+    return { book: b };
+  }
   if (path === '/api/admin/ads/overview') return { campaignsByStatus: { pending_review: 1, active: 1, suspended: 0 }, revenue: { amountKobo: 3700000, payments: 2, currency: 'NGN' } };
   if (path === '/api/admin/ads/campaigns') return page(campaigns, { limit: 100 });
   if (/^\/api\/admin\/ads\/campaigns\/[^/]+\/(approve|reject|suspend|reinstate|remove)$/.test(path)) { const c = campaigns.find((x) => path.includes(x.id)); if (c) c.status = path.endsWith('approve') ? 'active' : path.endsWith('reject') ? 'rejected' : path.endsWith('suspend') ? 'suspended' : 'active'; return { campaign: c }; }
@@ -93,4 +121,5 @@ export const ADMIN_CONSOLE_PREFIXES = [
   '/api/admin/students', '/api/admin/roster', '/api/admin/promote', '/api/admin/create', '/api/admin/demote', '/api/admin/users',
   '/api/admin/settings', '/api/admin/question-flags', '/api/admin/feedback', '/api/admin/questions', '/api/admin/ads',
   '/api/questions', '/api/verifications/queue', '/api/verifications/', '/api/advertising/admin', '/api/billing/ad-free/entitlements',
+  '/api/library/books', '/api/library/notes',
 ];
