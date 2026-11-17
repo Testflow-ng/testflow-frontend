@@ -137,7 +137,17 @@ export const adminApi = {
     apiClient.get('/api/library/notes', { params }).then((res) => res.data),
   createLibraryNote: (payload) =>
     apiClient.post('/api/library/notes', payload).then((res) => res.data),
-  getLibraryNote: (id) => apiClient.get(`/api/library/notes/${id}`).then((res) => res.data.note),
+  getLibraryNote: (id) => apiClient.get(`/api/library/notes/${id}`).then((res) => res.data),
+  uploadLibraryNoteImages: (id, files) => {
+    const form = new FormData();
+    for (const file of files) form.append('images', file);
+    return apiClient
+      .post(`/api/library/notes/${id}/images`, form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((res) => res.data);
+  },
+  deleteLibraryNote: (id) => apiClient.delete(`/api/library/notes/${id}`).then((res) => res.data),
   downloadLibraryNote: (id) =>
     apiClient.get(`/api/library/notes/${id}/download`).then((res) => res.data),
 };

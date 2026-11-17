@@ -14,6 +14,9 @@ export const libraryApi = {
   pages: (id, page) => apiClient.get(`/api/library/books/${id}/pages`, { params: { page } }).then((r) => r.data),
   setBookmark: (id) => apiClient.post(`/api/library/books/${id}/bookmark`).then((r) => r.data),
   saveProgress: (id, body) => apiClient.put(`/api/library/books/${id}/progress`, body).then((r) => r.data.progress),
-  /** Returns the short-lived file URL; the caller saves it. */
   download: (id) => apiClient.get(`/api/library/books/${id}/download`).then((r) => r.data),
+  /** Notes half of the shelf; paged like the books list. */
+  listNotes: (params) => apiClient.get('/api/library/notes', { params }).then((r) => r.data),
+  /** Note detail; the only place image URLs are handed out, short-lived and signed. */
+  getNote: (id) => apiClient.get(`/api/library/notes/${id}`).then((r) => r.data),
 };

@@ -11,6 +11,27 @@ export function useBooks(params) {
   });
 }
 
+/** The notes half of the shelf; same paging contract as the books list. */
+export function useNotes(params, enabled = true) {
+  return useQuery({
+    queryKey: ['library', 'notes', params],
+    queryFn: () => libraryApi.listNotes(params),
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+    enabled,
+  });
+}
+
+/** Note detail, with its images signed as short-lived URLs. */
+export function useNote(id) {
+  return useQuery({
+    queryKey: ['library', 'note', id],
+    queryFn: () => libraryApi.getNote(id),
+    enabled: Boolean(id),
+    staleTime: 60_000,
+  });
+}
+
 export function useBook(id) {
   return useQuery({
     queryKey: ['library', 'book', id],

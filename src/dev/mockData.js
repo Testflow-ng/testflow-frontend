@@ -67,12 +67,13 @@ export const mockSessions = [
 
 /* --- Library (books, bookmarks, reading progress) ------------------------- */
 
-const book = (code, title, subtitle, color, level, semester, pages, sizeKb, edition, topics) => ({
+const book = (code, title, subtitle, color, level, semester, pages, sizeKb, edition, topics, bookType = 'textbook') => ({
   id: `bk_${code.toLowerCase()}`,
   code,
   title,
   subtitle,
   color,
+  bookType,
   level,
   semester,
   pages,
@@ -95,8 +96,8 @@ export const mockBooks = [
   book('CHM101', 'General Chemistry I', 'Atoms, reactions and equations', 'ink', 100, 'first', 172, 5140, '2nd edition', ['Atomic structure', 'Bonding', 'Stoichiometry']),
   book('BIO101', 'General Biology I', 'Cells, genetics and ecology', 'green', 100, 'first', 164, 4980, '2nd edition', ['Cells', 'Genetics', 'Ecology']),
   book('PHY101', 'General Physics I', 'Mechanics, heat and waves', 'amber', 100, 'first', 188, 6020, '2nd edition', ['Mechanics', 'Heat', 'Waves']),
-  book('CSC101', 'Introduction to Computing', 'Hardware, software and problem solving', 'violet', 100, 'first', 120, 3520, '1st edition', ['Hardware', 'Software', 'Algorithms']),
-  book('STA101', 'Statistics for Science', 'Describing and presenting data', 'teal', 100, 'second', 132, 3880, '1st edition', ['Data', 'Averages', 'Charts']),
+  book('CSC101', 'Introduction to Computing', 'Hardware, software and problem solving', 'violet', 100, 'first', 120, 3520, '1st edition', ['Hardware', 'Software', 'Algorithms'], 'slides'),
+  book('STA101', 'Statistics for Science', 'Describing and presenting data', 'teal', 100, 'second', 132, 3880, '1st edition', ['Data', 'Averages', 'Charts'], 'slides'),
   book('MTH102', 'Elementary Mathematics II', 'Vectors, series and coordinate geometry', 'red', 100, 'second', 156, 4460, '2nd edition', ['Vectors', 'Series', 'Geometry']),
   book('GST102', 'Use of English II', 'Essay writing and comprehension', 'blue', 100, 'second', 88, 2640, '3rd edition', ['Essay', 'Summary', 'Comprehension']),
   book('CHM102', 'General Chemistry II', 'Organic and physical chemistry', 'ink', 100, 'second', 168, 5020, '2nd edition', ['Organic', 'Equilibria', 'Energetics']),
@@ -108,6 +109,13 @@ export const mockBooks = [
   book('BIO201', 'Genetics', 'Inheritance from Mendel onwards', 'green', 200, 'first', 158, 4680, '1st edition', ['Inheritance', 'DNA', 'Mutation']),
   book('CHM201', 'Organic Chemistry', 'Structure, naming and reactions', 'ink', 200, 'first', 212, 7120, '1st edition', ['Structure', 'Naming', 'Reactions']),
   book('PHY201', 'Classical Mechanics', 'Motion, forces and energy', 'amber', 200, 'first', 196, 6380, '1st edition', ['Motion', 'Forces', 'Energy']),
+];
+
+/* Student-written class notes: images, mapped to a course and level. */
+export const mockNotes = [
+  { id: 'nt_mth101_w3', subjectCode: 'MTH101', title: 'Limits — Week 3', description: "Scans from the lecturer's board work.", level: 100, semester: 'first', imageCount: 3, visibility: 'all_students', createdAt: daysAgo(3, 11) },
+  { id: 'nt_mth101_w7', subjectCode: 'MTH101', title: 'Integration by parts — Week 7', description: 'Worked examples and past-question steps.', level: 100, semester: 'first', imageCount: 5, visibility: 'all_students', createdAt: daysAgo(6, 15) },
+  { id: 'nt_bio101_cell', subjectCode: 'BIO101', title: 'Cell organelles — Week 2', description: 'Phone photos of the whiteboard.', level: 100, semester: 'first', imageCount: 2, visibility: 'all_students', createdAt: daysAgo(9, 9) },
 ];
 
 /* Books already opened, newest first: what "Continue reading" reads. */

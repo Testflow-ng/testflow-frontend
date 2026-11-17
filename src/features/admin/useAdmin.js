@@ -1,5 +1,4 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from './api.js';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';import { adminApi } from './api.js';
 
 const key = (...parts) => ['admin', ...parts];
 
@@ -19,7 +18,8 @@ export const useAdvertisingHealth = () => useQuery({ queryKey: key('ads', 'healt
 export const useHouseAds = () => useQuery({ queryKey: key('ads', 'house-ads'), queryFn: adminApi.listHouseAds, retry: false });
 export const useRetentionOverview = () => useQuery({ queryKey: key('retention', 'overview'), queryFn: adminApi.retentionOverview, retry: false });
 export const useAdminQuestions = (params) => useQuery({ queryKey: key('questions', params), queryFn: () => adminApi.listQuestions(params), placeholderData: keepPreviousData });
-export const useAdminBooks = () => useQuery({ queryKey: key('library', 'books'), queryFn: adminApi.listLibraryBooks });
+export const useAdminBooks = (params) => useQuery({ queryKey: key('library', 'books', params), queryFn: () => adminApi.listLibraryBooks(params), placeholderData: keepPreviousData });
+export const useAdminNotes = (params) => useQuery({ queryKey: key('library', 'notes', params), queryFn: () => adminApi.listLibraryNotes(params), placeholderData: keepPreviousData });
 
 /** A mutation that refreshes every admin query when it succeeds. */
 export function useAdminMutation(fn, options = {}) {

@@ -7,7 +7,7 @@ import { feedbackRoute, FEEDBACK_PREFIXES } from './mockFeedback.js';
 import { adminRoute, ADMIN_PREFIXES } from './mockAdmin.js';
 import { adminConsoleRoute, ADMIN_CONSOLE_PREFIXES } from './mockAdminConsole.js';
 import { workspaceRoute, WORKSPACE_PREFIXES } from './mockWorkspace.js';
-import { mockBooks, mockReading, mockSessions, mockStats, mockSubjects, mockUser } from './mockData.js';
+import { mockBooks, mockNotes, mockReading, mockSessions, mockStats, mockSubjects, mockUser } from './mockData.js';
 
 const pinned = new Set(mockUser.pinnedSubjects);
 
@@ -109,10 +109,12 @@ const routes = [
     'GET',
     /^\/api\/library\/books$/,
     (_m, _body, config) => {
-      const { q = '', page = 1, limit = 12, filter = 'all' } = config.params ?? {};
+      const { q = '', page = 1, limit = 12, filter = 'all', bookType, level } = config.params ?? {};
       const needle = String(q).trim().toLowerCase();
       const rows = mockBooks.filter((b) => {
         if (filter === 'bookmarks' && !bookmarked.has(b.id)) return false;
+        if (bookType && b.bookType !== bookType) return false;
+        if (level != null && Number(b.level) !== Number(level)) return false;
         if (!needle) return true;
         return [b.code, b.title, b.subtitle, b.author, ...b.topics].join(' ').toLowerCase().includes(needle);
       });
@@ -122,6 +124,31 @@ const routes = [
       return { books: rows.slice(start, start + limit).map(withBookmark), page: Math.max(1, page), pageCount, total };
     },
   ],
+  ['GET', /^\/api\/library\/notes$/, (_m, _body, config) => {
+    const { q = '', page = 1, limit = 12, subject, level } = config.params ?? {};
+    const needle = String(q).trim().toLowerCase();
+    const rows = mockNotes.filter((n) => {
+      if (subject && n.subjectCode !== String(subject).toUpperCase()) return false;
+      if (level != null && Number(n.level) !== Number(level)) return false;
+      if (!needle) return true;
+      return [n.title, n.description, n.subjectCode].join(' ').toLowerCase().includes(needle);
+    });
+    const total = rows.length;
+    const pageCount = Math.max(1, Math.ceil(total / limit));
+    const current = Math.min(Math.max(1, page), pageCount);
+    const start = (current - 1) * limit;
+    return { notes: rows.slice(start, start + limit), page: current, pageCount, total };
+  }],
+  ['GET', /^\/api\/library\/notes\/([^/]+)$/, (m) => {
+    const n = mockNotes.find((x) => x.id === m[1]);
+    if (!n) return { error: 'not_found' };
+    // A placeholder page so the reader renders something real in design work.
+    const pageSvg = (i) =>
+      `data:image/svg+xml;utf8,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#f6f4ec"/><rect x="12" y="12" width="376" height="276" rx="10" fill="#fffdf6" stroke="#d8d3c2"/><text x="200" y="150" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#1b4332">${n.title}</text><text x="200" y="185" text-anchor="middle" font-family="Georgia,serif" font-size="14" fill="#8a8a7a">page ${i + 1} of ${n.imageCount}</text></svg>`,
+      )}`;
+    return { ...n, imageUrls: Array.from({ length: n.imageCount }, (_v, i) => pageSvg(i)) };
+  }],
   ['GET', /^\/api\/library\/reading$/, () => ({
     reading: [...mockReading]
       .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))

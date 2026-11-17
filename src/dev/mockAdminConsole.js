@@ -33,6 +33,10 @@ let books = [
   { id: 'kb2', title: 'Use of English I', code: 'GST101', bookType: 'textbook', description: 'Comprehension and lexis practice.', level: 100, semester: 'first', priceMinor: 150000, visibility: 'paid', color: 'blue', fileName: 'GST101.pdf', createdAt: ago(48) },
   { id: 'kb3', title: 'General Physics I', code: 'PHY101', bookType: 'slides', description: 'Mechanics, waves and heat.', level: 100, semester: 'second', priceMinor: 0, visibility: 'all_students', color: 'teal', fileName: 'PHY101.pdf', createdAt: ago(12) },
 ];
+let notes = [
+  { id: 'nt1', subjectCode: 'MTH101', title: 'Limits — Week 3', description: 'Board work on limits.', level: 100, semester: 'first', imageCount: 3, visibility: 'all_students', createdAt: ago(30) },
+  { id: 'nt2', subjectCode: 'BIO101', title: 'Cell organelles — Week 2', description: 'Whiteboard photos.', level: 100, semester: 'first', imageCount: 2, visibility: 'all_students', createdAt: ago(6) },
+];
 let adsSettings = { adsEnabled: true, dailyFeeKobo: 100000, minDurationDays: 1, maxDurationDays: 30, maxAdsPerStudentPerDay: 3 };
 const campaigns = [
   { id: 'c1', status: 'pending_review', title: 'Campus laptop deals', description: 'Fresh stock, student prices.', destination: { type: 'whatsapp', whatsapp: '2348012345678' }, advertiser: { fullName: 'Campus Laptops' }, durationDays: 7, priceKobo: 700000, keywords: ['laptops'], submittedAt: ago(4) },
@@ -84,8 +88,42 @@ export function adminConsoleRoute(method, path, body, config = {}) {
   if (path === '/api/verifications/queue') return { requests: verifications.filter((v) => params.status === 'all' || v.status === params.status) };
   const ver = path.match(/^\/api\/verifications\/([^/]+)\/process$/);
   if (ver) { const v = verifications.find((x) => x.id === ver[1]); Object.assign(v, { status: body.status, rejectionReason: body.rejectionReason }); return { request: v }; }
-  if (path === '/api/library/notes') return { items: [], total: 0, page: 1, pages: 1 };
-  if (path === '/api/library/books' && method === 'GET') return { books, total: books.length, page: 1, pages: 1 };
+  if (path === '/api/library/notes' && method === 'GET') {
+    const rows = notes.filter((n) => {
+      if (params.level != null && Number(n.level) !== Number(params.level)) return false;
+      if (params.subject && n.subjectCode !== String(params.subject).toUpperCase()) return false;
+      const needle = String(params.q ?? '').trim().toLowerCase();
+      if (needle && ![n.title, n.description].join(' ').toLowerCase().includes(needle)) return false;
+      return true;
+    });
+    return { notes: rows, page: 1, pageCount: 1, total: rows.length };
+  }
+  if (path === '/api/library/notes' && method === 'POST') {
+    const n = { id: `nt${notes.length + 1}`, imageCount: 0, level: 100, semester: 'first', visibility: 'all_students', ...body, createdAt: new Date().toISOString() };
+    notes = [n, ...notes];
+    return n;
+  }
+  const noteImages = path.match(/^\/api\/library\/notes\/([^/]+)\/images$/);
+  if (noteImages && method === 'POST') {
+    const data = config?.data;
+    const files = data && typeof data.getAll === 'function' ? data.getAll('images') : [];
+    notes = notes.map((n) => (n.id === noteImages[1] ? { ...n, imageCount: (n.imageCount ?? 0) + files.length } : n));
+    return notes.find((n) => n.id === noteImages[1]);
+  }
+  const note = path.match(/^\/api\/library\/notes\/([^/]+)$/);
+  if (note) {
+    if (method === 'DELETE') { notes = notes.filter((n) => n.id !== note[1]); return { id: note[1], deleted: true }; }
+    if (method === 'GET') {
+      const n = notes.find((x) => x.id === note[1]);
+      return n ? { ...n, imageUrls: [] } : { error: 'not_found' };
+    }
+  }
+  if (path === '/api/library/books' && method === 'GET') {
+    let rows = books;
+    if (params.bookType) rows = rows.filter((b) => b.bookType === params.bookType);
+    if (params.level != null) rows = rows.filter((b) => Number(b.level) === Number(params.level));
+    return { books: rows, total: rows.length, page: 1, pageCount: 1 };
+  }
   if (path === '/api/library/books' && method === 'POST') {
     const b = { id: `kb${books.length + 1}`, level: 100, semester: 'first', priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: 'ink', ...body, createdAt: new Date().toISOString() };
     books = [b, ...books];
