@@ -29,9 +29,9 @@ let verifications = [
 ];
 let settings = { isPostUtmeActive: true, postUtmePrice: 2000, paymentBankName: 'Test Bank', paymentAccountNumber: '1234567890', paymentAccountName: 'Testflow Admin', updatedAt: 'v1' };
 let books = [
-  { id: 'kb1', title: 'JAMB Mathematics Notes', code: 'MTH101', bookType: 'textbook', description: 'Algebra, calculus and statistics.', priceMinor: 0, visibility: 'all_students', color: '#4a35f0', createdAt: ago(72) },
-  { id: 'kb2', title: 'English Past Questions', code: 'GST101', bookType: 'textbook', description: 'Comprehension and lexis practice.', priceMinor: 150000, visibility: 'paid', color: '#1b4332', createdAt: ago(48) },
-  { id: 'kb3', title: 'Physics Lecture Slides', code: 'PHY101', bookType: 'slides', description: 'Mechanics, waves and heat.', priceMinor: 0, visibility: 'all_students', color: '#163a5f', createdAt: ago(12) },
+  { id: 'kb1', title: 'Elementary Mathematics I', code: 'MTH101', bookType: 'textbook', description: 'Algebra, calculus and statistics.', level: 100, semester: 'first', priceMinor: 0, visibility: 'all_students', color: 'violet', fileName: 'MTH101.pdf', createdAt: ago(72) },
+  { id: 'kb2', title: 'Use of English I', code: 'GST101', bookType: 'textbook', description: 'Comprehension and lexis practice.', level: 100, semester: 'first', priceMinor: 150000, visibility: 'paid', color: 'blue', fileName: 'GST101.pdf', createdAt: ago(48) },
+  { id: 'kb3', title: 'General Physics I', code: 'PHY101', bookType: 'slides', description: 'Mechanics, waves and heat.', level: 100, semester: 'second', priceMinor: 0, visibility: 'all_students', color: 'teal', fileName: 'PHY101.pdf', createdAt: ago(12) },
 ];
 let adsSettings = { adsEnabled: true, dailyFeeKobo: 100000, minDurationDays: 1, maxDurationDays: 30, maxAdsPerStudentPerDay: 3 };
 const campaigns = [
@@ -87,25 +87,22 @@ export function adminConsoleRoute(method, path, body, config = {}) {
   if (path === '/api/library/notes') return { items: [], total: 0, page: 1, pages: 1 };
   if (path === '/api/library/books' && method === 'GET') return { books, total: books.length, page: 1, pages: 1 };
   if (path === '/api/library/books' && method === 'POST') {
-    const b = { id: `kb${books.length + 1}`, priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: '#163a5f', ...body, createdAt: new Date().toISOString() };
+    const b = { id: `kb${books.length + 1}`, level: 100, semester: 'first', priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: 'ink', ...body, createdAt: new Date().toISOString() };
     books = [b, ...books];
-    return { book: b };
+    return b;
   }
   const book = path.match(/^\/api\/library\/books\/([^/]+)$/);
   if (book) {
-    if (method === 'DELETE') { books = books.filter((b) => b.id !== book[1]); return { message: 'Removed.' }; }
+    if (method === 'DELETE') { books = books.filter((b) => b.id !== book[1]); return { id: book[1], deleted: true }; }
     books = books.map((b) => (b.id === book[1] ? { ...b, ...body } : b));
-    return { book: books.find((b) => b.id === book[1]) };
+    return books.find((b) => b.id === book[1]);
   }
   if (/^\/api\/library\/books\/[^/]+\/upload$/.test(path)) {
     const m = path.match(/^\/api\/library\/books\/([^/]+)\/upload$/);
-    if (m[1] !== 'new') {
-      books = books.map((b) => (b.id === m[1] ? { ...b, fileName: body?.file?.name ?? 'book.pdf' } : b));
-      return { book: books.find((b) => b.id === m[1]) };
-    }
-    const b = { id: `kb${books.length + 1}`, title: body?.title ?? 'Untitled book', code: body?.code ?? 'NEW', priceMinor: 0, visibility: 'all_students', bookType: 'textbook', color: '#163a5f', createdAt: new Date().toISOString() };
-    books = [b, ...books];
-    return { book: b };
+    const data = config?.data;
+    const file = data && typeof data.get === 'function' ? data.get('file') : data?.file ?? null;
+    books = books.map((b) => (b.id === m[1] ? { ...b, fileName: file?.name ?? b.fileName ?? 'book.pdf' } : b));
+    return { url: 'blob:sample', fileName: file?.name ?? 'book.pdf', key: `sample/${m[1]}` };
   }
   if (path === '/api/admin/ads/overview') return { campaignsByStatus: { pending_review: 1, active: 1, suspended: 0 }, revenue: { amountKobo: 3700000, payments: 2, currency: 'NGN' } };
   if (path === '/api/admin/ads/campaigns') return page(campaigns, { limit: 100 });

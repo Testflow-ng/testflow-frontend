@@ -122,14 +122,17 @@ export const adminApi = {
   createLibraryBook: (payload) =>
     apiClient.post('/api/library/books', payload).then((res) => res.data),
   updateLibraryBook: (id, payload) =>
-    apiClient.patch(`/api/library/books/${id}`, payload).then((res) => res.data),
+    apiClient.put(`/api/library/books/${id}`, payload).then((res) => res.data),
   deleteLibraryBook: (id) => apiClient.delete(`/api/library/books/${id}`).then((res) => res.data),
-  uploadLibraryBook: (id, formData) =>
-    apiClient
-      .post(`/api/library/books/${id ?? 'new'}/upload`, formData, {
+  uploadLibraryBook: (id, file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return apiClient
+      .post(`/api/library/books/${id}/upload`, form, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
-      .then((res) => res.data),
+      .then((res) => res.data);
+  },
   listLibraryNotes: (params) =>
     apiClient.get('/api/library/notes', { params }).then((res) => res.data),
   createLibraryNote: (payload) =>
