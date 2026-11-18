@@ -15,6 +15,10 @@ export const libraryApi = {
   setBookmark: (id) => apiClient.post(`/api/library/books/${id}/bookmark`).then((r) => r.data),
   saveProgress: (id, body) => apiClient.put(`/api/library/books/${id}/progress`, body).then((r) => r.data.progress),
   download: (id) => apiClient.get(`/api/library/books/${id}/download`).then((r) => r.data),
+  /** Mint (or fetch) the public link for a book — the token is the credential, anyone with it can open the page and file. */
+  shareBook: (id) => apiClient.get(`/api/library/books/${id}/share`).then((r) => r.data),
+  /** Same for a note; the public page shows every image in reading order. */
+  shareNote: (id) => apiClient.get(`/api/library/notes/${id}/share`).then((r) => r.data),
   /** Notes half of the shelf; paged like the books list. */
   listNotes: (params) => apiClient.get('/api/library/notes', { params }).then((r) => r.data),
   /** Note detail; the only place image URLs are handed out, short-lived and signed. */

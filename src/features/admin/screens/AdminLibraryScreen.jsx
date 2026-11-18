@@ -382,8 +382,8 @@ function BookModal({ initial, onClose }) {
         <FileUpload
           label="PDF file"
           accept="application/pdf,.pdf"
-          maxBytes={25 * 1024 * 1024}
-          hint="PDF, up to 25 MB"
+          maxBytes={50 * 1024 * 1024}
+          hint="PDF, up to 50 MB"
           fileName={file?.name ?? (initial.fileName || undefined)}
           onFile={setFile}
           onRemove={() => setFile(null)}

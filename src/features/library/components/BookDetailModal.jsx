@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Bookmark, BookOpen, Download, Lock } from 'lucide-react';
+import { Bookmark, BookOpen, Download, Lock, Share2 } from 'lucide-react';
 import { Badge, Button, IconButton, KeyValueList, Modal, ProgressBar } from '../../../components/ui/index.js';
 import { ICON } from '../../../components/ui/iconProps.js';
 import Book from '../../../components/data/Book.jsx';
@@ -22,13 +22,16 @@ function BookDetailModal({
   onRead,
   onToggleBookmark,
   onDownload,
+  onShare,
   bookmarkBusy = false,
   downloading = false,
+  sharing = false,
   locked = false,
 }) {
   if (!book) return null;
 
   const finished = progress?.percent >= 100;
+  const shareable = (book.visibility ?? 'all_students') !== 'paid';
 
   return (
     <Modal
@@ -56,6 +59,16 @@ function BookDetailModal({
 
         <div className="flex min-w-0 flex-1 flex-col items-end gap-2">
           <div className="flex items-center gap-1">
+            {shareable ? (
+              <IconButton
+                aria-label={`Share ${book.code}`}
+                title="Share this book"
+                onClick={onShare}
+                disabled={sharing}
+              >
+                <Share2 {...ICON} />
+              </IconButton>
+            ) : null}
             <IconButton
               aria-label={`Download ${book.code}`}
               title="Download"

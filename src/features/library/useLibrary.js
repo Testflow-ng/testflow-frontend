@@ -81,3 +81,11 @@ export function useSaveProgress() {
 export function useDownloadBook() {
   return useMutation({ mutationFn: (id) => libraryApi.download(id) });
 }
+
+export function useBookShare() {
+  return useMutation({ mutationFn: (id) => libraryApi.shareBook(id) });
+}
+
+export function useNoteShare() {
+  return useMutation({ mutationFn: (id) => libraryApi.shareNote(id) });
+}

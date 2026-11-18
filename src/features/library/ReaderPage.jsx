@@ -1,13 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, Bookmark, ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { Button, EmptyState, IconButton, ProgressBar, SkeletonText, useToast } from '../../components/ui/index.js';
+import { AlertTriangle, Bookmark, ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react';
+import { Button, EmptyState, IconButton, ProgressBar, Skeleton, SkeletonText, useToast } from '../../components/ui/index.js';
 import Screen, { PageHeader } from '../../components/layout/Screen.jsx';
 import { ICON } from '../../components/ui/iconProps.js';
+import apiClient from '../../api/client.js';
 import { saveFile } from './download.js';
 import { hasLibraryAccess, useEntitlement } from '../billing/useBilling.js';
+import { useAuth } from '../auth/useAuth.js';
 import LibraryLocked from './components/LibraryLocked.jsx';
+import { useLibraryShare } from './useLibraryShare.js';
 import { useBook, useBookPages, useDownloadBook, useReading, useSaveProgress, useSetBookmark } from './useLibrary.js';
+
+/* pdfjs is heavy, so the rasteriser ships in its own chunk and only loads for books with a file. */
+const PdfReader = lazy(() => import('./components/PdfReader.jsx'));
 
 /**
  * The reader. One page at a time, with the two things a student wants at hand:
@@ -25,6 +31,10 @@ function ReaderPage() {
      turn a page, so the derived page stays correct when that list lands. */
   const [requested, setRequested] = useState(() => Number(searchParams.get('page')) || null);
   const [bookmarkOverride, setBookmarkOverride] = useState(null);
+  /* PDF mode state: the real page count reported by the document, and any load failure. */
+  const [pdfPages, setPdfPages] = useState(null);
+  const [pdfError, setPdfError] = useState(null);
+  const [readerKey, setReaderKey] = useState(0);
 
   const { data: book, isError: bookFailed, error: bookError, refetch: refetchBook } = useBook(id);
   const { data: reading } = useReading();
@@ -32,6 +42,8 @@ function ReaderPage() {
   const setBookmark = useSetBookmark();
   const download = useDownloadBook();
   const { data: held } = useEntitlement();
+  const { user } = useAuth();
+  const { shareBook, pending: sharePending } = useLibraryShare();
 
   const saved = reading?.find((entry) => entry.bookId === id);
   /* Do not decide the starting page until the reading list has answered, or a
@@ -41,7 +53,12 @@ function ReaderPage() {
 
   const { data: content, isPending, isError, error, refetch } = useBookPages(id, page);
 
-  const totalPages = content?.totalPages ?? book?.pages ?? 1;
+  /* A book with an uploaded PDF renders the file itself; the paged text endpoint stays as the
+     fallback for books that were published without a file. */
+  const hasFile = Boolean(book?.hasFile);
+  const totalPages = pdfPages ?? content?.totalPages ?? book?.pages ?? 1;
+  const fileUrl = book?.id ? `${apiClient.defaults.baseURL}/api/library/books/${book.id}/file` : null;
+  const shareable = (book?.visibility ?? 'all_students') !== 'paid';
   const bookmarked = bookmarkOverride ?? book?.bookmarked ?? false;
 
   /* Record the visit, so the book shows up in "Continue reading" from here on.
@@ -81,11 +98,11 @@ function ReaderPage() {
         saveFile(file);
         toast.success(`Downloading ${book?.code ?? 'book'}`);
       },
-      onError: () => toast.error('Could not prepare that download.'),
+      onError: (e) => toast.error(e?.message ?? 'Could not prepare that download.'),
     });
   };
 
-  if (!hasLibraryAccess(held)) {
+  if (!hasLibraryAccess(held, user)) {
     return (
       <Screen width="md">
         <PageHeader back="/library" title={book?.title ?? 'Library'} />
@@ -93,6 +110,44 @@ function ReaderPage() {
       </Screen>
     );
   }
+
+  /* Footer shared by the PDF and the paged-text reader. */
+  const footer = (
+    <>
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <Button
+          variant="outline"
+          onClick={() => goTo(page - 1)}
+          disabled={page <= 1}
+          leadingIcon={<ChevronLeft {...ICON} />}
+        >
+          Previous
+        </Button>
+        <p className="text-sm text-muted">
+          Page <span className="font-semibold text-foreground-strong">{page}</span> of {totalPages}
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => goTo(page + 1)}
+          disabled={page >= totalPages}
+          trailingIcon={<ChevronRight {...ICON} />}
+        >
+          Next
+        </Button>
+      </div>
+
+      <ProgressBar className="mt-4" value={page} max={totalPages} label="Reading progress" />
+
+      <div className="mt-6 flex justify-center">
+        <Button variant="ghost" onClick={() => navigate('/library')}>
+          Back to the library
+        </Button>
+      </div>
+    </>
+  );
+
+  const failed = bookFailed || (hasFile ? Boolean(pdfError) : isError);
+  const failureDetail = hasFile ? pdfError : (error ?? bookError);
 
   return (
     <Screen width="lg">
@@ -103,6 +158,16 @@ function ReaderPage() {
         subtitle={book ? `${book.author} · page ${page} of ${totalPages}` : undefined}
         action={
           <div className="flex items-center gap-1">
+            {shareable ? (
+              <IconButton
+                aria-label={`Share ${book?.code ?? 'book'}`}
+                title="Share this book"
+                onClick={() => book && shareBook(book)}
+                disabled={sharePending || !book}
+              >
+                <Share2 {...ICON} />
+              </IconButton>
+            ) : null}
             <IconButton aria-label={`Download ${book?.code ?? 'book'}`} title="Download" onClick={onDownload} disabled={download.isPending}>
               <Download {...ICON} />
             </IconButton>
@@ -120,24 +185,38 @@ function ReaderPage() {
         }
       />
 
-      {bookFailed || isError ? (
+      {failed ? (
         <EmptyState
           className="mt-6"
           icon={AlertTriangle}
           title="That page would not load"
-          description={(error ?? bookError)?.message ?? 'Check your connection and try again.'}
+          description={failureDetail?.message ?? 'Check your connection and try again.'}
           action={
             <Button
               variant="outline"
               onClick={() => {
-                refetchBook();
-                refetch();
+                if (hasFile) {
+                  setPdfError(null);
+                  setReaderKey((key) => key + 1);
+                } else {
+                  refetchBook();
+                  refetch();
+                }
               }}
             >
               Try again
             </Button>
           }
         />
+      ) : hasFile ? (
+        <>
+          <div className="mt-6 rounded-[24px] border border-border bg-surface p-3 shadow-[0_1px_2px_rgba(27,67,50,0.04),0_8px_24px_-12px_rgba(27,67,50,0.12)] sm:p-5">
+            <Suspense fallback={<Skeleton className="aspect-[3/4] w-full rounded-2xl" />}>
+              <PdfReader key={readerKey} url={fileUrl} page={page} onPages={setPdfPages} onError={setPdfError} />
+            </Suspense>
+          </div>
+          {footer}
+        </>
       ) : isPending || !content ? (
         <div className="mt-6 rounded-[24px] border border-border bg-surface p-6 sm:p-10" role="status" aria-live="polite">
           <span className="sr-only">Loading page {page}</span>
@@ -162,36 +241,7 @@ function ReaderPage() {
               )}
             </div>
           </article>
-
-          <div className="mt-5 flex items-center justify-between gap-3">
-            <Button
-              variant="outline"
-              onClick={() => goTo(page - 1)}
-              disabled={page <= 1}
-              leadingIcon={<ChevronLeft {...ICON} />}
-            >
-              Previous
-            </Button>
-            <p className="text-sm text-muted">
-              Page <span className="font-semibold text-foreground-strong">{page}</span> of {totalPages}
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => goTo(page + 1)}
-              disabled={page >= totalPages}
-              trailingIcon={<ChevronRight {...ICON} />}
-            >
-              Next
-            </Button>
-          </div>
-
-          <ProgressBar className="mt-4" value={page} max={totalPages} label="Reading progress" />
-
-          <div className="mt-6 flex justify-center">
-            <Button variant="ghost" onClick={() => navigate('/library')}>
-              Back to the library
-            </Button>
-          </div>
+          {footer}
         </>
       )}
     </Screen>

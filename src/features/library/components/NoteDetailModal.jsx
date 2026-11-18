@@ -1,4 +1,4 @@
-import { Lock } from 'lucide-react';
+import { Lock, Share2 } from 'lucide-react';
 import { Banner, Button, Modal, Skeleton } from '../../../components/ui/index.js';
 import { ICON } from '../../../components/ui/iconProps.js';
 import { Link } from 'react-router-dom';
@@ -10,11 +10,12 @@ import { useNote } from '../useLibrary.js';
  * stacked in reading order. Images are handed out as short-lived URLs by the note endpoint, so
  * they load here and nowhere else.
  */
-function NoteDetailModal({ note, open, onOpenChange, locked = false }) {
+function NoteDetailModal({ note, open, onOpenChange, locked = false, onShare, sharing = false }) {
   const { data, isLoading, isError, error } = useNote(open ? note?.id : null);
   if (!note) return null;
 
   const images = data?.imageUrls ?? [];
+  const shareable = (note.visibility ?? 'all_students') !== 'paid';
 
   return (
     <Modal
@@ -24,9 +25,16 @@ function NoteDetailModal({ note, open, onOpenChange, locked = false }) {
       description={`${note.subjectCode || 'Note'}${note.level ? ` · ${note.level} level` : ''} · ${note.semester === 'second' ? 'Second' : 'First'} semester`}
       size="lg"
       footer={
-        <Button variant="ghost" onClick={() => onOpenChange(false)}>
-          Close
-        </Button>
+        <>
+          {shareable && onShare ? (
+            <Button variant="outline" leadingIcon={<Share2 {...ICON} />} onClick={() => onShare()} disabled={sharing}>
+              {sharing ? 'Creating link…' : 'Share this note'}
+            </Button>
+          ) : null}
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+        </>
       }
     >
       <div className="flex items-start gap-4 pb-4 pt-1">

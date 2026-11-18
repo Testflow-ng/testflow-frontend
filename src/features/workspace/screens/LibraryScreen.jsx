@@ -53,7 +53,7 @@ function BookModal({ initial, onClose, noPayout }) {
   const save = useWsMutation((id, body) => wsApi.saveBook(id, body), { onSuccess: () => { toast.success('Book saved'); onClose(); }, onError: (e) => toast.error(e.code === 'PAYOUT_REQUIRED' ? 'Add a payout account first' : 'Could not save', e.message) });
   const priced = (b.priceMinor ?? 0) > 0;
   return (
-    <Modal open onOpenChange={(o) => !o && onClose()} title={initial.id ? 'Edit book' : 'Add a book'} description="PDF files up to 25 MB."
+    <Modal open onOpenChange={(o) => !o && onClose()} title={initial.id ? 'Edit book' : 'Add a book'} description="PDF files up to 50 MB."
       footer={<><Button variant="ghost" onClick={onClose}>Cancel</Button><Button loading={save.isPending} disabled={!b.title.trim() || (priced && noPayout)} onClick={() => save.mutate(b)}>Save book</Button></>}>
       <div className="space-y-4 py-1">
         <Field label="Title" required><Input value={b.title} maxLength={120} onChange={(e) => set('title')(e.target.value)} /></Field>
@@ -63,7 +63,7 @@ function BookModal({ initial, onClose, noPayout }) {
         </div>
         <Field label="Who can read it"><Select value={b.visibility} onValueChange={set('visibility')} options={VIS} /></Field>
         <Field label="About this book"><Textarea rows={3} value={b.description} maxLength={500} onChange={(e) => set('description')(e.target.value)} /></Field>
-        <FileUpload label="PDF file" accept="application/pdf,.pdf" maxBytes={25 * 1024 * 1024} hint="PDF, up to 25 MB" fileName={b.fileName || undefined} onFile={(f) => set('fileName')(f.name)} onRemove={() => set('fileName')('')} />
+        <FileUpload label="PDF file" accept="application/pdf,.pdf" maxBytes={50 * 1024 * 1024} hint="PDF, up to 50 MB" fileName={b.fileName || undefined} onFile={(f) => set('fileName')(f.name)} onRemove={() => set('fileName')('')} />
         {priced && noPayout && <Banner variant="warning">Add a payout account before selling this book.</Banner>}
       </div>
     </Modal>

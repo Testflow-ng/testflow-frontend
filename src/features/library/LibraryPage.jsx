@@ -1,5 +1,6 @@
 import AdSlot from '../advertising/AdSlot.jsx';
 import { hasLibraryAccess, useEntitlement } from '../billing/useBilling.js';
+import { useAuth } from '../auth/useAuth.js';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Bookmark, Search } from 'lucide-react';
@@ -14,6 +15,7 @@ import { saveFile } from './download.js';
 import BookDetailModal from './components/BookDetailModal.jsx';
 import NoteDetailModal from './components/NoteDetailModal.jsx';
 import ContinueReading from './components/ContinueReading.jsx';
+import { useLibraryShare } from './useLibraryShare.js';
 
 const PAGE_SIZE = 12;
 
@@ -81,7 +83,9 @@ function LibraryPage({ isGatedPreview = false }) {
   const setBookmark = useSetBookmark();
   const download = useDownloadBook();
   const { data: held } = useEntitlement();
-  const locked = !hasLibraryAccess(held);
+  const { user } = useAuth();
+  const { shareBook, shareNote, pending: sharePending } = useLibraryShare();
+  const locked = !hasLibraryAccess(held, user);
 
   const books = data?.books ?? [];
   const notes = notesData?.notes ?? [];
@@ -153,7 +157,7 @@ function LibraryPage({ isGatedPreview = false }) {
         saveFile(file);
         toast.success(`Downloading ${book.code}`);
       },
-      onError: () => toast.error('Could not prepare that download.'),
+      onError: (e) => toast.error(e?.message ?? 'Could not prepare that download.'),
     });
   };
 
@@ -342,8 +346,10 @@ function LibraryPage({ isGatedPreview = false }) {
         onRead={() => openReader(selectedBook, selectedProgress?.page)}
         onToggleBookmark={() => onToggleBookmark(selectedBook)}
         onDownload={() => onDownload(selectedBook)}
+        onShare={() => selectedBook && shareBook(selectedBook)}
         bookmarkBusy={setBookmark.isPending}
         downloading={download.isPending}
+        sharing={sharePending}
         locked={locked}
       />
       <NoteDetailModal
@@ -351,6 +357,8 @@ function LibraryPage({ isGatedPreview = false }) {
         open={Boolean(selectedNote)}
         onOpenChange={(next) => !next && setSelectedNote(null)}
         locked={locked}
+        onShare={() => selectedNote && shareNote(selectedNote)}
+        sharing={sharePending}
       />
       {/* One quiet slot under the shelf. The reader itself stays ad-free so reading is never interrupted. */}
       <AdSlot placement="library" className="mt-10" />

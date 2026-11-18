@@ -5,6 +5,10 @@
       "destination": "https://api.testflow.com.ng/r/:path*"
     },
     {
+      "source": "/s/:path*",
+      "destination": "https://api.testflow.com.ng/s/:path*"
+    },
+    {
       "source": "/api/public/:path*",
       "destination": "https://api.testflow.com.ng/api/public/:path*"
     },

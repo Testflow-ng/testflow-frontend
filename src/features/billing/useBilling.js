@@ -17,8 +17,11 @@ export function usePurchases() {
 /**
  * Can this student read and download in the Library? The backend's `library` entitlement when it exists,
  * otherwise any live Student Pass. `undefined` (still loading) counts as allowed so nothing flashes locked.
+ * Administrators manage the shelf, so they may read and download without a pass — the backend exempts
+ * them too, and this must agree or admins get a lock screen over content they can actually reach.
  */
-export function hasLibraryAccess(held) {
+export function hasLibraryAccess(held, user) {
+  if (['admin', 'super_admin'].includes(user?.role)) return true;
   if (!held) return true;
   return Boolean(held.library ?? held.entitlements?.library ?? held.adFree);
 }
